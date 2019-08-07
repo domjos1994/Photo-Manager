@@ -1,0 +1,16 @@
+
+#histogram .default-color0.chart-bar {
+    -fx-bar-fill: darkgray;
+}
+
+#histogram .default-color1.chart-bar {
+    -fx-bar-fill: red;
+}
+
+#histogram .default-color1.chart-bar {
+    -fx-bar-fill: green;
+}
+
+#histogram .default-color1.chart-bar {
+    -fx-bar-fill: blue;
+}

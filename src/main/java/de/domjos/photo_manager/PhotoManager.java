@@ -1,0 +1,51 @@
+package de.domjos.photo_manager;
+
+import de.domjos.photo_manager.helper.InitializationHelper;
+import de.domjos.photo_manager.settings.Globals;
+import de.domjos.photo_manager.utils.Dialogs;
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import java.util.ResourceBundle;
+
+public class PhotoManager extends Application {
+    public static final Globals GLOBALS = new Globals();
+
+    public void start(Stage primaryStage) throws Exception {
+        // initialize basic properties
+        PhotoManager.GLOBALS.setDebugMode(false);
+        PhotoManager.GLOBALS.setStage(primaryStage);
+
+        // initialize language
+        ResourceBundle language = InitializationHelper.getResourceBundle();
+        PhotoManager.GLOBALS.setLanguage(language);
+
+        // initialize path
+        InitializationHelper.initializePath();
+
+        // initialize logger
+        PhotoManager.GLOBALS.setLogger(InitializationHelper.initializeLogger());
+
+        // initialize database
+        PhotoManager.GLOBALS.setDatabase(InitializationHelper.initializeDatabase());
+
+        // initialize application-dialog
+        String title = InitializationHelper.getHeader();
+        Dialogs.printFXML("/fxml/main.fxml", language, title, false);
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent event) {
+                try {
+                    PhotoManager.GLOBALS.getDatabase().close();
+                } catch (Exception ex) {
+                    Dialogs.printException(ex);
+                }
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
+}
