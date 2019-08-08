@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS categories(
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     title VARCHAR(255) NOT NULL,
-    descriptions TEXT
+    description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tags(
      ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
      title VARCHAR(255) NOT NULL,
-     descriptions TEXT
+     description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS directories(

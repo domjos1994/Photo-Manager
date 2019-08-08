@@ -1,23 +1,24 @@
 package de.domjos.photo_manager.controller;
 
 import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.javascript.object.*;
+import com.lynden.gmapsfx.javascript.object.LatLong;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.DescriptionObject;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.MetaData;
+import de.domjos.photo_manager.services.RecreateTask;
+import de.domjos.photo_manager.services.SaveFolderTask;
 import de.domjos.photo_manager.services.TinifyTask;
+import de.domjos.photo_manager.services.TreeViewTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -31,12 +32,10 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.util.*;
 
-import static com.lynden.gmapsfx.javascript.object.MapTypeIdEnum.ROADMAP;
-
 public class MainController implements Initializable {
     private @FXML TabPane tbpMain;
-    private @FXML Tab tbMain, tbSettings;
-    private @FXML MenuItem menMainSettings, menMainClose, menMainExport, menMainImport, menMainHelp;
+    private @FXML Tab tbMain, tbSettings, tbApi, tbMap, tbHelp;
+    private @FXML MenuItem menMainSettings, menMainClose, menMainApi, menMainMap, menMainHelp;
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate;
 
     private @FXML TreeView<Directory> tvMain;
@@ -66,7 +65,15 @@ public class MainController implements Initializable {
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     private @FXML SettingsController settingsController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML ApiController apiController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML MapController mapController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML HelpController helpController;
+
     private long rootID;
     private Directory directory;
 
@@ -96,33 +103,12 @@ public class MainController implements Initializable {
                 boolean recursive = chkMainRecursive.isSelected();
                 String msg = resources.getString("main.image.import");
 
-                Task<Void> loadTask = new Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
-                        updateMessage(msg);
-                        updateProgress(0, 1);
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateDirectory(directory, parentId[0], recursive);
-                        updateProgress(1, 1);
-                        updateMessage("");
-                        return null;
-                    }
-                };
-                loadTask.setOnSucceeded(event1 -> Platform.runLater(()->{
+                SaveFolderTask saveFolderTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], recursive);
+                saveFolderTask.onFinish(()->{
                     this.enableFolderControls();
                     this.initTreeView();
-                    PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
-                    this.getProgressBar().progressProperty().unbind();
-                    this.lblMessages.textProperty().unbind();
-                }));
-                loadTask.setOnFailed(event1 -> Platform.runLater(()->{
-                    PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
-                    this.getProgressBar().progressProperty().unbind();
-                    this.lblMessages.textProperty().unbind();
-                }));
-                this.getProgressBar().progressProperty().bind(loadTask.progressProperty());
-                this.lblMessages.textProperty().bind(loadTask.messageProperty());
-                new Thread(loadTask).start();
+                });
+                new Thread(saveFolderTask).start();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -161,13 +147,13 @@ public class MainController implements Initializable {
                 if(!this.lvMain.getSelectionModel().isEmpty()) {
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
 
-                    if(this.txtMainImageCategory.getText().trim().isEmpty()) {
+                    if(!this.txtMainImageCategory.getText().trim().isEmpty()) {
                         DescriptionObject descriptionObject = new DescriptionObject();
                         descriptionObject.setTitle(this.txtMainImageCategory.getText().trim());
                         image.setCategory(descriptionObject);
                     }
 
-                    if(this.txtMainImageTags.getText().trim().isEmpty()) {
+                    if(!this.txtMainImageTags.getText().trim().isEmpty()) {
                         String tags = this.txtMainImageTags.getText().trim();
                         if(tags.contains(";")) {
                             for(String tag : tags.split(";")) {
@@ -186,6 +172,7 @@ public class MainController implements Initializable {
                     }
 
                     PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+                    Dialogs.printNotification(Alert.AlertType.INFORMATION, resources.getString("main.image.saved"), resources.getString("main.image.saved"));
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -200,30 +187,19 @@ public class MainController implements Initializable {
         this.cmdMainTinifyUpload.setOnAction(event -> {
             try {
                 TinifyTask tinifyTask = null;
+                String width = this.txtMainTinifyWidth.getText();
+                String height = this.txtMainTinifyHeight.getText();
                 if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    tinifyTask = new TinifyTask(this.txtMainTinifyWidth.getText(), this.txtMainTinifyHeight.getText(), this.lvMain.getSelectionModel().getSelectedItem());
+                    tinifyTask = new TinifyTask(this.pbMain, this.lblMessages, width, height, this.lvMain.getSelectionModel().getSelectedItem());
                 } else {
                     if(!this.tvMain.getSelectionModel().isEmpty()) {
-                        tinifyTask = new TinifyTask(this.txtMainTinifyWidth.getText(), this.txtMainTinifyHeight.getText(), this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                        tinifyTask = new TinifyTask(this.pbMain, this.lblMessages, width, height, this.tvMain.getSelectionModel().getSelectedItem().getValue());
                     }
                 }
 
                 if(tinifyTask!=null) {
-                    this.getProgressBar().progressProperty().bind(tinifyTask.progressProperty());
-                    this.lblMessages.textProperty().bind(tinifyTask.messageProperty());
-                    tinifyTask.exceptionProperty().addListener((observable, oldValue, newValue) -> Dialogs.printException(newValue));
                     new Thread(tinifyTask).start();
-                    tinifyTask.setOnSucceeded(event1 -> {
-                        this.getProgressBar().progressProperty().unbind();
-                        this.lblMessages.textProperty().unbind();
-                        PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
-                        if(!this.tvMain.getSelectionModel().isEmpty()) {
-                            this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
-                        }
-                    });
-                    tinifyTask.setOnFailed(tinifyTask.getOnSucceeded());
                 }
-
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -243,7 +219,28 @@ public class MainController implements Initializable {
             }
         });
 
-        this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(tbSettings));
+        this.ctxMainRecreate.setOnAction(event -> {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                List<Image> images = new LinkedList<>();
+                if(!this.lvMain.getSelectionModel().isEmpty()) {
+                    images.add(this.lvMain.getSelectionModel().getSelectedItem());
+                } else {
+                    images.addAll(this.lvMain.getItems());
+                }
+
+                RecreateTask recreateTask = new RecreateTask(this.pbMain, this.lblMessages, images);
+                recreateTask.onFinish(()->this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue()));
+                new Thread(recreateTask).start();
+            }
+        });
+
+        this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
+        this.menMainApi.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbApi));
+        this.menMainMap.setOnAction(event -> {
+            this.mapController.init();
+            this.tbpMain.getSelectionModel().select(this.tbMap);
+        });
+        this.menMainHelp.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbHelp));
         this.menMainClose.setOnAction(event -> Platform.exit());
     }
 
@@ -261,6 +258,9 @@ public class MainController implements Initializable {
 
     private void initControllers() {
         this.settingsController.init(this);
+        this.apiController.init(this);
+        this.mapController.init(this);
+        this.helpController.init(this);
     }
 
     private void initBindings() {
@@ -282,33 +282,17 @@ public class MainController implements Initializable {
 
     private void initTreeView() {
         try {
-            Task<TreeItem<Directory>> generateTreeView = new Task<>() {
-                @Override
-                protected TreeItem<Directory> call() throws Exception {
-                    Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
-                    Directory directory = PhotoManager.GLOBALS.getDatabase().getRoot();
-                    TreeItem<Directory> root = new TreeItem<>(directory, getIcon());
-                    root.setExpanded(true);
-                    rootID = directory.getId();
-                    addChildren(directory, root);
-                    return root;
-                }
-            };
-            generateTreeView.setOnSucceeded(event -> {
+            TreeViewTask treeViewTask = new TreeViewTask(this.pbMain, this.lblMessages);
+            treeViewTask.onFinish(()->{
                 try {
-                    TreeItem<Directory> root = generateTreeView.get();
-                    Platform.runLater(()->tvMain.setRoot(root));
+                    this.rootID = PhotoManager.GLOBALS.getDatabase().getRoot().getId();
+                    TreeItem<Directory> root = treeViewTask.get();
+                    this.tvMain.setRoot(root);
                 } catch (Exception ex) {
-                    Platform.runLater(()->Dialogs.printException(ex));
-                } finally {
-                    Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT));
+                    Dialogs.printException(ex);
                 }
             });
-            generateTreeView.setOnFailed(event -> {
-                Platform.runLater(()->tvMain.setRoot(null));
-                Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT));
-            });
-            new Thread(generateTreeView).start();
+            new Thread(treeViewTask).start();
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }
@@ -348,7 +332,8 @@ public class MainController implements Initializable {
     private void fillMetaData() {
        try {
            // image-date
-           MetaData metaData = ImageHelper.readMetaData(this.lvMain.getSelectionModel().getSelectedItem().getPath());
+           Image image = this.lvMain.getSelectionModel().getSelectedItem();
+           MetaData metaData = ImageHelper.readMetaData(image.getPath());
            if(metaData.getOriginal()!=null) {
                this.txtMainMetaDataDate.setText(metaData.getOriginal());
            }
@@ -358,22 +343,9 @@ public class MainController implements Initializable {
            this.txtMainMetaDataLatitude.setText(String.valueOf(metaData.getLatitude()));
            if(metaData.getLatitude()!=0 && metaData.getLongitude()!=0) {
                this.gvMainMetaDataLocation.setVisible(true);
-               LatLong latLong = new LatLong(metaData.getLatitude(), metaData.getLongitude());
 
-               MapOptions mapOptions = new MapOptions();
-               mapOptions.center(latLong)
-                       .mapType(ROADMAP)
-                       .overviewMapControl(false)
-                       .panControl(false)
-                       .rotateControl(false)
-                       .scaleControl(false)
-                       .streetViewControl(false)
-                       .zoomControl(false)
-                       .zoom(12);
-               GoogleMap map = this.gvMainMetaDataLocation.createMap(mapOptions);
-               MarkerOptions markerOptions = new MarkerOptions();
-               markerOptions.position(latLong);
-               map.addMarker(new Marker(markerOptions));
+               MapHelper mapHelper = new MapHelper(this.gvMainMetaDataLocation, new LatLong(metaData.getLatitude(), metaData.getLongitude()));
+               mapHelper.init(Collections.singletonList(image));
            } else {
                this.gvMainMetaDataLocation.setVisible(false);
            }
@@ -443,6 +415,8 @@ public class MainController implements Initializable {
                 this.pnlMainImage.setText(image.getName());
                 if(image.getCategory()!=null) {
                     this.txtMainImageCategory.setText(image.getCategory().getTitle());
+                } else {
+                    this.txtMainImageCategory.setText("");
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 for(DescriptionObject descriptionObject : image.getTags()) {
@@ -451,21 +425,6 @@ public class MainController implements Initializable {
                 }
                 this.txtMainImageTags.setText(stringBuilder.toString());
             }
-        }
-    }
-
-    private Node getIcon() {
-        return new ImageView(
-            new javafx.scene.image.Image(PhotoManager.class.getResourceAsStream("/images/icons/directory.png"), 16, 16, true, true)
-        );
-    }
-
-    private void addChildren(Directory directory, TreeItem<Directory> parent) {
-        for(Directory child : directory.getChildren()) {
-            TreeItem<Directory> childItem = new TreeItem<>(child, this.getIcon());
-            childItem.setExpanded(true);
-            parent.getChildren().add(childItem);
-            this.addChildren(child, childItem);
         }
     }
 

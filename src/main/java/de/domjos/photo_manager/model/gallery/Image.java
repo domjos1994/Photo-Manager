@@ -1,5 +1,6 @@
 package de.domjos.photo_manager.model.gallery;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class Image {
@@ -17,6 +18,7 @@ public class Image {
         this.path = "";
         this.thumbnail = null;
         this.directory = null;
+        this.tags = new LinkedList<>();
     }
 
     public long getId() {

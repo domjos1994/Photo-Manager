@@ -10,18 +10,19 @@ import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.Cursor;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TinifyTask extends Task<Void> {
+public final class TinifyTask extends ParentTask<Void> {
     private int width, height;
     private List<Image> images;
 
-    public TinifyTask(String width, String height, Object img) {
+    public TinifyTask(ProgressBar progressBar, Label messages, String width, String height, Object img) {
+        super(progressBar, messages);
         Tinify.setKey(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "").toString());
 
         this.width = -1;
@@ -47,8 +48,7 @@ public class TinifyTask extends Task<Void> {
     }
 
     @Override
-    protected Void call() {
-        Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
+    protected Void runBody() {
         int i = 0;
         updateProgress(i, this.images.size());
         for(Image image : this.images) {

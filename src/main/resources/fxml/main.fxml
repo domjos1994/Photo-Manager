@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.lynden.gmapsfx.GoogleMapView?>
 <?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
@@ -27,6 +26,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
+<?import com.lynden.gmapsfx.GoogleMapView?>
 <AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
    <children>
       <TabPane fx:id="tbpMain" layoutX="35.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-6.0">
@@ -68,7 +68,7 @@
                                                          <children>
                                                             <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
                                                               <items>
-                                                                <Button fx:id="cmdMainImageSave" mnemonicParsing="false" text="Button">
+                                                                <Button fx:id="cmdMainImageSave" mnemonicParsing="false" text="">
                                                                     <graphic>
                                                                         <ImageView fitHeight="16" fitWidth="16">
                                                                             <Image url="@../images/icons/save.png" />
@@ -77,8 +77,8 @@
                                                                 </Button>
                                                               </items>
                                                             </ToolBar>
-                                                            <TextField fx:id="cmdMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                            <TextField fx:id="cmdMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                            <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                            <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                                          </children>
                                                     </AnchorPane>
                                                   </content>
@@ -223,6 +223,15 @@
           <Tab fx:id="tbSettings" text="%main.menu.program.settings">
             <fx:include fx:id="settings" source="settings.fxml" />
           </Tab>
+            <Tab fx:id="tbApi" text="%main.menu.extras.api">
+                <fx:include fx:id="api" source="api.fxml" />
+            </Tab>
+            <Tab fx:id="tbMap" text="%main.menu.extras.map">
+                <fx:include fx:id="map" source="map.fxml" />
+            </Tab>
+            <Tab fx:id="tbHelp" text="%main.menu.help">
+                <fx:include fx:id="help" source="help.fxml" />
+            </Tab>
         </tabs>
       </TabPane>
       <MenuBar layoutX="14.0" layoutY="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -235,8 +244,8 @@
           </Menu>
           <Menu mnemonicParsing="false" text="%main.menu.extras">
             <items>
-              <MenuItem fx:id="menMainImport" mnemonicParsing="false" text="%main.menu.extras.import" />
-                  <MenuItem fx:id="menMainExport" mnemonicParsing="false" text="%main.menu.extras.export" />
+                <MenuItem fx:id="menMainApi" mnemonicParsing="false" text="%main.menu.extras.api" />
+                <MenuItem fx:id="menMainMap" mnemonicParsing="false" text="%main.menu.extras.map" />
             </items>
           </Menu>
           <Menu fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help" />

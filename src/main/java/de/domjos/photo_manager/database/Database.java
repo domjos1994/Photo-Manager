@@ -130,7 +130,7 @@ public class Database {
             preparedStatement.setLong(6, image.getId());
 
         } else {
-            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category=?) VALUES(?, ?, ?, ?)");
+            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category) VALUES(?, ?, ?, ?, ?)");
         }
         preparedStatement.setString(1, image.getName());
         preparedStatement.setString(2, image.getPath());

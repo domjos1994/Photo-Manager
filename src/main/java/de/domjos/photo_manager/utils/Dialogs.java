@@ -60,7 +60,7 @@ public final class Dialogs {
     public static void printException(Throwable ex) {
         PhotoManager.GLOBALS.getLogger().error("Unhandled " + ex.getClass().getName(), ex);
         if(!PhotoManager.GLOBALS.isDebugMode()) {
-            Dialogs.printNotification(Alert.AlertType.ERROR, "Unhandled " + ex.getClass().getName(), ex.getMessage());
+            Dialogs.printNotification(Alert.AlertType.ERROR, "Unhandled " + ex.getClass().getName(), ex.toString());
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Unhandled " + ex.getClass().getName());
