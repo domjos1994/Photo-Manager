@@ -78,6 +78,11 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${jfx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${jfx.version}</version>
+        </dependency>
 
         <!-- extended components -->
         <dependency>

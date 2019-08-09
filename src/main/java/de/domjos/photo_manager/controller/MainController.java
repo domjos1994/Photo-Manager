@@ -16,14 +16,18 @@ import de.domjos.photo_manager.services.TreeViewTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -31,6 +35,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 
 public class MainController implements Initializable {
     private @FXML TabPane tbpMain;
@@ -40,13 +45,19 @@ public class MainController implements Initializable {
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
-    private @FXML ImageView ivMain;
-    private @FXML AnchorPane pnlMain;
+    private @FXML ImageView ivMainImage, ivMainPreview;
+
+    private @FXML Slider slMainImageZoom;
+    private @FXML Label lblMainImageZoom;
+    private @FXML Button cmdMainImageZoom;
 
     private @FXML Button cmdMainAddFolder, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
     private @FXML TextField txtMainFolderName;
     private @FXML TextField txtMainImageCategory, txtMainImageTags;
+
+    private @FXML Button cmdMainImageSearch;
+    private @FXML TextField txtMainImageSearch;
 
     private @FXML BarChart<String, Integer> bcMainHistogram;
     private @FXML CheckBox chkMainHistogram, chkMainHistogramRed, chkMainHistogramGreen, chkMainHistogramBlue;
@@ -62,6 +73,8 @@ public class MainController implements Initializable {
     private @FXML TextField txtMainTinifyWidth, txtMainTinifyHeight;
     private @FXML Button cmdMainTinifyUpload;
 
+    private @FXML Slider slMainSaturation, slMainHue, slMainBrightness;
+
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
 
@@ -76,6 +89,8 @@ public class MainController implements Initializable {
 
     private long rootID;
     private Directory directory;
+    private javafx.scene.image.Image currentImage;
+    private BufferedImage previewImage, originalPreview;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.initControllers();
@@ -129,9 +144,9 @@ public class MainController implements Initializable {
                 if(newValue !=null) {
                     File img = new File(newValue.getPath());
                     if(img.exists()) {
-                        this.ivMain.setImage(new javafx.scene.image.Image(new FileInputStream(img)));
+                        this.fillImage(new javafx.scene.image.Image(new FileInputStream(img)));
                     } else {
-                        this.ivMain.setImage(new javafx.scene.image.Image(new ByteArrayInputStream(newValue.getThumbnail())));
+                        this.fillImage(new javafx.scene.image.Image(new ByteArrayInputStream(newValue.getThumbnail())));
                     }
                     this.fillBarChart();
                     this.fillMetaData();
@@ -139,6 +154,38 @@ public class MainController implements Initializable {
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
+            }
+        });
+
+        this.slMainImageZoom.valueProperty().addListener((observable, oldValue, newValue) -> this.lblMainImageZoom.setText(newValue.intValue() + " %"));
+
+        this.cmdMainImageZoom.setOnAction(event -> {
+            // scale image
+            if(!this.lvMain.getSelectionModel().isEmpty() && this.currentImage!=null) {
+                Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
+                int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
+                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.currentImage, null);
+                bufferedImage = ImageHelper.scale(bufferedImage, width, height);
+                this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
+                this.ivMainImage.setImage(this.currentImage);
+            }
+        });
+
+        this.ivMainImage.setOnMouseClicked(event -> {
+            switch (event.getButton()) {
+                case PRIMARY:
+                    if(this.slMainImageZoom.getValue()>=11) {
+                        this.slMainImageZoom.setValue(this.slMainImageZoom.getValue()-10);
+                        this.cmdMainImageZoom.fire();
+                    }
+                    break;
+                case SECONDARY:
+                    if(this.slMainImageZoom.getValue()<=90) {
+                        this.slMainImageZoom.setValue(this.slMainImageZoom.getValue()+10);
+                        this.cmdMainImageZoom.fire();
+                    }
+                    break;
             }
         });
 
@@ -161,11 +208,16 @@ public class MainController implements Initializable {
                                 descriptionObject.setTitle(tag);
                                 image.getTags().add(descriptionObject);
                             }
-                        }
-                        if(tags.contains(",")) {
+                        } else if(tags.contains(",")) {
                             for(String tag : tags.split(",")) {
                                 DescriptionObject descriptionObject = new DescriptionObject();
                                 descriptionObject.setTitle(tag);
+                                image.getTags().add(descriptionObject);
+                            }
+                        } else {
+                            if(!tags.trim().isEmpty()) {
+                                DescriptionObject descriptionObject = new DescriptionObject();
+                                descriptionObject.setTitle(tags.trim());
                                 image.getTags().add(descriptionObject);
                             }
                         }
@@ -205,6 +257,10 @@ public class MainController implements Initializable {
             }
         });
 
+        this.slMainHue.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
+        this.slMainSaturation.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
+        this.slMainBrightness.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
+
         this.ctxMainDelete.setOnAction(event -> {
             try {
                 if(!this.tvMain.getSelectionModel().isEmpty()) {
@@ -233,6 +289,8 @@ public class MainController implements Initializable {
                 new Thread(recreateTask).start();
             }
         });
+
+        this.cmdMainImageSearch.setOnAction(event -> search());
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
         this.menMainApi.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbApi));
@@ -267,13 +325,6 @@ public class MainController implements Initializable {
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.cmdMainFolder.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.txtMainFolderName.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.chkMainRecursive.visibleProperty());
-
-        this.pnlMain.widthProperty().addListener((observable, oldValue, newValue) -> {
-            int newWidth = newValue.intValue() - 20;
-            this.ivMain.setFitWidth(newWidth);
-            this.ivMain.setFitHeight(newWidth);
-            this.ivMain.setViewport(new Rectangle2D(0, 0, newWidth, this.ivMain.getFitHeight()));
-        });
     }
 
     void initTinify() {
@@ -309,19 +360,95 @@ public class MainController implements Initializable {
                     setGraphic(null);
                 } else {
                     setText(name.getName());
-                    this.imageView.setImage(new javafx.scene.image.Image(new ByteArrayInputStream(name.getThumbnail())));
-                    setGraphic(this.imageView);
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(new ByteArrayInputStream(name.getThumbnail()));
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+                    if(bufferedImage!=null) {
+                        this.imageView.setImage(SwingFXUtils.toFXImage(ImageHelper.scale(bufferedImage, 50, 50), null));
+                        setGraphic(this.imageView);
+                    }
                 }
             }
         });
     }
 
+    private void enableFolderControls() {
+        if(this.cmdMainFolder.isVisible()) {
+            this.txtMainFolderName.setText("");
+            this.cmdMainFolder.setVisible(false);
+        } else {
+            this.directory = new Directory();
+            this.cmdMainFolder.setVisible(true);
+        }
+    }
+
+    private void search() {
+        if(!this.tvMain.getSelectionModel().isEmpty()) {
+            this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue(), this.txtMainImageSearch.getText().toLowerCase().trim());
+        }
+    }
+
+    private void fillImage(javafx.scene.image.Image image) {
+        this.currentImage = image;
+        Image img = this.lvMain.getSelectionModel().getSelectedItem();
+        javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
+        this.originalPreview = SwingFXUtils.fromFXImage(preview, null);
+        this.previewImage = ImageHelper.deepCopy(this.originalPreview);
+        this.ivMainPreview.setImage(preview);
+        this.lvMain.getSelectionModel().getSelectedItem().setBufferedImage(SwingFXUtils.fromFXImage(preview, null));
+        this.ivMainImage.setFitWidth(image.getWidth());
+        this.ivMainImage.setFitHeight(image.getHeight());
+        this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));
+        this.ivMainImage.setPreserveRatio(true);
+        this.ivMainImage.setImage(image);
+        this.slMainImageZoom.setValue(100.0);
+    }
+
+    private javafx.scene.image.Image editImage() {
+        // change saturation
+        int hue = (int) this.slMainHue.getValue();
+        int saturation = (int) this.slMainSaturation.getValue();
+        int brightness = (int) this.slMainBrightness.getValue();
+
+        if(this.originalPreview!=null && this.previewImage!=null) {
+            ImageHelper.changeHSB(this.previewImage, this.originalPreview, hue, saturation, brightness);
+            return SwingFXUtils.toFXImage(this.previewImage, null);
+        }
+
+        return null;
+    }
+
     private void fillImageList(Directory directory) {
+        this.fillImageList(directory, "");
+    }
+
+    private void fillImageList(Directory directory, String search) {
         try {
+            search = search.trim();
             if(directory!=null) {
                 this.lvMain.getItems().clear();
                 for(Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
-                    this.lvMain.getItems().add(image);
+                    boolean foundItem = true;
+                    if(!search.isEmpty()) {
+                        foundItem = false;
+                        if(image.getCategory()!=null) {
+                            System.out.println(image.getCategory().getTitle());
+                            if(image.getCategory().getTitle().trim().toLowerCase().contains(search)) {
+                                foundItem = true;
+                            }
+                        }
+                        if(!image.getTags().isEmpty()) {
+                            for(DescriptionObject descriptionObject : image.getTags()) {
+                                System.out.println(descriptionObject.getTitle());
+                                if(descriptionObject.getTitle().trim().toLowerCase().contains(search)) {
+                                    foundItem = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if(foundItem) {
+                        this.lvMain.getItems().add(image);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -425,16 +552,6 @@ public class MainController implements Initializable {
                 }
                 this.txtMainImageTags.setText(stringBuilder.toString());
             }
-        }
-    }
-
-    private void enableFolderControls() {
-        if(this.cmdMainFolder.isVisible()) {
-            this.txtMainFolderName.setText("");
-            this.cmdMainFolder.setVisible(false);
-        } else {
-            this.directory = new Directory();
-            this.cmdMainFolder.setVisible(true);
         }
     }
 }

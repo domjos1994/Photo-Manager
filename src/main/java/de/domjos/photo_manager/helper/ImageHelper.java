@@ -15,9 +15,7 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
+import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -186,6 +184,30 @@ public class ImageHelper {
             } catch (Exception ignored) {}
         }
         return metaData;
+    }
+
+    public static void changeHSB(BufferedImage bufferedImage, BufferedImage original, int hue, int saturation, int brightness) {
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+
+        for(int y = 0; y<=height-1; y++) {
+            for(int x = 0; x<=width-1; x++) {
+                Color color = new Color(original.getRGB(x, y));
+                float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+                hsb[0] = ((hsb[0]/100f) * hue);
+                hsb[1] = ((hsb[1]/100f) * saturation);
+                hsb[2] = ((hsb[2]/100f) * brightness);
+                int rgb = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
+                bufferedImage.setRGB(x, y, rgb);
+            }
+        }
+    }
+
+    public static BufferedImage deepCopy(BufferedImage bi) {
+        ColorModel cm = bi.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster raster = bi.copyData(null);
+        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 
     private static Object getValue(final JpegImageMetadata jpegMetadata, final TagInfo tagInfo) throws Exception {

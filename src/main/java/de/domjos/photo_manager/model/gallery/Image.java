@@ -1,5 +1,6 @@
 package de.domjos.photo_manager.model.gallery;
 
+import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +12,9 @@ public class Image {
     private Directory directory;
     private DescriptionObject category;
     private List<DescriptionObject> tags;
+    private int width;
+    private int height;
+    private BufferedImage bufferedImage;
 
     public Image() {
         this.id = 0;
@@ -18,6 +22,8 @@ public class Image {
         this.path = "";
         this.thumbnail = null;
         this.directory = null;
+        this.width = 0;
+        this.height = 0;
         this.tags = new LinkedList<>();
     }
 
@@ -75,5 +81,29 @@ public class Image {
 
     public void setTags(List<DescriptionObject> tags) {
         this.tags = tags;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public BufferedImage getBufferedImage() {
+        return this.bufferedImage;
+    }
+
+    public void setBufferedImage(BufferedImage bufferedImage) {
+        this.bufferedImage = bufferedImage;
     }
 }

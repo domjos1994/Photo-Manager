@@ -126,11 +126,11 @@ public class Database {
     public void insertOrUpdateImage(Image image) throws Exception {
         PreparedStatement preparedStatement;
         if(image.getId()!=0) {
-            preparedStatement = this.prepare("UPDATE images SET name=?, path=?, thumbnail=?, parent=?, category=? WHERE id=?");
-            preparedStatement.setLong(6, image.getId());
+            preparedStatement = this.prepare("UPDATE images SET name=?, path=?, thumbnail=?, parent=?, category=?, width=?, height=? WHERE id=?");
+            preparedStatement.setLong(8, image.getId());
 
         } else {
-            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category) VALUES(?, ?, ?, ?, ?)");
+            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category, width, height) VALUES(?, ?, ?, ?, ?, ?, ?)");
         }
         preparedStatement.setString(1, image.getName());
         preparedStatement.setString(2, image.getPath());
@@ -141,6 +141,8 @@ public class Database {
         } else {
             preparedStatement.setNull(5, Types.INTEGER);
         }
+        preparedStatement.setInt(6, image.getWidth());
+        preparedStatement.setInt(7, image.getHeight());
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
@@ -153,6 +155,7 @@ public class Database {
             }
             this.executeUpdate("DELETE FROM images_tags WHERE image=" + id);
             for(DescriptionObject descriptionObject : image.getTags()) {
+                System.out.println(descriptionObject.getTitle());
                 long tag_id = this.insertOrUpdateDescriptionObject(descriptionObject, 1);
                 this.executeUpdate(String.format("INSERT INTO images_tags(image, tag) VALUES('%s', '%s')", id, tag_id));
             }
@@ -172,8 +175,22 @@ public class Database {
                         image.setDirectory(directory);
                         image.setName(file.getName());
                         image.setPath(file.getAbsolutePath());
-                        BufferedImage bufferedImage = ImageHelper.scale(ImageHelper.getImage(image.getPath()), 50, 50);
-                        image.setThumbnail(ImageHelper.imageToByteArray(bufferedImage));
+                        BufferedImage originalImage = ImageHelper.getImage(image.getPath());
+                        if(originalImage!=null) {
+                            image.setWidth(originalImage.getWidth());
+                            image.setHeight(originalImage.getHeight());
+                            BufferedImage bufferedImage;
+                            if(originalImage.getWidth()>originalImage.getHeight()) {
+                                double factor = originalImage.getWidth() / 200;
+                                bufferedImage = ImageHelper.scale(originalImage, 200, (int) (originalImage.getHeight()/factor));
+                            } else if(originalImage.getWidth()<originalImage.getHeight()) {
+                                double factor = originalImage.getHeight() / 200;
+                                bufferedImage = ImageHelper.scale(originalImage, (int) (originalImage.getWidth()/factor), 200);
+                            } else {
+                                bufferedImage = ImageHelper.scale(originalImage, 200, 200);
+                            }
+                            image.setThumbnail(ImageHelper.imageToByteArray(bufferedImage));
+                        }
                         this.insertOrUpdateImage(image);
                     } catch (Exception ex) {
                         PhotoManager.GLOBALS.getLogger().error("Read Image", ex);
@@ -190,7 +207,15 @@ public class Database {
                 image.setName(rs.getString("name"));
                 image.setPath(rs.getString("path"));
                 image.setDirectory(directory);
+                image.setHeight(rs.getInt("height"));
+                image.setWidth(rs.getInt("width"));
                 image.setThumbnail(rs.getBytes("thumbnail"));
+
+                List<DescriptionObject> descriptionObjects = this.getDescriptionObjects(rs.getLong("category"), 0);
+                if(!descriptionObjects.isEmpty()) {
+                    image.setCategory(descriptionObjects.get(0));
+                }
+                image.setTags(this.getDescriptionObjects(image.getId(), 1));
                 images.add(image);
             }
             rs.close();
@@ -225,6 +250,29 @@ public class Database {
             id = this.getGeneratedId(preparedStatement);
         }
         return id;
+    }
+
+    private List<DescriptionObject> getDescriptionObjects(long id, int type) throws Exception {
+        List<DescriptionObject> descriptionObjects = new LinkedList<>();
+        PreparedStatement preparedStatement;
+        if(type==0) {
+            preparedStatement = this.prepare("SELECT * FROM categories WHERE id=" + id);
+        } else {
+            preparedStatement = this.prepare("SELECT * FROM tags INNER JOIN images_tags ON images_tags.tag=tags.id WHERE images_tags.image=" + id);
+        }
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            DescriptionObject descriptionObject = new DescriptionObject();
+            descriptionObject.setId(resultSet.getLong(1));
+            descriptionObject.setTitle(resultSet.getString(2));
+            descriptionObject.setDescription(resultSet.getString(3));
+            descriptionObjects.add(descriptionObject);
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        return descriptionObjects;
     }
 
     private void getChildren(Directory directory) throws Exception {
