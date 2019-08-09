@@ -8,7 +8,8 @@ public class Directory {
     private String name;
     private String path;
     private boolean root;
-    private Directory parent;
+    private boolean library;
+    private boolean recursive;
     private List<Directory> children;
     private List<Image> images;
 
@@ -17,7 +18,8 @@ public class Directory {
         this.name = "";
         this.path = "";
         this.root = false;
-        this.parent = null;
+        this.library = false;
+        this.recursive = false;
         this.children = new LinkedList<>();
         this.images = new LinkedList<>();
     }
@@ -54,14 +56,6 @@ public class Directory {
         this.root = root;
     }
 
-    public Directory getParent() {
-        return this.parent;
-    }
-
-    public void setParent(Directory parent) {
-        this.parent = parent;
-    }
-
     public List<Directory> getChildren() {
         return this.children;
     }
@@ -80,5 +74,21 @@ public class Directory {
 
     public String toString() {
         return this.name;
+    }
+
+    public boolean isLibrary() {
+        return this.library;
+    }
+
+    public void setLibrary(boolean library) {
+        this.library = library;
+    }
+
+    public boolean isRecursive() {
+        return this.recursive;
+    }
+
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
     }
 }

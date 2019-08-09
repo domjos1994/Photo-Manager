@@ -5,6 +5,8 @@ import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.model.gallery.DescriptionObject;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
+import de.domjos.photo_manager.model.gallery.TemporaryEdited;
+import de.domjos.photo_manager.services.SaveFolderTask;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,11 +36,13 @@ public class Database {
         this.connection.close();
     }
 
-    public long insertOrUpdateDirectory(Directory directory, long id, boolean recursive) throws Exception {
-        PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT) VALUES(?, ?, ?)");
+    public long insertOrUpdateDirectory(Directory directory, long id, boolean recursive, SaveFolderTask task) throws Exception {
+        PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT, isLibrary, isRecursive) VALUES(?, ?, ?, ?, ?)");
         preparedStatement.setString(1, directory.getName());
         preparedStatement.setString(2, directory.getPath());
         preparedStatement.setInt(3, 0);
+        preparedStatement.setInt(4, directory.isLibrary() ? 1 : 0);
+        preparedStatement.setInt(5, directory.isRecursive() ? 1 : 0);
         preparedStatement.executeUpdate();
         long genId = this.getGeneratedId(preparedStatement);
         preparedStatement.close();
@@ -56,7 +60,12 @@ public class Database {
             File file = new File(directory.getPath());
             File[] paths = file.listFiles(File::isDirectory);
             if(paths!=null) {
+                int i = 0;
                 for(File sub  : paths) {
+                    if(task!=null) {
+                        task.max = paths.length;
+                        task.counter.set(i);
+                    }
                     if(sub.isDirectory() && !sub.getName().startsWith(".")) {
                         Directory subDir = new Directory();
                         subDir.setName(sub.getName());
@@ -65,10 +74,15 @@ public class Database {
                         subDir.setId(this.insertOrUpdateDirectory(subDir, genId, true));
                         this.getImages(subDir, true);
                     }
+                    i++;
                 }
             }
         }
         return genId;
+    }
+
+    private long insertOrUpdateDirectory(Directory directory, long id, boolean recursive) throws Exception {
+        return this.insertOrUpdateDirectory(directory, id, recursive, null);
     }
 
     public void deleteDirectory(Directory directory) throws Exception {
@@ -210,6 +224,7 @@ public class Database {
                 image.setHeight(rs.getInt("height"));
                 image.setWidth(rs.getInt("width"));
                 image.setThumbnail(rs.getBytes("thumbnail"));
+                image.setTemporaryEditedList(this.getTemporaryEdited(image.getId()));
 
                 List<DescriptionObject> descriptionObjects = this.getDescriptionObjects(rs.getLong("category"), 0);
                 if(!descriptionObjects.isEmpty()) {
@@ -222,6 +237,30 @@ public class Database {
             preparedStatement.close();
         }
         return images;
+    }
+
+    public void insertOrUpdateEdited(TemporaryEdited temporaryEdited, long image) throws Exception {
+        PreparedStatement preparedStatement = this.prepare("INSERT INTO images_edited(image, type, value) VALUES(?, ?, ?)");
+        preparedStatement.setLong(1, image);
+        preparedStatement.setString(2, temporaryEdited.getChangeType().name());
+        preparedStatement.setDouble(3, temporaryEdited.getValue());
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    public List<TemporaryEdited> getTemporaryEdited(long image) throws Exception {
+        List<TemporaryEdited> temporaryEditedList = new LinkedList<>();
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM images_edited WHERE image=" + image);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            TemporaryEdited temporaryEdited = new TemporaryEdited();
+            temporaryEdited.setId(resultSet.getLong("id"));
+            temporaryEdited.setChangeType(TemporaryEdited.ChangeType.valueOf(resultSet.getString("type")));
+            temporaryEdited.setValue(resultSet.getDouble("value"));
+            temporaryEditedList.add(temporaryEdited);
+        }
+
+        return temporaryEditedList;
     }
 
     private long insertOrUpdateDescriptionObject(DescriptionObject descriptionObject, int type) throws Exception {
@@ -284,6 +323,8 @@ public class Database {
             sub.setId(rs.getInt("id"));
             sub.setName(rs.getString("name"));
             sub.setPath(rs.getString("path"));
+            sub.setLibrary(rs.getInt("isLibrary")==1);
+            sub.setRecursive(rs.getInt("isRecursive")==1);
             this.getChildren(sub);
             directories.add(sub);
         }

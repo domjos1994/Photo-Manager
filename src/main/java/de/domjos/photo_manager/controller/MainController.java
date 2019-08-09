@@ -5,10 +5,7 @@ import com.lynden.gmapsfx.javascript.object.LatLong;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
-import de.domjos.photo_manager.model.gallery.DescriptionObject;
-import de.domjos.photo_manager.model.gallery.Directory;
-import de.domjos.photo_manager.model.gallery.Image;
-import de.domjos.photo_manager.model.gallery.MetaData;
+import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.services.RecreateTask;
 import de.domjos.photo_manager.services.SaveFolderTask;
 import de.domjos.photo_manager.services.TinifyTask;
@@ -27,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 
 import java.awt.image.BufferedImage;
@@ -74,6 +72,8 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainTinifyUpload;
 
     private @FXML Slider slMainSaturation, slMainHue, slMainBrightness;
+    private @FXML Button cmdMainImageEditSave;
+    private @FXML TableView<TemporaryEdited> tblMainImageHistory;
 
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
@@ -116,6 +116,8 @@ public class MainController implements Initializable {
                     parentId[0] = tvMain.getSelectionModel().getSelectedItem().getValue().getId();
                 }
                 boolean recursive = chkMainRecursive.isSelected();
+                directory.setRecursive(recursive);
+                directory.setLibrary(true);
                 String msg = resources.getString("main.image.import");
 
                 SaveFolderTask saveFolderTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], recursive);
@@ -148,6 +150,8 @@ public class MainController implements Initializable {
                     } else {
                         this.fillImage(new javafx.scene.image.Image(new ByteArrayInputStream(newValue.getThumbnail())));
                     }
+
+                    this.reloadHistory(newValue.getId());
                     this.fillBarChart();
                     this.fillMetaData();
                     this.fillCategoryAndTags();
@@ -261,6 +265,69 @@ public class MainController implements Initializable {
         this.slMainSaturation.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
         this.slMainBrightness.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
 
+        this.tblMainImageHistory.getSelectionModel().selectedItemProperty().addListener((observableValue, temporaryEdited, t1) -> {
+            if(!this.tblMainImageHistory.getSelectionModel().isEmpty()) {
+                long id = this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId();
+                int hue = 100, saturation = 100, brightness = 100;
+
+                for(TemporaryEdited temp : this.tblMainImageHistory.getItems()) {
+                    if(temp.getChangeType()!=null) {
+                        switch (temp.getChangeType()) {
+                            case Hue:
+                                hue = (int) temp.getValue();
+                                break;
+                            case Saturation:
+                                saturation = (int) temp.getValue();
+                                break;
+                            case Brightness:
+                                brightness = (int) temp.getValue();
+                                break;
+                        }
+
+                        BufferedImage image = SwingFXUtils.fromFXImage(this.ivMainImage.getImage(), null);
+                        ImageHelper.changeHSB(image, SwingFXUtils.fromFXImage(this.currentImage, null),
+                                hue, saturation, brightness);
+                        System.out.println(hue + ": " + saturation + ": " + brightness);
+                        this.ivMainImage.setImage(SwingFXUtils.toFXImage(image, null));
+
+                        if(id== temp.getId()) {
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
+        this.cmdMainImageEditSave.setOnAction(actionEvent -> {
+            try {
+                if(!this.lvMain.getSelectionModel().isEmpty()) {
+                    long id = this.lvMain.getSelectionModel().getSelectedItem().getId();
+                    if(this.slMainHue.getValue()!=100) {
+                        TemporaryEdited temporaryEdited = new TemporaryEdited();
+                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Hue);
+                        temporaryEdited.setValue(this.slMainHue.getValue());
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
+                    }
+                    if(this.slMainSaturation.getValue()!=100) {
+                        TemporaryEdited temporaryEdited = new TemporaryEdited();
+                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Saturation);
+                        temporaryEdited.setValue(this.slMainSaturation.getValue());
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
+                    }
+                    if(this.slMainBrightness.getValue()!=100) {
+                        TemporaryEdited temporaryEdited = new TemporaryEdited();
+                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Brightness);
+                        temporaryEdited.setValue(this.slMainBrightness.getValue());
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
+                    }
+
+                    this.reloadHistory(id);
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
         this.ctxMainDelete.setOnAction(event -> {
             try {
                 if(!this.tvMain.getSelectionModel().isEmpty()) {
@@ -321,10 +388,26 @@ public class MainController implements Initializable {
         this.helpController.init(this);
     }
 
+    private void reloadHistory(long id) throws Exception {
+        this.tblMainImageHistory.getItems().clear();
+        for(TemporaryEdited temporaryEdited : PhotoManager.GLOBALS.getDatabase().getTemporaryEdited(id)) {
+            this.tblMainImageHistory.getItems().add(temporaryEdited);
+        }
+    }
+
     private void initBindings() {
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.cmdMainFolder.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.txtMainFolderName.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.chkMainRecursive.visibleProperty());
+
+        TableColumn<TemporaryEdited, String> changeType = new TableColumn<>("ChangeType");
+        changeType.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.type"));
+        changeType.setCellValueFactory(new PropertyValueFactory<>("changeType"));
+        TableColumn<TemporaryEdited, String>  value = new TableColumn<>("Value");
+        value.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.value"));
+        value.setCellValueFactory(new PropertyValueFactory<>("value"));
+        this.tblMainImageHistory.getColumns().add(changeType);
+        this.tblMainImageHistory.getColumns().add(value);
     }
 
     void initTinify() {
@@ -394,7 +477,6 @@ public class MainController implements Initializable {
         this.originalPreview = SwingFXUtils.fromFXImage(preview, null);
         this.previewImage = ImageHelper.deepCopy(this.originalPreview);
         this.ivMainPreview.setImage(preview);
-        this.lvMain.getSelectionModel().getSelectedItem().setBufferedImage(SwingFXUtils.fromFXImage(preview, null));
         this.ivMainImage.setFitWidth(image.getWidth());
         this.ivMainImage.setFitHeight(image.getHeight());
         this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));

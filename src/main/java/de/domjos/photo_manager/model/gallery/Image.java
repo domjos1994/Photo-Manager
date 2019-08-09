@@ -9,12 +9,13 @@ public class Image {
     private String name;
     private String path;
     private byte[] thumbnail;
-    private Directory directory;
-    private DescriptionObject category;
-    private List<DescriptionObject> tags;
     private int width;
     private int height;
     private BufferedImage bufferedImage;
+    private Directory directory;
+    private DescriptionObject category;
+    private List<DescriptionObject> tags;
+    private List<TemporaryEdited> temporaryEditedList;
 
     public Image() {
         this.id = 0;
@@ -25,6 +26,7 @@ public class Image {
         this.width = 0;
         this.height = 0;
         this.tags = new LinkedList<>();
+        this.temporaryEditedList = new LinkedList<>();
     }
 
     public long getId() {
@@ -99,11 +101,11 @@ public class Image {
         this.height = height;
     }
 
-    public BufferedImage getBufferedImage() {
-        return this.bufferedImage;
+    public List<TemporaryEdited> getTemporaryEditedList() {
+        return this.temporaryEditedList;
     }
 
-    public void setBufferedImage(BufferedImage bufferedImage) {
-        this.bufferedImage = bufferedImage;
+    public void setTemporaryEditedList(List<TemporaryEdited> temporaryEditedList) {
+        this.temporaryEditedList = temporaryEditedList;
     }
 }
