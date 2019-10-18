@@ -6,7 +6,7 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>photo_manager</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.alpha.1</version>
 
     <properties>
         <!-- Information of the project -->

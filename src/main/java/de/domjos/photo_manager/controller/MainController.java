@@ -10,6 +10,7 @@ import de.domjos.photo_manager.services.RecreateTask;
 import de.domjos.photo_manager.services.SaveFolderTask;
 import de.domjos.photo_manager.services.TinifyTask;
 import de.domjos.photo_manager.services.TreeViewTask;
+import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
@@ -90,7 +91,7 @@ public class MainController implements Initializable {
     private long rootID;
     private Directory directory;
     private javafx.scene.image.Image currentImage;
-    private BufferedImage previewImage, originalPreview;
+    private final Cache cache = new Cache();
 
     public void initialize(URL location, ResourceBundle resources) {
         this.initControllers();
@@ -169,7 +170,7 @@ public class MainController implements Initializable {
                 Image image = this.lvMain.getSelectionModel().getSelectedItem();
                 int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
                 int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.currentImage, null);
+                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.cache.getOriginal(), null);
                 bufferedImage = ImageHelper.scale(bufferedImage, width, height);
                 this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
                 this.ivMainImage.setImage(this.currentImage);
@@ -472,10 +473,11 @@ public class MainController implements Initializable {
 
     private void fillImage(javafx.scene.image.Image image) {
         this.currentImage = image;
+        this.cache.setOriginal(image);
         Image img = this.lvMain.getSelectionModel().getSelectedItem();
         javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
-        this.originalPreview = SwingFXUtils.fromFXImage(preview, null);
-        this.previewImage = ImageHelper.deepCopy(this.originalPreview);
+        this.cache.setOriginalPreview(SwingFXUtils.fromFXImage(preview, null));
+        this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
         this.ivMainPreview.setImage(preview);
         this.ivMainImage.setFitWidth(image.getWidth());
         this.ivMainImage.setFitHeight(image.getHeight());
@@ -491,9 +493,9 @@ public class MainController implements Initializable {
         int saturation = (int) this.slMainSaturation.getValue();
         int brightness = (int) this.slMainBrightness.getValue();
 
-        if(this.originalPreview!=null && this.previewImage!=null) {
-            ImageHelper.changeHSB(this.previewImage, this.originalPreview, hue, saturation, brightness);
-            return SwingFXUtils.toFXImage(this.previewImage, null);
+        if(this.cache.getOriginalPreview()!=null && this.cache.getPreviewImage()!=null) {
+            ImageHelper.changeHSB(this.cache.getPreviewImage(), this.cache.getOriginalPreview(), hue, saturation, brightness);
+            return SwingFXUtils.toFXImage(this.cache.getPreviewImage(), null);
         }
 
         return null;
