@@ -21,6 +21,9 @@ public class Globals {
     public final static String PATH = "PATH";
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";
+    public final static String CLOUD_PATH = "CLOUD_PATH";
+    public final static String CLOUD_USER = "CLOUD_USER";
+    public final static String CLOUD_PWD = "CLOUD_PWD";
 
     public Globals() {
         this.debugMode = false;

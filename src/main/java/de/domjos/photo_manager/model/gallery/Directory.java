@@ -1,5 +1,7 @@
 package de.domjos.photo_manager.model.gallery;
 
+import de.domjos.photo_manager.model.services.Cloud;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ public class Directory {
     private boolean recursive;
     private List<Directory> children;
     private List<Image> images;
+    private Cloud cloud;
 
     public Directory() {
         this.id = 0;
@@ -22,6 +25,7 @@ public class Directory {
         this.recursive = false;
         this.children = new LinkedList<>();
         this.images = new LinkedList<>();
+        this.cloud = null;
     }
 
     public long getId() {
@@ -90,5 +94,13 @@ public class Directory {
 
     public void setRecursive(boolean recursive) {
         this.recursive = recursive;
+    }
+
+    public Cloud getCloud() {
+        return this.cloud;
+    }
+
+    public void setCloud(Cloud cloud) {
+        this.cloud = cloud;
     }
 }

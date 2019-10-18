@@ -1,5 +1,7 @@
 package de.domjos.photo_manager.model.gallery;
 
+import de.domjos.photo_manager.model.services.Cloud;
+
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ public class Image {
     private DescriptionObject category;
     private List<DescriptionObject> tags;
     private List<TemporaryEdited> temporaryEditedList;
+    private Cloud cloud;
 
     public Image() {
         this.id = 0;
@@ -27,6 +30,7 @@ public class Image {
         this.height = 0;
         this.tags = new LinkedList<>();
         this.temporaryEditedList = new LinkedList<>();
+        this.cloud = null;
     }
 
     public long getId() {
@@ -107,5 +111,13 @@ public class Image {
 
     public void setTemporaryEditedList(List<TemporaryEdited> temporaryEditedList) {
         this.temporaryEditedList = temporaryEditedList;
+    }
+
+    public Cloud getCloud() {
+        return this.cloud;
+    }
+
+    public void setCloud(Cloud cloud) {
+        this.cloud = cloud;
     }
 }

@@ -2,14 +2,20 @@ package de.domjos.photo_manager.controller;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.InitializationHelper;
+import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,6 +31,10 @@ public class SettingsController implements Initializable {
     private @FXML TextField txtSettingsPath;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
+
+    private @FXML TextField txtSettingsCloudPath, txtSettingsCloudUserName;
+    private @FXML PasswordField txtSettingsCloudPassword;
+    private @FXML Button cmdSettingsCloudTest;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString());
@@ -82,6 +92,10 @@ public class SettingsController implements Initializable {
         this.cmdSettingsSave.setOnAction(event -> {
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText());
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText());
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText());
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText());
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText());
+
             PhotoManager.GLOBALS.setDebugMode(this.chkSettingsDebugMode.isSelected());
             if(this.chkSettingsDebugMode.isSelected()) {
                 PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader() + " - (Debug)");
@@ -90,9 +104,26 @@ public class SettingsController implements Initializable {
             }
             mainController.initTinify();
         });
+
+        this.cmdSettingsCloudTest.setOnAction(event -> {
+            WebDav webDav = new WebDav(this.txtSettingsCloudUserName.getText(), this.txtSettingsCloudPassword.getText(), this.txtSettingsCloudPath.getText());
+
+            Color color = webDav.testConnection() ? Color.GREEN : Color.RED;
+            Background background = new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY));
+            this.cmdSettingsCloudTest.setBackground(background);
+        });
+    }
+
+    private void fillData() {
+        this.txtSettingsTinyKey.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "")));
+        this.txtSettingsTinyFile.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "")));
+        this.txtSettingsCloudPath.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "")));
+        this.txtSettingsCloudUserName.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, "")));
+        this.txtSettingsCloudPassword.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, "")));
     }
 
     void init(MainController mainController) {
         this.mainController = mainController;
+        this.fillData();
     }
 }

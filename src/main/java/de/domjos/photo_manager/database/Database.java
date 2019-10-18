@@ -6,6 +6,7 @@ import de.domjos.photo_manager.model.gallery.DescriptionObject;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
+import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.SaveFolderTask;
 
 import java.awt.image.BufferedImage;
@@ -37,12 +38,21 @@ public class Database {
     }
 
     public long insertOrUpdateDirectory(Directory directory, long id, boolean recursive, SaveFolderTask task) throws Exception {
-        PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT, isLibrary, isRecursive) VALUES(?, ?, ?, ?, ?)");
+        if(directory.getCloud()!=null) {
+            directory.getCloud().setId(this.insertCloud(directory.getCloud()));
+        }
+
+        PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT, isLibrary, isRecursive, cloud_id) VALUES(?, ?, ?, ?, ?, ?)");
         preparedStatement.setString(1, directory.getName());
         preparedStatement.setString(2, directory.getPath());
         preparedStatement.setInt(3, 0);
         preparedStatement.setInt(4, directory.isLibrary() ? 1 : 0);
         preparedStatement.setInt(5, directory.isRecursive() ? 1 : 0);
+        if(directory.getCloud()!=null) {
+            preparedStatement.setLong(6, directory.getCloud().getId());
+        } else {
+            preparedStatement.setNull(6, Types.INTEGER);
+        }
         preparedStatement.executeUpdate();
         long genId = this.getGeneratedId(preparedStatement);
         preparedStatement.close();
@@ -138,13 +148,17 @@ public class Database {
     }
 
     public void insertOrUpdateImage(Image image) throws Exception {
+        if(image.getCloud()!=null) {
+            image.getCloud().setId(this.insertCloud(image.getCloud()));
+        }
+
         PreparedStatement preparedStatement;
         if(image.getId()!=0) {
-            preparedStatement = this.prepare("UPDATE images SET name=?, path=?, thumbnail=?, parent=?, category=?, width=?, height=? WHERE id=?");
-            preparedStatement.setLong(8, image.getId());
+            preparedStatement = this.prepare("UPDATE images SET name=?, path=?, thumbnail=?, parent=?, category=?, width=?, height=?, cloud_id=? WHERE id=?");
+            preparedStatement.setLong(9, image.getId());
 
         } else {
-            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category, width, height) VALUES(?, ?, ?, ?, ?, ?, ?)");
+            preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category, width, height, cloud_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
         }
         preparedStatement.setString(1, image.getName());
         preparedStatement.setString(2, image.getPath());
@@ -157,6 +171,11 @@ public class Database {
         }
         preparedStatement.setInt(6, image.getWidth());
         preparedStatement.setInt(7, image.getHeight());
+        if(image.getCloud()!=null) {
+            preparedStatement.setLong(8, image.getCloud().getId());
+        } else {
+            preparedStatement.setNull(8, Types.INTEGER);
+        }
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
@@ -195,10 +214,10 @@ public class Database {
                             image.setHeight(originalImage.getHeight());
                             BufferedImage bufferedImage;
                             if(originalImage.getWidth()>originalImage.getHeight()) {
-                                double factor = originalImage.getWidth() / 200;
+                                double factor = originalImage.getWidth() / 200.0;
                                 bufferedImage = ImageHelper.scale(originalImage, 200, (int) (originalImage.getHeight()/factor));
                             } else if(originalImage.getWidth()<originalImage.getHeight()) {
-                                double factor = originalImage.getHeight() / 200;
+                                double factor = originalImage.getHeight() / 200.0;
                                 bufferedImage = ImageHelper.scale(originalImage, (int) (originalImage.getWidth()/factor), 200);
                             } else {
                                 bufferedImage = ImageHelper.scale(originalImage, 200, 200);
@@ -224,6 +243,7 @@ public class Database {
                 image.setHeight(rs.getInt("height"));
                 image.setWidth(rs.getInt("width"));
                 image.setThumbnail(rs.getBytes("thumbnail"));
+                image.setCloud(this.getCloud(rs.getLong("cloud_id")));
                 image.setTemporaryEditedList(this.getTemporaryEdited(image.getId()));
 
                 List<DescriptionObject> descriptionObjects = this.getDescriptionObjects(rs.getLong("category"), 0);
@@ -325,6 +345,7 @@ public class Database {
             sub.setPath(rs.getString("path"));
             sub.setLibrary(rs.getInt("isLibrary")==1);
             sub.setRecursive(rs.getInt("isRecursive")==1);
+            sub.setCloud(this.getCloud(rs.getLong("cloud_id")));
             this.getChildren(sub);
             directories.add(sub);
         }
@@ -339,5 +360,37 @@ public class Database {
         long id = rs.getLong(1);
         rs.close();
         return id;
+    }
+
+    private Cloud getCloud(long id) throws Exception {
+        Cloud cloud = null;
+        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT * FROM cloud_inclusion WHERE ID=" + id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            cloud = new Cloud();
+            cloud.setId(id);
+            cloud.setPath(resultSet.getString("path"));
+        }
+        resultSet.close();
+        preparedStatement.close();
+        return cloud;
+    }
+
+    private long insertCloud(Cloud cloud) throws Exception {
+        PreparedStatement preparedStatement;
+        if(cloud.getId()==0) {
+            preparedStatement = this.connection.prepareStatement("INSERT INTO cloud_inclusion(path) VALUES(?)");
+
+        } else {
+            preparedStatement = this.connection.prepareStatement("UPDATE cloud_inclusion SET path=? WHERE id=?");
+            preparedStatement.setLong(2, cloud.getId());
+        }
+
+        preparedStatement.setString(1, cloud.getPath());
+        preparedStatement.executeUpdate();
+        if(cloud.getId()==0) {
+            cloud.setId(this.getGeneratedId(preparedStatement));
+        }
+        return cloud.getId();
     }
 }

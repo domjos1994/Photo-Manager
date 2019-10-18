@@ -1,19 +1,19 @@
 package de.domjos.photo_manager.controller;
 
+import com.github.sardine.DavResource;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.javascript.object.LatLong;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.*;
-import de.domjos.photo_manager.services.RecreateTask;
-import de.domjos.photo_manager.services.SaveFolderTask;
-import de.domjos.photo_manager.services.TinifyTask;
-import de.domjos.photo_manager.services.TreeViewTask;
+import de.domjos.photo_manager.model.services.Cloud;
+import de.domjos.photo_manager.services.*;
 import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -68,6 +68,10 @@ public class MainController implements Initializable {
     private @FXML TextField txtMainMetaDataSoftware, txtMainMetaDataCamera;
     private @FXML GoogleMapView gvMainMetaDataLocation;
 
+    private @FXML TextField txtMainCloudPath;
+    private @FXML TreeView<DavResource> tvMainCloudDirectories;
+    private @FXML Button cmdMainCloudUpload;
+
     private @FXML TitledPane pnlMainTinify, pnlMainImage;
     private @FXML TextField txtMainTinifyWidth, txtMainTinifyHeight;
     private @FXML Button cmdMainTinifyUpload;
@@ -92,6 +96,7 @@ public class MainController implements Initializable {
     private Directory directory;
     private javafx.scene.image.Image currentImage;
     private final Cache cache = new Cache();
+    private WebDav webDav;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.initControllers();
@@ -136,6 +141,8 @@ public class MainController implements Initializable {
             try {
                 if(newValue!=null) {
                     this.fillImageList(newValue.getValue());
+                    this.fillCloudWithDefault();
+                    this.getCloudPath();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -156,6 +163,8 @@ public class MainController implements Initializable {
                     this.fillBarChart();
                     this.fillMetaData();
                     this.fillCategoryAndTags();
+                    this.fillCloudWithDefault();
+                    this.getCloudPath();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -324,6 +333,49 @@ public class MainController implements Initializable {
 
                     this.reloadHistory(id);
                 }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
+        this.tvMainCloudDirectories.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                if(newValue!=null) {
+                    if(newValue.getValue().isDirectory()) {
+                        String path = this.webDav.getBaseUrl() + newValue.getValue().getPath();
+                        this.txtMainCloudPath.setText(path);
+                        this.webDav.readDirectory(path);
+
+                        if(newValue.getChildren().isEmpty()) {
+                            if(!path.equals(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "").toString())) {
+                                this.webDav.readDirectory(path);
+                                this.addChildren(newValue);
+                                newValue.setExpanded(true);
+                                this.setCloudPath();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
+        this.cmdMainCloudUpload.setOnAction(event -> {
+            try {
+                Task<Void> task = new Task<>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        if(!tvMainCloudDirectories.getSelectionModel().isEmpty() && !lvMain.getSelectionModel().isEmpty()) {
+                            webDav.put(tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue(), lvMain.getSelectionModel().getSelectedItem());
+                        }
+                        return null;
+                    }
+                };
+                task.setOnFailed(event1 -> {
+                    Dialogs.printException(task.getException());
+                });
+                new Thread(task).start();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -636,6 +688,98 @@ public class MainController implements Initializable {
                 }
                 this.txtMainImageTags.setText(stringBuilder.toString());
             }
+        }
+    }
+
+    private void fillCloudWithDefault() {
+        try {
+            TreeItem<DavResource> treeItem = new TreeItem<>();
+
+            String path = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, ""));
+            String user = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, ""));
+            String pwd = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, ""));
+
+            this.webDav = new WebDav(user, pwd, path);
+            if(this.webDav.testConnection()) {
+                this.txtMainCloudPath.setText(path);
+                treeItem.setValue(this.webDav.listDirectoriesRecursive().get(0));
+                this.addChildren(treeItem);
+                this.tvMainCloudDirectories.setRoot(treeItem);
+            }
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
+        }
+    }
+
+    private void addChildren(TreeItem<DavResource> parent) {
+        for(int i = 1; i<=this.webDav.listDirectoriesRecursive().size()-1; i++) {
+            TreeItem<DavResource> child = new TreeItem<>();
+            child.setValue(this.webDav.listDirectoriesRecursive().get(i));
+            parent.getChildren().add(child);
+        }
+    }
+
+    private void setCloudPath() {
+        Cloud cloud = new Cloud();
+        cloud.setPath(this.txtMainCloudPath.getText());
+        if(!this.lvMain.getSelectionModel().isEmpty()) {
+            this.lvMain.getSelectionModel().getSelectedItem().setCloud(cloud);
+        } else {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                this.tvMain.getSelectionModel().getSelectedItem().getValue().setCloud(cloud);
+                if(this.directory!=null) {
+                    this.directory.setCloud(cloud);
+                }
+            }
+        }
+    }
+
+    private void getCloudPath() {
+        String path = "";
+        if(!this.lvMain.getSelectionModel().isEmpty()) {
+            if(this.lvMain.getSelectionModel().getSelectedItem().getCloud()!=null) {
+                path = this.lvMain.getSelectionModel().getSelectedItem().getCloud().getPath();
+            }
+        } else {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                if(this.tvMain.getSelectionModel().getSelectedItem().getValue().getCloud()!=null) {
+                    path = this.tvMain.getSelectionModel().getSelectedItem().getValue().getCloud().getPath();
+                }
+            }
+        }
+
+        this.findPath(null, path);
+    }
+
+    private void findPath(TreeItem<DavResource> item, String path) {
+        try {
+            if(!path.trim().isEmpty()) {
+                if(item==null) {
+                    String completeUrl = this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getRoot().getValue().getPath();
+                    while(!completeUrl.equals(path)) {
+                        for(TreeItem<DavResource> davResourceTreeItem : this.tvMainCloudDirectories.getRoot().getChildren()) {
+                            if(path.contains(davResourceTreeItem.getValue().getPath())) {
+                                this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
+                                this.findPath(davResourceTreeItem, path);
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    String completeUrl = this.webDav.getBaseUrl() + item.getValue().getPath();
+                    while(!completeUrl.equals(path)) {
+                        for(TreeItem<DavResource> davResourceTreeItem : item.getChildren()) {
+                            if(path.contains(davResourceTreeItem.getValue().getPath())) {
+                                this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
+                                this.findPath(davResourceTreeItem, path);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
         }
     }
 }

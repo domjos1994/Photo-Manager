@@ -181,6 +181,17 @@
                                                         <Button fx:id="cmdMainTinifyUpload" layoutX="57.0" layoutY="65.0" mnemonicParsing="false" text="%main.image.services.tinify.upload" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
                                                     </AnchorPane>
                                                 </TitledPane>
+                                    <TitledPane animated="false" collapsible="false" layoutX="15.0" layoutY="338.0" text="%settings.cloud" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="320.0">
+                                      <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <TreeView fx:id="tvMainCloudDirectories" layoutX="-9.0" layoutY="-25.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="25.0" />
+                                                <TextField fx:id="txtMainCloudPath" editable="false" layoutX="14.0" layoutY="14.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="-5.0" />
+                                                <Button fx:id="cmdMainCloudUpload" layoutX="24.0" layoutY="184.0" mnemonicParsing="false" text="%main.image.services.cloud.upload" AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-5.0" />
+                                             </children>
+                                          </AnchorPane>
+                                      </content>
+                                    </TitledPane>
                                             </AnchorPane>
                                         </TitledPane>
                               <TitledPane animated="false" text="%main.image.history">

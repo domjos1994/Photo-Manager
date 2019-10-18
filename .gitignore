@@ -1,4 +1,4 @@
 # Project exclude paths
 /build/
-.idea
 *.iml
+.idea
