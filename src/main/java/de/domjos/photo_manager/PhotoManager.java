@@ -4,6 +4,7 @@ import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -34,13 +35,22 @@ public class PhotoManager extends Application {
         // initialize application-dialog
         String title = InitializationHelper.getHeader();
         Dialogs.printFXML("/fxml/main.fxml", language, title, false);
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            public void handle(WindowEvent event) {
-                try {
-                    PhotoManager.GLOBALS.getDatabase().close();
-                } catch (Exception ex) {
-                    Dialogs.printException(ex);
+        Platform.setImplicitExit(false);
+        primaryStage.setOnCloseRequest(event -> {
+            try {
+                for(Runnable runnable : PhotoManager.GLOBALS.getCloseRunnable()) {
+                    if(runnable!=null) {
+                        runnable.run();
+                    }
                 }
+                if(PhotoManager.GLOBALS.isClose()) {
+                    PhotoManager.GLOBALS.getDatabase().close();
+                    Platform.exit();
+                } else {
+                    event.consume();
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
             }
         });
     }

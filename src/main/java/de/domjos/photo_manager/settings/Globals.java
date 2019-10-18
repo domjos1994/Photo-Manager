@@ -6,6 +6,8 @@ import javafx.stage.Stage;
 
 import org.apache.logging.log4j.Logger;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
@@ -16,6 +18,8 @@ public class Globals {
     private Preferences preferences;
     private ResourceBundle language;
     private Database database;
+    private List<Runnable> closeRunnable;
+    private boolean close;
 
     // Keys of general settings
     public final static String PATH = "PATH";
@@ -30,6 +34,8 @@ public class Globals {
         this.stage = null;
         this.logger = null;
         this.preferences = Preferences.userRoot().node(PhotoManager.class.getName());
+        this.closeRunnable = new LinkedList<>();
+        this.close = false;
     }
 
     public boolean isDebugMode() {
@@ -112,5 +118,17 @@ public class Globals {
         } else {
             this.preferences.put(key, String.valueOf(value));
         }
+    }
+
+    public List<Runnable> getCloseRunnable() {
+        return this.closeRunnable;
+    }
+
+    public boolean isClose() {
+        return close;
+    }
+
+    public void setClose(boolean close) {
+        this.close = close;
     }
 }

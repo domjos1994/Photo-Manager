@@ -97,6 +97,7 @@ public class MainController implements Initializable {
     private javafx.scene.image.Image currentImage;
     private final Cache cache = new Cache();
     private WebDav webDav;
+    private SaveFolderTask importTask;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.initControllers();
@@ -104,6 +105,15 @@ public class MainController implements Initializable {
         this.initTinify();
         this.initTreeView();
         this.initListView();
+
+        PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
+            if(importTask!=null) {
+                if(importTask.isRunning()) {
+                    String content = resources.getString("sys.progressMessage");
+                    PhotoManager.GLOBALS.setClose(Dialogs.printConfirmDialog(Alert.AlertType.WARNING, "Warning", content, content));
+                }
+            }
+        });
 
         this.cmdMainAddFolder.setOnAction(event -> this.enableFolderControls());
         this.cmdMainFolder.setOnAction(event -> {
@@ -126,12 +136,12 @@ public class MainController implements Initializable {
                 directory.setLibrary(true);
                 String msg = resources.getString("main.image.import");
 
-                SaveFolderTask saveFolderTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], recursive);
-                saveFolderTask.onFinish(()->{
+                importTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], recursive);
+                importTask.onFinish(()->{
                     this.enableFolderControls();
                     this.initTreeView();
                 });
-                new Thread(saveFolderTask).start();
+                new Thread(importTask).start();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -372,9 +382,7 @@ public class MainController implements Initializable {
                         return null;
                     }
                 };
-                task.setOnFailed(event1 -> {
-                    Dialogs.printException(task.getException());
-                });
+                task.setOnFailed(event1 -> Dialogs.printException(task.getException()));
                 new Thread(task).start();
             } catch (Exception ex) {
                 Dialogs.printException(ex);

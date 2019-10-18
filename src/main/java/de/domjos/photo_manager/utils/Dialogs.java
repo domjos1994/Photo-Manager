@@ -5,9 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -19,10 +17,7 @@ import org.controlsfx.control.Notifications;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public final class Dialogs {
 
@@ -55,6 +50,15 @@ public final class Dialogs {
             alert.setContentText(content);
             alert.showAndWait();
         }
+    }
+
+    public static boolean printConfirmDialog(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type, title, ButtonType.YES, ButtonType.NO);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+        return alert.getResult()==ButtonType.YES;
     }
 
     public static void printException(Throwable ex) {
