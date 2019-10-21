@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-public class WebDav {
+public final class WebDav {
     private String baseUrl;
     private Sardine sardine;
     private List<DavResource> davResources;
@@ -47,14 +47,15 @@ public class WebDav {
         }
     }
 
-    public void put(DavResource davResource, Image image) throws Exception {
-        File file = new File(image.getPath());
+    void put(DavResource davResource, Image image) throws Exception {
+        File file = new File(image.getPath().replace(" ", "%20"));
         if(file.exists()) {
-            this.sardine.put(this.getBaseUrl() + davResource.getPath() + file.getName(), new FileInputStream(file));
+            this.sardine.put(this.getBaseUrl() + davResource.getPath().replace(" ", "%20") + file.getName(), new FileInputStream(file));
         }
     }
 
     public void readDirectory(String directory) throws Exception {
+        directory = directory.replace(" ", "%20");
         this.davResources.clear();
         this.davResources.addAll(sardine.list(directory == null ? this.baseUrl : directory.isEmpty() ? this.baseUrl : directory));
     }

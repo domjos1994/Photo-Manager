@@ -8,12 +8,12 @@ import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.services.Cloud;
+import de.domjos.photo_manager.model.services.DavItem;
 import de.domjos.photo_manager.services.*;
 import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -69,7 +69,7 @@ public class MainController implements Initializable {
     private @FXML GoogleMapView gvMainMetaDataLocation;
 
     private @FXML TextField txtMainCloudPath;
-    private @FXML TreeView<DavResource> tvMainCloudDirectories;
+    private @FXML TreeView<DavItem> tvMainCloudDirectories;
     private @FXML Button cmdMainCloudUpload;
 
     private @FXML TitledPane pnlMainTinify, pnlMainImage;
@@ -111,7 +111,11 @@ public class MainController implements Initializable {
                 if(importTask.isRunning()) {
                     String content = resources.getString("sys.progressMessage");
                     PhotoManager.GLOBALS.setClose(Dialogs.printConfirmDialog(Alert.AlertType.WARNING, "Warning", content, content));
+                } else {
+                    PhotoManager.GLOBALS.setClose(true);
                 }
+            } else {
+                PhotoManager.GLOBALS.setClose(true);
             }
         });
 
@@ -249,6 +253,20 @@ public class MainController implements Initializable {
 
                     PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
                     Dialogs.printNotification(Alert.AlertType.INFORMATION, resources.getString("main.image.saved"), resources.getString("main.image.saved"));
+                } else {
+                    if(!this.tvMain.getSelectionModel().isEmpty()) {
+                        Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                        if(!this.tvMainCloudDirectories.getSelectionModel().isEmpty()) {
+                            Cloud cloud = new Cloud();
+                            cloud.setPath(this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get().getPath());
+                            if (directory.getCloud()!=null) {
+                                cloud.setId(directory.getCloud().getId());
+                            }
+                            directory.setCloud(cloud);
+                            this.tvMain.getSelectionModel().getSelectedItem().getValue().setCloud(cloud);
+                        }
+                        PhotoManager.GLOBALS.getDatabase().updateDirectory(directory);
+                    }
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -351,8 +369,8 @@ public class MainController implements Initializable {
         this.tvMainCloudDirectories.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 if(newValue!=null) {
-                    if(newValue.getValue().isDirectory()) {
-                        String path = this.webDav.getBaseUrl() + newValue.getValue().getPath();
+                    if(newValue.getValue().get().isDirectory()) {
+                        String path = this.webDav.getBaseUrl() + newValue.getValue().get().getPath();
                         this.txtMainCloudPath.setText(path);
                         this.webDav.readDirectory(path);
 
@@ -373,17 +391,33 @@ public class MainController implements Initializable {
 
         this.cmdMainCloudUpload.setOnAction(event -> {
             try {
-                Task<Void> task = new Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        if(!tvMainCloudDirectories.getSelectionModel().isEmpty() && !lvMain.getSelectionModel().isEmpty()) {
-                            webDav.put(tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue(), lvMain.getSelectionModel().getSelectedItem());
-                        }
-                        return null;
+                if(!this.lvMain.getSelectionModel().isEmpty()) {
+                    DavResource davResource = this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get();
+                    Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                    UploadTask uploadTask = new UploadTask(this.pbMain, this.lblMessages, image, this.webDav, davResource);
+                    uploadTask.onFinish(()->
+                            Dialogs.printNotification(
+                                    Alert.AlertType.INFORMATION,
+                                    resources.getString("main.image.services.cloud.finish"),
+                                    resources.getString("main.image.services.cloud.finish")
+                            )
+                    );
+                    new Thread(uploadTask).start();
+                } else {
+                    if(!this.tvMain.getSelectionModel().isEmpty()) {
+                        DavResource davResource = this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get();
+                        Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                        UploadTask uploadTask = new UploadTask(this.pbMain, this.lblMessages, directory, this.webDav, davResource);
+                        uploadTask.onFinish(()->
+                                Dialogs.printNotification(
+                                        Alert.AlertType.INFORMATION,
+                                        resources.getString("main.image.services.cloud.finish"),
+                                        resources.getString("main.image.services.cloud.finish")
+                                )
+                        );
+                        new Thread(uploadTask).start();
                     }
-                };
-                task.setOnFailed(event1 -> Dialogs.printException(task.getException()));
-                new Thread(task).start();
+                }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -701,7 +735,7 @@ public class MainController implements Initializable {
 
     private void fillCloudWithDefault() {
         try {
-            TreeItem<DavResource> treeItem = new TreeItem<>();
+            TreeItem<DavItem> treeItem = new TreeItem<>();
 
             String path = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, ""));
             String user = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, ""));
@@ -710,7 +744,7 @@ public class MainController implements Initializable {
             this.webDav = new WebDav(user, pwd, path);
             if(this.webDav.testConnection()) {
                 this.txtMainCloudPath.setText(path);
-                treeItem.setValue(this.webDav.listDirectoriesRecursive().get(0));
+                treeItem.setValue(new DavItem(this.webDav.listDirectoriesRecursive().get(0)));
                 this.addChildren(treeItem);
                 this.tvMainCloudDirectories.setRoot(treeItem);
             }
@@ -719,10 +753,10 @@ public class MainController implements Initializable {
         }
     }
 
-    private void addChildren(TreeItem<DavResource> parent) {
+    private void addChildren(TreeItem<DavItem> parent) {
         for(int i = 1; i<=this.webDav.listDirectoriesRecursive().size()-1; i++) {
-            TreeItem<DavResource> child = new TreeItem<>();
-            child.setValue(this.webDav.listDirectoriesRecursive().get(i));
+            TreeItem<DavItem> child = new TreeItem<>();
+            child.setValue(new DavItem(this.webDav.listDirectoriesRecursive().get(i)));
             parent.getChildren().add(child);
         }
     }
@@ -759,14 +793,14 @@ public class MainController implements Initializable {
         this.findPath(null, path);
     }
 
-    private void findPath(TreeItem<DavResource> item, String path) {
+    private void findPath(TreeItem<DavItem> item, String path) {
         try {
             if(!path.trim().isEmpty()) {
                 if(item==null) {
-                    String completeUrl = this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getRoot().getValue().getPath();
+                    String completeUrl = this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getRoot().getValue().get().getPath();
                     while(!completeUrl.equals(path)) {
-                        for(TreeItem<DavResource> davResourceTreeItem : this.tvMainCloudDirectories.getRoot().getChildren()) {
-                            if(path.contains(davResourceTreeItem.getValue().getPath())) {
+                        for(TreeItem<DavItem> davResourceTreeItem : this.tvMainCloudDirectories.getRoot().getChildren()) {
+                            if(path.contains(davResourceTreeItem.getValue().get().getPath())) {
                                 this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
                                 this.findPath(davResourceTreeItem, path);
                                 return;
@@ -774,10 +808,10 @@ public class MainController implements Initializable {
                         }
                     }
                 } else {
-                    String completeUrl = this.webDav.getBaseUrl() + item.getValue().getPath();
+                    String completeUrl = this.webDav.getBaseUrl() + item.getValue().get().getPath();
                     while(!completeUrl.equals(path)) {
-                        for(TreeItem<DavResource> davResourceTreeItem : item.getChildren()) {
-                            if(path.contains(davResourceTreeItem.getValue().getPath())) {
+                        for(TreeItem<DavItem> davResourceTreeItem : item.getChildren()) {
+                            if(path.contains(davResourceTreeItem.getValue().get().getPath())) {
                                 this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
                                 this.findPath(davResourceTreeItem, path);
                                 return;

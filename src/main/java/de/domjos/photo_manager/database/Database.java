@@ -37,6 +37,22 @@ public class Database {
         this.connection.close();
     }
 
+    public void updateDirectory(Directory directory) throws Exception {
+        if(directory.getCloud()!=null) {
+            directory.getCloud().setId(this.insertCloud(directory.getCloud()));
+        }
+
+        PreparedStatement preparedStatement = this.prepare("UPDATE directories SET cloud_id=? WHERE ID=?");
+        preparedStatement.setLong(2, directory.getId());
+        if(directory.getCloud()!=null) {
+            preparedStatement.setLong(1, directory.getCloud().getId());
+        } else {
+            preparedStatement.setNull(1, Types.INTEGER);
+        }
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
     public long insertOrUpdateDirectory(Directory directory, long id, boolean recursive, SaveFolderTask task) throws Exception {
         if(directory.getCloud()!=null) {
             directory.getCloud().setId(this.insertCloud(directory.getCloud()));
