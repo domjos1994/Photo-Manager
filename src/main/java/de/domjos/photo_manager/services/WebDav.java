@@ -57,7 +57,7 @@ public final class WebDav {
     public void readDirectory(String directory) throws Exception {
         directory = directory.replace(" ", "%20");
         this.davResources.clear();
-        this.davResources.addAll(sardine.list(directory == null ? this.baseUrl : directory.isEmpty() ? this.baseUrl : directory));
+        this.davResources.addAll(sardine.list(directory.isEmpty() ? this.baseUrl : directory));
     }
 
     public String getBaseUrl() throws Exception {
