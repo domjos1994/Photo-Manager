@@ -37,7 +37,7 @@ public class SettingsController implements Initializable {
     private @FXML Button cmdSettingsCloudTest;
 
     public void initialize(URL location, ResourceBundle resources) {
-        this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString());
+        this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString());
         this.cmdSettingsPath.setOnAction(event -> {
             this.mainController.setMessage(resources.getString("settings.general.move"));
             List<File> files = Dialogs.printFileChooser(resources.getString("main.initialize.path"), true, true, false, null);
@@ -49,7 +49,7 @@ public class SettingsController implements Initializable {
                             Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
                             updateProgress(0, 1);
                             updateProgress(0.1, 1);
-                            String oldPath = PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString();
+                            String oldPath = PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString();
                             String path = files.get(0).getAbsolutePath();
                             String key = Globals.PATH;
                             String hidden = InitializationHelper.HIDDEN_PROJECT_DIR;
@@ -60,7 +60,7 @@ public class SettingsController implements Initializable {
                                     Platform.exit();
                                 }
                             }
-                            PhotoManager.GLOBALS.saveSetting(key, path);
+                            PhotoManager.GLOBALS.saveSetting(key, path, false);
 
                             File oldDirectory = new File(oldPath + File.separatorChar + hidden);
                             FileUtils.moveDirectory(oldDirectory, new File(file.getAbsolutePath() + File.separatorChar + hidden));
@@ -90,11 +90,11 @@ public class SettingsController implements Initializable {
         this.cmdSettingsHome.setOnAction(event -> this.mainController.back());
 
         this.cmdSettingsSave.setOnAction(event -> {
-            PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText());
-            PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText());
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText());
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText());
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText());
+            PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
+            PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText(), true);
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText(), true);
+            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText(), true);
 
             PhotoManager.GLOBALS.setDebugMode(this.chkSettingsDebugMode.isSelected());
             if(this.chkSettingsDebugMode.isSelected()) {
@@ -115,11 +115,11 @@ public class SettingsController implements Initializable {
     }
 
     private void fillData() {
-        this.txtSettingsTinyKey.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "")));
-        this.txtSettingsTinyFile.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "")));
-        this.txtSettingsCloudPath.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "")));
-        this.txtSettingsCloudUserName.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, "")));
-        this.txtSettingsCloudPassword.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, "")));
+        this.txtSettingsTinyKey.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "", true)));
+        this.txtSettingsTinyFile.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "", false)));
+        this.txtSettingsCloudPath.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "", true)));
+        this.txtSettingsCloudUserName.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, "", true)));
+        this.txtSettingsCloudPassword.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, "", true)));
     }
 
     void init(MainController mainController) {

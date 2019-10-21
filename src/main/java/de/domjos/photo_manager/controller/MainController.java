@@ -375,7 +375,7 @@ public class MainController implements Initializable {
                         this.webDav.readDirectory(path);
 
                         if(newValue.getChildren().isEmpty()) {
-                            if(!path.equals(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "").toString())) {
+                            if(!path.equals(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "", false).toString())) {
                                 this.webDav.readDirectory(path);
                                 this.addChildren(newValue);
                                 newValue.setExpanded(true);
@@ -506,7 +506,7 @@ public class MainController implements Initializable {
     }
 
     void initTinify() {
-        this.pnlMainTinify.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "").equals(""));
+        this.pnlMainTinify.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "", true).equals(""));
     }
 
     private void initTreeView() {
@@ -737,9 +737,9 @@ public class MainController implements Initializable {
         try {
             TreeItem<DavItem> treeItem = new TreeItem<>();
 
-            String path = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, ""));
-            String user = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, ""));
-            String pwd = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, ""));
+            String path = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, "", true));
+            String user = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_USER, "", true));
+            String pwd = String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PWD, "", true));
 
             this.webDav = new WebDav(user, pwd, path);
             if(this.webDav.testConnection()) {

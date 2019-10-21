@@ -8,7 +8,7 @@ import javafx.scene.control.ProgressBar;
 
 import java.util.List;
 
-public class RecreateTask extends ParentTask<Void> {
+public final class RecreateTask extends ParentTask<Void> {
     private List<Image> images;
 
     public RecreateTask(ProgressBar progressBar, Label messages, List<Image> images) {

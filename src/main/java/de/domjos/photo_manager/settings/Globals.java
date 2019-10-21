@@ -2,6 +2,7 @@ package de.domjos.photo_manager.settings;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.database.Database;
+import de.domjos.photo_manager.utils.CryptoUtils;
 import javafx.stage.Stage;
 
 import org.apache.logging.log4j.Logger;
@@ -82,7 +83,7 @@ public class Globals {
         return this.preferences.get(key, "").equals("");
     }
 
-    public Object getSetting(String key, Object def) {
+    public Object getSetting(String key, Object def, boolean enc) {
         if(def instanceof Boolean) {
             return this.preferences.getBoolean(key, (Boolean) def);
         } else if(def instanceof Double) {
@@ -96,11 +97,19 @@ public class Globals {
         } if(def instanceof byte[]) {
             return this.preferences.getByteArray(key, (byte[]) def);
         } else {
-            return this.preferences.get(key, (String) def);
+            if(enc) {
+                if(!this.isEmpty(key)) {
+                    return CryptoUtils.decrypt(this.preferences.get(key, (String) def));
+                } else {
+                    return "";
+                }
+            } else {
+                return this.preferences.get(key, (String) def);
+            }
         }
     }
 
-    public void saveSetting(String key, Object value) {
+    public void saveSetting(String key, Object value, boolean enc) {
         if(value instanceof Boolean) {
             this.preferences.putBoolean(key, (Boolean) value);
         } else if(value instanceof Double) {
@@ -112,7 +121,11 @@ public class Globals {
         } else if(value instanceof Long) {
             this.preferences.putLong(key, (Long) value);
         } else if(value instanceof String) {
-            this.preferences.put(key, (String) value);
+            if(enc) {
+                this.preferences.put(key, CryptoUtils.encrypt((String) value));
+            } else {
+                this.preferences.put(key, (String) value);
+            }
         } else if(value instanceof byte[]) {
             this.preferences.putByteArray(key, (byte[]) value);
         } else {

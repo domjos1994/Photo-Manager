@@ -33,8 +33,8 @@ public class InitializationHelper {
             List<File> files = Dialogs.printFileChooser(PhotoManager.GLOBALS.getLanguage().getString("main.initialize.path"), true, true, false, null);
             if(files!=null) {
                 if(!files.isEmpty()) {
-                    PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.get(0).getAbsolutePath());
-                    File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
+                    PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.get(0).getAbsolutePath(), false);
+                    File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
                     if(!file.exists()) {
                         if(!file.mkdirs()) {
                             Platform.exit();
@@ -47,9 +47,9 @@ public class InitializationHelper {
                 Platform.exit();
             }
         } else {
-            File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
+            File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
             if(!file.exists()) {
-                PhotoManager.GLOBALS.saveSetting(Globals.PATH, "");
+                PhotoManager.GLOBALS.saveSetting(Globals.PATH, "", false);
                 InitializationHelper.initializePath();
             }
         }
@@ -63,7 +63,7 @@ public class InitializationHelper {
      */
     public static Logger initializeLogger() throws Exception {
         // copy config file to application-path if not exists
-        String path = PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR + File.separatorChar;
+        String path = PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR + File.separatorChar;
         File logConfig = new File(path + "log4j2.xml");
         if(!logConfig.exists()) {
             FileUtils.copyInputStreamToFile(PhotoManager.class.getResourceAsStream("/properties/log4j2.xml"), logConfig);
@@ -83,7 +83,7 @@ public class InitializationHelper {
      * @throws Exception exception
      */
     public static Database initializeDatabase() throws Exception {
-        Database database = new Database(PhotoManager.GLOBALS.getSetting(Globals.PATH, "").toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR + File.separatorChar + "photoManager.db");
+        Database database = new Database(PhotoManager.GLOBALS.getSetting(Globals.PATH, "", false).toString() + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR + File.separatorChar + "photoManager.db");
         String initFile = Helper.readResource("/sql/init.sql");
         for(String query : initFile.split(";")) {
             database.executeUpdate(query.trim());
