@@ -2,11 +2,9 @@ package de.domjos.photo_manager.services;
 
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
-import com.github.sardine.SardineFactory;
 import com.github.sardine.impl.SardineImpl;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;

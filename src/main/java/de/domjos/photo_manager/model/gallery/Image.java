@@ -1,14 +1,14 @@
 package de.domjos.photo_manager.model.gallery;
 
+import de.domjos.photo_manager.model.objects.BaseObject;
+import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Image {
-    private long id;
-    private String name;
+public class Image extends BaseObject {
     private String path;
     private byte[] thumbnail;
     private int width;
@@ -21,8 +21,8 @@ public class Image {
     private Cloud cloud;
 
     public Image() {
-        this.id = 0;
-        this.name = "";
+        super();
+
         this.path = "";
         this.thumbnail = null;
         this.directory = null;
@@ -31,22 +31,6 @@ public class Image {
         this.tags = new LinkedList<>();
         this.temporaryEditedList = new LinkedList<>();
         this.cloud = null;
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPath() {

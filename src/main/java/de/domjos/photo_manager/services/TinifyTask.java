@@ -99,7 +99,7 @@ public final class TinifyTask extends ParentTask<Void> {
         Image tinified = new Image();
         tinified.setThumbnail(image.getThumbnail());
         tinified.setPath(file);
-        tinified.setName(new File(file).getName());
+        tinified.setTitle(new File(file).getName());
         tinified.setDirectory(image.getDirectory());
         PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(tinified);
     }

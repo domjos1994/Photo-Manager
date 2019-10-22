@@ -1,13 +1,12 @@
 package de.domjos.photo_manager.model.gallery;
 
+import de.domjos.photo_manager.model.objects.BaseObject;
 import de.domjos.photo_manager.model.services.Cloud;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class Directory {
-    private long id;
-    private String name;
+public class Directory extends BaseObject {
     private String path;
     private boolean root;
     private boolean library;
@@ -17,8 +16,8 @@ public class Directory {
     private Cloud cloud;
 
     public Directory() {
-        this.id = 0;
-        this.name = "";
+        super();
+
         this.path = "";
         this.root = false;
         this.library = false;
@@ -26,22 +25,6 @@ public class Directory {
         this.children = new LinkedList<>();
         this.images = new LinkedList<>();
         this.cloud = null;
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPath() {
@@ -76,10 +59,6 @@ public class Directory {
         this.images = images;
     }
 
-    public String toString() {
-        return this.name;
-    }
-
     public boolean isLibrary() {
         return this.library;
     }
@@ -102,5 +81,9 @@ public class Directory {
 
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
+    }
+
+    public String toString() {
+        return super.getTitle();
     }
 }

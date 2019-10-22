@@ -2,7 +2,8 @@ package de.domjos.photo_manager.database;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
-import de.domjos.photo_manager.model.gallery.DescriptionObject;
+import de.domjos.photo_manager.model.gallery.Template;
+import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
@@ -59,7 +60,7 @@ public class Database {
         }
 
         PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT, isLibrary, isRecursive, cloud_id) VALUES(?, ?, ?, ?, ?, ?)");
-        preparedStatement.setString(1, directory.getName());
+        preparedStatement.setString(1, directory.getTitle());
         preparedStatement.setString(2, directory.getPath());
         preparedStatement.setInt(3, 0);
         preparedStatement.setInt(4, directory.isLibrary() ? 1 : 0);
@@ -94,7 +95,7 @@ public class Database {
                     }
                     if(sub.isDirectory() && !sub.getName().startsWith(".")) {
                         Directory subDir = new Directory();
-                        subDir.setName(sub.getName());
+                        subDir.setTitle(sub.getName());
                         subDir.setPath(sub.getAbsolutePath());
                         subDir.setRoot(false);
                         subDir.setId(this.insertOrUpdateDirectory(subDir, genId, true));
@@ -156,7 +157,7 @@ public class Database {
         ResultSet rs = preparedStatement.executeQuery();
         rs.next();
         directory.setId(rs.getInt("id"));
-        directory.setName(rs.getString("name"));
+        directory.setTitle(rs.getString("name"));
         rs.close();
         preparedStatement.close();
         this.getChildren(directory);
@@ -176,7 +177,7 @@ public class Database {
         } else {
             preparedStatement = this.prepare("INSERT INTO images(name, path, thumbnail, parent, category, width, height, cloud_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
         }
-        preparedStatement.setString(1, image.getName());
+        preparedStatement.setString(1, image.getTitle());
         preparedStatement.setString(2, image.getPath());
         preparedStatement.setBytes(3, image.getThumbnail());
         preparedStatement.setLong(4, image.getDirectory().getId());
@@ -222,7 +223,7 @@ public class Database {
                     try {
                         Image image = new Image();
                         image.setDirectory(directory);
-                        image.setName(file.getName());
+                        image.setTitle(file.getName());
                         image.setPath(file.getAbsolutePath());
                         BufferedImage originalImage = ImageHelper.getImage(image.getPath());
                         if(originalImage!=null) {
@@ -253,7 +254,7 @@ public class Database {
             while (rs.next()) {
                 Image image = new Image();
                 image.setId(rs.getInt("id"));
-                image.setName(rs.getString("name"));
+                image.setTitle(rs.getString("name"));
                 image.setPath(rs.getString("path"));
                 image.setDirectory(directory);
                 image.setHeight(rs.getInt("height"));
@@ -297,6 +298,46 @@ public class Database {
         }
 
         return temporaryEditedList;
+    }
+
+    public void insertOrUpdateTemplate(Template template) throws Exception {
+        PreparedStatement preparedStatement;
+        if(template.getId()==0) {
+            preparedStatement = this.prepare("INSERT INTO templates(name, content) VALUES(?,?)");
+        } else {
+            preparedStatement = this.prepare("UPDATE templates SET name=?, content=? WHERE id=?");
+            preparedStatement.setLong(3, template.getId());
+        }
+        preparedStatement.setString(1, template.getTitle());
+        preparedStatement.setString(2, template.getContent());
+        preparedStatement.executeUpdate();
+    }
+
+    public void deleteTemplate(String title) throws Exception {
+        if(title!=null) {
+            PreparedStatement preparedStatement = this.prepare("DELETE FROM templates WHERE name=?");
+            preparedStatement.setString(1, title);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        }
+    }
+
+    public List<Template> getTemplates(String where) throws Exception {
+        List<Template> templates = new LinkedList<>();
+
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM templates" + (where.isEmpty() ? "" : " WHERE " + where));
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            Template template = new Template();
+            template.setId(resultSet.getLong("id"));
+            template.setTitle(resultSet.getString("name"));
+            template.setContent(resultSet.getString("content"));
+            templates.add(template);
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        return templates;
     }
 
     private long insertOrUpdateDescriptionObject(DescriptionObject descriptionObject, int type) throws Exception {
@@ -357,7 +398,7 @@ public class Database {
         while (rs.next()) {
             Directory sub = new Directory();
             sub.setId(rs.getInt("id"));
-            sub.setName(rs.getString("name"));
+            sub.setTitle(rs.getString("name"));
             sub.setPath(rs.getString("path"));
             sub.setLibrary(rs.getInt("isLibrary")==1);
             sub.setRecursive(rs.getInt("isRecursive")==1);

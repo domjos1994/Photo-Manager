@@ -1,6 +1,6 @@
 package de.domjos.photo_manager.model.services;
 
-import de.domjos.photo_manager.model.gallery.DescriptionObject;
+import de.domjos.photo_manager.model.objects.DescriptionObject;
 
 public class Cloud extends DescriptionObject {
     private String path;

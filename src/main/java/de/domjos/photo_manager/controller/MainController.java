@@ -7,6 +7,7 @@ import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.*;
+import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.model.services.DavItem;
 import de.domjos.photo_manager.services.*;
@@ -58,6 +59,9 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainImageSearch;
     private @FXML TextField txtMainImageSearch;
 
+    private @FXML Button cmdMainTemplateAdd, cmdMainTemplateDelete;
+    private @FXML ComboBox<String> cmbMainTemplates;
+
     private @FXML BarChart<String, Integer> bcMainHistogram;
     private @FXML CheckBox chkMainHistogram, chkMainHistogramRed, chkMainHistogramGreen, chkMainHistogramBlue;
 
@@ -105,6 +109,7 @@ public class MainController implements Initializable {
         this.initTinify();
         this.initTreeView();
         this.initListView();
+        this.fillTemplates();
 
         PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
             if(importTask!=null) {
@@ -130,7 +135,7 @@ public class MainController implements Initializable {
         });
         this.cmdMainFolderSave.setOnAction(event -> {
             try {
-                directory.setName(txtMainFolderName.getText());
+                directory.setTitle(txtMainFolderName.getText());
                 final long[] parentId = {rootID};
                 if(!tvMain.getSelectionModel().isEmpty()) {
                     parentId[0] = tvMain.getSelectionModel().getSelectedItem().getValue().getId();
@@ -423,6 +428,59 @@ public class MainController implements Initializable {
             }
         });
 
+        this.cmdMainTemplateAdd.setOnAction(event -> {
+            try {
+                Template template = new Template();
+                template.setTitle(this.cmbMainTemplates.getValue());
+                List<Template> templates = PhotoManager.GLOBALS.getDatabase().getTemplates("name='" + this.cmbMainTemplates.getValue() + "'");
+                if(!templates.isEmpty()) {
+                    template.setId(templates.get(0).getId());
+                }
+                template.getPreferences().put(Template.Preference.ZOOM.toString(), String.valueOf(this.slMainImageZoom.getValue()));
+                template.getPreferences().put(Template.Preference.HUE.toString(), String.valueOf(this.slMainHue.getValue()));
+                template.getPreferences().put(Template.Preference.BRIGHTNESS.toString(), String.valueOf(this.slMainBrightness.getValue()));
+                template.getPreferences().put(Template.Preference.SATURATION.toString(), String.valueOf(this.slMainSaturation.getValue()));
+                PhotoManager.GLOBALS.getDatabase().insertOrUpdateTemplate(template);
+                this.fillTemplates();
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
+        this.cmdMainTemplateDelete.setOnAction(event -> {
+            try {
+                PhotoManager.GLOBALS.getDatabase().deleteTemplate(this.cmbMainTemplates.getValue());
+                this.fillTemplates();
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
+        this.cmbMainTemplates.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                if(newValue!=null) {
+                    if(newValue.isEmpty()) {
+                        this.slMainImageZoom.setValue(100.0);
+                        this.slMainHue.setValue(100.0);
+                        this.slMainBrightness.setValue(100.0);
+                        this.slMainSaturation.setValue(100.0);
+                    } else {
+                        List<Template> templates = PhotoManager.GLOBALS.getDatabase().getTemplates("name='" + newValue + "'");
+                        if(!templates.isEmpty()) {
+                            Template template = templates.get(0);
+                            this.slMainImageZoom.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.ZOOM.toString(), "100.0")));
+                            this.slMainHue.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.HUE.toString(), "100.0")));
+                            this.slMainBrightness.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.BRIGHTNESS.toString(), "100.0")));
+                            this.slMainSaturation.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.SATURATION.toString(), "100.0")));
+                        }
+                    }
+                    this.cmdMainImageZoom.fire();
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
         this.ctxMainDelete.setOnAction(event -> {
             try {
                 if(!this.tvMain.getSelectionModel().isEmpty()) {
@@ -537,7 +595,7 @@ public class MainController implements Initializable {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setText(name.getName());
+                    setText(name.getTitle());
                     javafx.scene.image.Image image = new javafx.scene.image.Image(new ByteArrayInputStream(name.getThumbnail()));
                     BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
                     if(bufferedImage!=null) {
@@ -717,7 +775,7 @@ public class MainController implements Initializable {
         if(!this.lvMain.getSelectionModel().isEmpty()) {
             Image image = this.lvMain.getSelectionModel().getSelectedItem();
             if(image!=null) {
-                this.pnlMainImage.setText(image.getName());
+                this.pnlMainImage.setText(image.getTitle());
                 if(image.getCategory()!=null) {
                     this.txtMainImageCategory.setText(image.getCategory().getTitle());
                 } else {
@@ -748,6 +806,18 @@ public class MainController implements Initializable {
                 this.addChildren(treeItem);
                 this.tvMainCloudDirectories.setRoot(treeItem);
             }
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
+        }
+    }
+
+    private void fillTemplates() {
+        try {
+            this.cmbMainTemplates.getItems().clear();
+            PhotoManager.GLOBALS.getDatabase().getTemplates("").forEach(
+                template -> this.cmbMainTemplates.getItems().add(template.getTitle())
+            );
+            this.cmbMainTemplates.getItems().add(0, "");
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }

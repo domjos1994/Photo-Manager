@@ -29,10 +29,10 @@ public class MapHelper {
             MetaData metaData = ImageHelper.readMetaData(image.getPath());
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(new LatLong(metaData.getLatitude(), metaData.getLongitude()));
-            File file = File.createTempFile(image.getPath(), image.getName());
+            File file = File.createTempFile(image.getPath(), image.getTitle());
             FileUtils.writeByteArrayToFile(file, image.getThumbnail());
             markerOptions.icon(file.getAbsolutePath());
-            markerOptions.title(image.getName());
+            markerOptions.title(image.getTitle());
             this.map.addMarker(new Marker(markerOptions));
         }
     }
