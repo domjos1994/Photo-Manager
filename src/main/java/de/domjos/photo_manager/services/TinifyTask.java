@@ -23,7 +23,7 @@ public final class TinifyTask extends ParentTask<Void> {
 
     public TinifyTask(ProgressBar progressBar, Label messages, String width, String height, Object img) {
         super(progressBar, messages);
-        Tinify.setKey(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "", true).toString());
+        Tinify.setKey(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
 
         this.width = -1;
         if(width!=null) {
@@ -91,7 +91,7 @@ public final class TinifyTask extends ParentTask<Void> {
         File originalFile = new File(path);
         String fileWithoutName = originalFile.getAbsolutePath().replace(originalFile.getName(), "");
         String[] name = originalFile.getName().split("\\.");
-        return fileWithoutName + PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "", false).toString().replace("[old]", name[0]) + "." + name[1];
+        return fileWithoutName + PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "").replace("[old]", name[0]) + "." + name[1];
     }
 
     private void saveImage(String file, Image image) throws Exception {

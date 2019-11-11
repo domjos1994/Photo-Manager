@@ -24,6 +24,7 @@ public class Globals {
 
     // Keys of general settings
     public final static String PATH = "PATH";
+    public final static String DEBUG = "DEBUG";
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";
     public final static String CLOUD_PATH = "CLOUD_PATH";
@@ -83,29 +84,39 @@ public class Globals {
         return this.preferences.get(key, "").equals("");
     }
 
-    public Object getSetting(String key, Object def, boolean enc) {
-        if(def instanceof Boolean) {
-            return this.preferences.getBoolean(key, (Boolean) def);
-        } else if(def instanceof Double) {
-            return this.preferences.getDouble(key, (Double) def);
-        } else if(def instanceof Float) {
-            return this.preferences.getFloat(key, (Float) def);
-        } else if(def instanceof Integer) {
-            return this.preferences.getInt(key, (Integer) def);
-        } else if(def instanceof Long) {
-            return this.preferences.getLong(key, (Long) def);
-        } if(def instanceof byte[]) {
-            return this.preferences.getByteArray(key, (byte[]) def);
+    public boolean getSetting(String key, boolean def) {
+        return this.preferences.getBoolean(key, def);
+    }
+
+    public double getSetting(String key, double def) {
+        return this.preferences.getDouble(key, def);
+    }
+
+    public float getSetting(String key, float def) {
+        return this.preferences.getFloat(key, def);
+    }
+
+    public int getSetting(String key, int def) {
+        return this.preferences.getInt(key, def);
+    }
+
+    public long getSetting(String key, long def) {
+        return this.preferences.getLong(key, def);
+    }
+
+    public byte[] getSetting(String key, byte[] def) {
+        return this.preferences.getByteArray(key, def);
+    }
+
+    public String getSetting(String key, String def) {
+        return this.preferences.get(key, def);
+    }
+
+    public String getDecryptedSetting(String key, String def) {
+        if(!this.isEmpty(key)) {
+            return CryptoUtils.decrypt(this.preferences.get(key, def));
         } else {
-            if(enc) {
-                if(!this.isEmpty(key)) {
-                    return CryptoUtils.decrypt(this.preferences.get(key, (String) def));
-                } else {
-                    return "";
-                }
-            } else {
-                return this.preferences.get(key, (String) def);
-            }
+            return "";
         }
     }
 

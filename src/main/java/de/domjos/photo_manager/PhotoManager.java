@@ -5,9 +5,7 @@ import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.util.ResourceBundle;
 
@@ -16,7 +14,7 @@ public class PhotoManager extends Application {
 
     public void start(Stage primaryStage) throws Exception {
         // initialize basic properties
-        PhotoManager.GLOBALS.setDebugMode(false);
+        PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         PhotoManager.GLOBALS.setStage(primaryStage);
 
         // initialize language
@@ -34,6 +32,9 @@ public class PhotoManager extends Application {
 
         // initialize application-dialog
         String title = InitializationHelper.getHeader();
+        if(PhotoManager.GLOBALS.isDebugMode()) {
+            title += " - (Debug)";
+        }
         Dialogs.printFXML("/fxml/main.fxml", language, title, false);
         Platform.setImplicitExit(false);
         primaryStage.setOnCloseRequest(event -> {
