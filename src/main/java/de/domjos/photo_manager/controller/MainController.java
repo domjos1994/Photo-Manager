@@ -557,6 +557,12 @@ public class MainController implements Initializable {
 
     private void reloadHistory(long id) throws Exception {
         this.tblMainImageHistory.getItems().clear();
+
+        TemporaryEdited root = new TemporaryEdited();
+        root.setChangeType(TemporaryEdited.ChangeType.nothing);
+        root.setValue(0.0);
+        this.tblMainImageHistory.getItems().add(root);
+
         for(TemporaryEdited temporaryEdited : PhotoManager.GLOBALS.getDatabase().getTemporaryEdited(id)) {
             this.tblMainImageHistory.getItems().add(temporaryEdited);
         }

@@ -40,6 +40,7 @@ public class TemporaryEdited {
         Hue,
         Saturation,
         Brightness,
+        nothing,
         Width,
         Height
     }
