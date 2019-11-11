@@ -69,9 +69,17 @@ public class ImageHelper {
         return scaledImage;
     }
 
+    private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
+        return bufferedImage.getColorModel().hasAlpha();
+    }
+
     public static byte[] imageToByteArray(BufferedImage bufferedImage) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "jpg", bos );
+        if(ImageHelper.checkImageHasAlpha(bufferedImage)) {
+            ImageIO.write(bufferedImage, "png", bos);
+        } else {
+            ImageIO.write(bufferedImage, "jpg", bos);
+        }
         return bos.toByteArray();
     }
 
