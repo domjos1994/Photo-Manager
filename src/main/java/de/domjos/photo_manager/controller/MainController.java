@@ -367,6 +367,10 @@ public class MainController implements Initializable {
 
                     this.reloadHistory(id);
                 }
+
+                this.slMainSaturation.setValue(100.0);
+                this.slMainBrightness.setValue(100.0);
+                this.slMainHue.setValue(100.0);
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
