@@ -28,6 +28,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -59,7 +60,7 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainImageSearch;
     private @FXML TextField txtMainImageSearch;
 
-    private @FXML Button cmdMainTemplateAdd, cmdMainTemplateDelete;
+    private @FXML Button cmdMainTemplate, cmdMainTemplateAdd, cmdMainTemplateDelete;
     private @FXML ComboBox<String> cmbMainTemplates;
 
     private @FXML BarChart<String, Integer> bcMainHistogram;
@@ -428,6 +429,8 @@ public class MainController implements Initializable {
             }
         });
 
+        this.cmdMainTemplate.setOnAction(event ->  this.cmdMainTemplateAdd.setVisible(!this.cmdMainTemplateAdd.isVisible()));
+
         this.cmdMainTemplateAdd.setOnAction(event -> {
             try {
                 Template template = new Template();
@@ -510,7 +513,18 @@ public class MainController implements Initializable {
             }
         });
 
-        this.cmdMainImageSearch.setOnAction(event -> search());
+        this.cmdMainImageSearch.setOnAction(event -> {
+            if(!this.txtMainImageSearch.isVisible()) {
+                this.txtMainImageSearch.setVisible(true);
+                this.txtMainImageSearch.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            } else {
+                if(this.txtMainImageSearch.getText().trim().isEmpty()) {
+                    this.txtMainImageSearch.setVisible(false);
+                    this.txtMainImageSearch.setPrefWidth(0);
+                }
+                search();
+            }
+        });
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
         this.menMainApi.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbApi));
@@ -552,6 +566,9 @@ public class MainController implements Initializable {
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.cmdMainFolder.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.txtMainFolderName.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.chkMainRecursive.visibleProperty());
+
+        this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmdMainTemplateDelete.visibleProperty());
+        this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
 
         TableColumn<TemporaryEdited, String> changeType = new TableColumn<>("ChangeType");
         changeType.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.type"));

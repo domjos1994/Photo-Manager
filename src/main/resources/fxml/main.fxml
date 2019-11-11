@@ -217,7 +217,7 @@
                 <ToolBar prefHeight="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <Button fx:id="cmdMainAddFolder" mnemonicParsing="false">
                         <graphic>
-                            <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                 <Image url="@../images/icons/folder.png" />
                             </ImageView>
                         </graphic>
@@ -227,13 +227,13 @@
                     <Button fx:id="cmdMainFolder" mnemonicParsing="false" text="..." visible="false" />
                     <Button fx:id="cmdMainFolderSave" mnemonicParsing="false" visible="false">
                         <graphic>
-                            <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                 <Image url="@../images/icons/save.png" />
                             </ImageView>
                         </graphic>
                     </Button>
                     <HBox HBox.hgrow="ALWAYS" />
-               <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false">
+               <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false" visible="false">
                   <graphic>
                      <ImageView fitHeight="16" fitWidth="16">
                         <image>
@@ -242,7 +242,7 @@
                      </ImageView>
                   </graphic>
                </Button>
-               <Button fx:id="cmdMainTemplateDelete" mnemonicParsing="false">
+               <Button fx:id="cmdMainTemplateDelete" mnemonicParsing="false" visible="false">
                   <graphic>
                      <ImageView fitHeight="16" fitWidth="16">
                         <image>
@@ -251,11 +251,20 @@
                      </ImageView>
                   </graphic>
                </Button>
-               <ComboBox fx:id="cmbMainTemplates" editable="true" prefWidth="150.0" promptText="%main.templates" />
-                    <TextField fx:id="txtMainImageSearch" />
+               <ComboBox fx:id="cmbMainTemplates" editable="true" prefWidth="150.0" promptText="%main.templates" visible="false" />
+               <Button fx:id="cmdMainTemplate" mnemonicParsing="false">
+                  <graphic>
+                     <ImageView fitHeight="16" fitWidth="16">
+                        <image>
+                           <Image url="@../images/icons/template.png" />
+                        </image>
+                     </ImageView>
+                  </graphic>
+               </Button>
+                    <TextField fx:id="txtMainImageSearch" prefWidth="0.0" visible="false" />
                     <Button fx:id="cmdMainImageSearch" mnemonicParsing="false">
                         <graphic>
-                            <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                 <Image url="@../images/icons/search.png" />
                             </ImageView>
                         </graphic>
