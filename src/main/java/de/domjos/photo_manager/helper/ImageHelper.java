@@ -233,18 +233,12 @@ public class ImageHelper {
 
         Graphics2D w = (Graphics2D) watermarked.getGraphics();
         w.drawImage(bufferedImage, 0, 0, null);
-        AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);
+        AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f);
         w.setComposite(alphaChannel);
         w.setColor(Color.GRAY);
-        w.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 26));
+        w.setFont(new Font(Font.SANS_SERIF, Font.BOLD, bufferedImage.getWidth() / 25));
         FontMetrics fontMetrics = w.getFontMetrics();
-        Rectangle2D rect = fontMetrics.getStringBounds(text, w);
-
-        int centerX = (bufferedImage.getWidth() - (int) rect.getWidth()) / 2;
-        int centerY = bufferedImage.getHeight() / 2;
-
-        // add text overlay to the image
-        w.drawString(text, centerX, centerY);
+        w.drawString(text, bufferedImage.getWidth() / 50, bufferedImage.getHeight() - ((bufferedImage.getWidth() / 50) * 3));
         return watermarked;
     }
 
