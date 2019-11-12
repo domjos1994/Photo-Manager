@@ -19,24 +19,26 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
 
 public class MainController implements Initializable {
     private @FXML TabPane tbpMain;
@@ -81,6 +83,11 @@ public class MainController implements Initializable {
     private @FXML TextField txtMainTinifyWidth, txtMainTinifyHeight;
     private @FXML Button cmdMainTinifyUpload;
 
+    private @FXML TitledPane pnlMainImageUnsplash;
+    private @FXML TextField txtMainImageUnsplashSearch;
+    private @FXML Button cmdMainImageUnsplashSearch;
+    private @FXML ListView<Image> lvMainImageUnsplash;
+
     private @FXML Slider slMainSaturation, slMainHue, slMainBrightness;
     private @FXML Button cmdMainImageEditSave;
     private @FXML TableView<TemporaryEdited> tblMainImageHistory;
@@ -111,6 +118,7 @@ public class MainController implements Initializable {
         this.initTreeView();
         this.initListView();
         this.fillTemplates();
+        this.pnlMainImageUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
 
         PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
             if(importTask!=null) {
@@ -367,10 +375,6 @@ public class MainController implements Initializable {
 
                     this.reloadHistory(id);
                 }
-
-                this.slMainSaturation.setValue(100.0);
-                this.slMainBrightness.setValue(100.0);
-                this.slMainHue.setValue(100.0);
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -488,6 +492,25 @@ public class MainController implements Initializable {
             }
         });
 
+        this.cmdMainImageUnsplashSearch.setOnAction(event -> {
+            String query = this.txtMainImageUnsplashSearch.getText();
+            UnsplashTask unsplashTask = new UnsplashTask(this.pbMain, this.lblMessages, query);
+            unsplashTask.setOnSucceeded(evt ->
+                Platform.runLater(() -> {
+                    try {
+                        this.pbMain.getScene().setCursor(Cursor.DEFAULT);
+                        this.lvMainImageUnsplash.getItems().addAll(unsplashTask.get());
+                    } catch (Exception e) {
+                        Dialogs.printException(e);
+                    }
+                })
+            );
+            unsplashTask.setOnFailed(unsplashTask.getOnSucceeded());
+            unsplashTask.setOnCancelled(unsplashTask.getOnSucceeded());
+            this.pbMain.getScene().setCursor(Cursor.WAIT);
+            new Thread(unsplashTask).start();
+        });
+
         this.ctxMainDelete.setOnAction(event -> {
             try {
                 if(!this.tvMain.getSelectionModel().isEmpty()) {
@@ -530,6 +553,64 @@ public class MainController implements Initializable {
             }
         });
 
+        this.lvMainImageUnsplash.setOnDragDetected(mouseEvent -> {
+            Dragboard db = this.lvMainImageUnsplash.startDragAndDrop(TransferMode.ANY);
+
+            ClipboardContent content = new ClipboardContent();
+            StringBuilder strContent = new StringBuilder();
+            for(int index : this.lvMainImageUnsplash.getSelectionModel().getSelectedIndices()) {
+                strContent.append(index);
+                strContent.append(";");
+            }
+            content.putString(strContent.toString());
+            db.setContent(content);
+            mouseEvent.consume();
+        });
+
+        this.tvMain.setOnDragOver(mouseEvent -> {
+            if(mouseEvent.getGestureSource() != this.tvMain && mouseEvent.getDragboard().hasString()) {
+                mouseEvent.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            mouseEvent.consume();
+        });
+
+        this.tvMain.setOnDragDropped(mouseEvent -> {
+            try {
+                Dragboard db = mouseEvent.getDragboard();
+                boolean success = false;
+                if (db.hasString()) {
+                    String content = db.getString();
+                    for(String strIndex : content.split(";")) {
+                        if(!strIndex.trim().isEmpty()) {
+                            int index = Integer.parseInt(strIndex.trim());
+                            Image image = this.lvMainImageUnsplash.getItems().get(index);
+
+                            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                                Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                                File file = new File(directory.getPath() + File.separatorChar + image.getExtended().getOrDefault("id", "tmp") + ".jpg");
+                                InputStream inputStream = new URL(image.getExtended().get("unSplash")).openStream();
+                                FileUtils.writeByteArrayToFile(file, IOUtils.toByteArray(inputStream));
+                                inputStream.close();
+                                image.setPath(file.getAbsolutePath());
+                                image.setDirectory(directory);
+                                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+
+                                this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                                success = true;
+                            } else {
+                                success = false;
+                            }
+                        }
+                    }
+                }
+
+                mouseEvent.setDropCompleted(success);
+                mouseEvent.consume();
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
         this.menMainApi.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbApi));
         this.menMainMap.setOnAction(event -> {
@@ -561,12 +642,6 @@ public class MainController implements Initializable {
 
     private void reloadHistory(long id) throws Exception {
         this.tblMainImageHistory.getItems().clear();
-
-        TemporaryEdited root = new TemporaryEdited();
-        root.setChangeType(TemporaryEdited.ChangeType.nothing);
-        root.setValue(0.0);
-        this.tblMainImageHistory.getItems().add(root);
-
         for(TemporaryEdited temporaryEdited : PhotoManager.GLOBALS.getDatabase().getTemporaryEdited(id)) {
             this.tblMainImageHistory.getItems().add(temporaryEdited);
         }
@@ -613,7 +688,13 @@ public class MainController implements Initializable {
     }
 
     private void initListView() {
-        this.lvMain.setCellFactory(param -> new ListCell<>() {
+        this.lvMain.setCellFactory(param ->  this.initListCell());
+        this.lvMainImageUnsplash.setCellFactory(param -> this.initListCell());
+        this.lvMainImageUnsplash.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    private ListCell<Image> initListCell() {
+        return new ListCell<>() {
             private ImageView imageView = new ImageView();
             @Override
             public void updateItem(Image name, boolean empty) {
@@ -631,7 +712,7 @@ public class MainController implements Initializable {
                     }
                 }
             }
-        });
+        };
     }
 
     private void enableFolderControls() {

@@ -57,6 +57,18 @@
                </AnchorPane>
            </content>
          </TitledPane>
+         <TitledPane animated="false" text="%settings.unsplash">
+           <content>
+             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <children>
+                     <TextField fx:id="txtSettingsUnsplashKey" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                     <PasswordField fx:id="txtSettingsUnsplashSecretKey" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
+                     <Label maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.unsplash.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     <Label maxWidth="25.0" minWidth="25.0" prefWidth="25.0" text="%settings.unsplash.secret.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
+                  </children>
+               </AnchorPane>
+           </content>
+         </TitledPane>
          <TitledPane expanded="false" text="%settings.cloud">
            <content>
              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

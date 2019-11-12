@@ -27,6 +27,7 @@ module PhotoManager {
     requires org.apache.logging.log4j;
     requires httpclient;
     requires httpcore;
+    requires org.json;
 
     opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager to javafx.controls, javafx.fxml;

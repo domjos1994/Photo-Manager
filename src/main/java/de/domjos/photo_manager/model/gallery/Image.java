@@ -5,8 +5,10 @@ import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 
 import java.awt.image.BufferedImage;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Image extends BaseObject {
     private String path;
@@ -19,6 +21,7 @@ public class Image extends BaseObject {
     private List<DescriptionObject> tags;
     private List<TemporaryEdited> temporaryEditedList;
     private Cloud cloud;
+    private Map<String, String> extended;
 
     public Image() {
         super();
@@ -31,6 +34,7 @@ public class Image extends BaseObject {
         this.tags = new LinkedList<>();
         this.temporaryEditedList = new LinkedList<>();
         this.cloud = null;
+        this.extended = new LinkedHashMap<>();
     }
 
     public String getPath() {
@@ -103,5 +107,10 @@ public class Image extends BaseObject {
 
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
+    }
+
+
+    public Map<String, String> getExtended() {
+        return extended;
     }
 }

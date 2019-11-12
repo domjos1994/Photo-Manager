@@ -69,10 +69,6 @@ public class ImageHelper {
         return scaledImage;
     }
 
-    private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
-        return bufferedImage.getColorModel().hasAlpha();
-    }
-
     public static byte[] imageToByteArray(BufferedImage bufferedImage) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if(ImageHelper.checkImageHasAlpha(bufferedImage)) {
@@ -216,6 +212,10 @@ public class ImageHelper {
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = bi.copyData(null);
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+    }
+
+    private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
+        return bufferedImage.getColorModel().hasAlpha();
     }
 
     private static Object getValue(final JpegImageMetadata jpegMetadata, final TagInfo tagInfo) throws Exception {

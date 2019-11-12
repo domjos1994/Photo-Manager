@@ -25,11 +25,16 @@ public class Globals {
     // Keys of general settings
     public final static String PATH = "PATH";
     public final static String DEBUG = "DEBUG";
+
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";
+
     public final static String CLOUD_PATH = "CLOUD_PATH";
     public final static String CLOUD_USER = "CLOUD_USER";
     public final static String CLOUD_PWD = "CLOUD_PWD";
+
+    public final static String UNSPLASH_KEY = "UNSPLASH_KEY";
+    public final static String UNSPLASH_SECRET_KEY = "UNSPLASH_SECRET_KEY";
 
     public Globals() {
         this.debugMode = false;

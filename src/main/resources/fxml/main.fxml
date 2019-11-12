@@ -195,6 +195,25 @@
                                     </TitledPane>
                                             </AnchorPane>
                                         </TitledPane>
+                              <TitledPane fx:id="pnlMainImageUnsplash" animated="false" text="%main.image.unsplash">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <TextField fx:id="txtMainImageUnsplashSearch" layoutX="14.0" layoutY="116.0" promptText="%main.image.unsplash.search" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
+                                          <Button fx:id="cmdMainImageUnsplashSearch" layoutX="107.0" layoutY="189.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <graphic>
+                                                <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../images/icons/search.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <ListView fx:id="lvMainImageUnsplash" layoutX="16.0" layoutY="109.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="30.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </TitledPane>
                               <TitledPane animated="false" text="%main.image.history">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
