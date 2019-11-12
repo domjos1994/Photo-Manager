@@ -30,8 +30,8 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -602,8 +602,10 @@ public class MainController implements Initializable {
                                 Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
                                 File file = new File(directory.getPath() + File.separatorChar + image.getExtended().getOrDefault("id", "tmp") + ".jpg");
                                 InputStream inputStream = new URL(image.getExtended().get("unSplash")).openStream();
-                                FileUtils.writeByteArrayToFile(file, IOUtils.toByteArray(inputStream));
+                                BufferedImage bufferedImage = ImageIO.read(inputStream);
                                 inputStream.close();
+                                bufferedImage = ImageHelper.addWaterMark(bufferedImage, "(c) Unsplash");
+                                FileUtils.writeByteArrayToFile(file, ImageHelper.imageToByteArray(bufferedImage));
                                 image.setPath(file.getAbsolutePath());
                                 image.setDirectory(directory);
                                 PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);

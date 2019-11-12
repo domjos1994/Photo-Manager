@@ -16,6 +16,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -224,6 +225,27 @@ public class ImageHelper {
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = bi.copyData(null);
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+    }
+
+    public static BufferedImage addWaterMark(BufferedImage bufferedImage, String text) {
+        int imageType = ImageHelper.checkImageHasAlpha(bufferedImage) ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+        BufferedImage watermarked = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), imageType);
+
+        Graphics2D w = (Graphics2D) watermarked.getGraphics();
+        w.drawImage(bufferedImage, 0, 0, null);
+        AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);
+        w.setComposite(alphaChannel);
+        w.setColor(Color.GRAY);
+        w.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 26));
+        FontMetrics fontMetrics = w.getFontMetrics();
+        Rectangle2D rect = fontMetrics.getStringBounds(text, w);
+
+        int centerX = (bufferedImage.getWidth() - (int) rect.getWidth()) / 2;
+        int centerY = bufferedImage.getHeight() / 2;
+
+        // add text overlay to the image
+        w.drawString(text, centerX, centerY);
+        return watermarked;
     }
 
     private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.domjos</groupId>
-    <artifactId>photo_manager</artifactId>
+    <artifactId>PhotoManager</artifactId>
     <version>0.1.alpha.1</version>
 
     <properties>
@@ -32,9 +32,6 @@
 
         <!-- Project-Charset -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- JPackage -->
-        <jpackage.path>C:\Users\hae\Documents\Entwicklung\Java\JavaFX\jdk-14</jpackage.path>
     </properties>
 
     <name>${application.name}</name>
@@ -145,6 +142,13 @@
             <version>5.9</version>
         </dependency>
 
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20190722</version>
+        </dependency>
+
         <!-- ee dependencies -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -224,7 +228,7 @@
                     <archive>
                         <manifestEntries>
                             <Multi-Release>true</Multi-Release>
-                            <Main-Class>com.example.Main</Main-Class>
+                            <Main-Class>de.domjos.photo_manager.PhotoManager</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
