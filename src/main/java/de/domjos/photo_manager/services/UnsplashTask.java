@@ -20,15 +20,15 @@ public final class UnsplashTask extends ParentTask<List<Image>> {
     private String url;
     private String query;
 
-    public UnsplashTask(ProgressBar progressBar, Label messages, String query) {
+    public UnsplashTask(ProgressBar progressBar, Label messages, String query, int page) {
         super(progressBar, messages);
         this.query = query.toLowerCase().replace(" ", "%20").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").trim();
 
         String key = PhotoManager.GLOBALS.getDecryptedSetting(Globals.UNSPLASH_KEY, "");
         if(this.query.isEmpty()) {
-            this.url = "https://api.unsplash.com/photos?client_id=" + key;
+            this.url = "https://api.unsplash.com/photos?client_id=" + key + "&page=" + page;
         } else {
-            this.url = "https://api.unsplash.com/search/photos?client_id=" + key + "&query=" + this.query;
+            this.url = "https://api.unsplash.com/search/photos?client_id=" + key + "&page=" + page + "&query=" + this.query;
         }
     }
 

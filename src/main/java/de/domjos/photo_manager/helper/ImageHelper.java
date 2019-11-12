@@ -15,6 +15,7 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -205,6 +206,17 @@ public class ImageHelper {
                 bufferedImage.setRGB(x, y, rgb);
             }
         }
+    }
+
+    public static BufferedImage rotate(BufferedImage bufferedImage, int rotation) {
+        double rotationRequired = Math.toRadians (rotation);
+        double locationX = bufferedImage.getWidth() / 2.0;
+        double locationY = bufferedImage.getHeight() / 2.0;
+        AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
+        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+        BufferedImage newImage =new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+        op.filter(bufferedImage, newImage);
+        return(newImage);
     }
 
     public static BufferedImage deepCopy(BufferedImage bi) {

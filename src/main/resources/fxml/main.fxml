@@ -166,6 +166,8 @@
                                                               <Slider fx:id="slMainSaturation" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="260.0" />
                                                               <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.brightness" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="300.0" />
                                                               <Slider fx:id="slMainBrightness" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="300.0" />
+                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.rotate" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="340.0" />
+                                                <Slider fx:id="slMainRotate" layoutX="10.0" layoutY="10.0" max="360.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="0.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="340.0" />
                                                           </AnchorPane>
                                                       </ScrollPane>
                                        </children>
@@ -195,7 +197,7 @@
                                     </TitledPane>
                                             </AnchorPane>
                                         </TitledPane>
-                              <TitledPane fx:id="pnlMainImageUnsplash" animated="false" text="%main.image.unsplash">
+                              <TitledPane fx:id="pnlMainImageUnsplash" animated="false" expanded="false" text="%main.image.unsplash">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
@@ -209,7 +211,10 @@
                                                 </ImageView>
                                              </graphic>
                                           </Button>
-                                          <ListView fx:id="lvMainImageUnsplash" layoutX="16.0" layoutY="109.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="30.0" />
+                                          <ListView fx:id="lvMainImageUnsplash" layoutX="16.0" layoutY="109.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="60.0" />
+                                          <Button fx:id="cmdMainImageUnsplashPrevious" layoutX="44.0" layoutY="35.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&lt;&lt;" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                          <Button fx:id="cmdMainImageUnsplashNext" layoutX="116.0" layoutY="40.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&gt;&gt;" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                          <Label fx:id="lblMainImageUnsplashPage" layoutX="82.0" layoutY="44.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" textAlignment="CENTER" AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="30.0" />
                                        </children>
                                     </AnchorPane>
                                 </content>

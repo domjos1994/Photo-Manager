@@ -85,10 +85,11 @@ public class MainController implements Initializable {
 
     private @FXML TitledPane pnlMainImageUnsplash;
     private @FXML TextField txtMainImageUnsplashSearch;
-    private @FXML Button cmdMainImageUnsplashSearch;
+    private @FXML Button cmdMainImageUnsplashSearch, cmdMainImageUnsplashPrevious, cmdMainImageUnsplashNext;
+    private @FXML Label lblMainImageUnsplashPage;
     private @FXML ListView<Image> lvMainImageUnsplash;
 
-    private @FXML Slider slMainSaturation, slMainHue, slMainBrightness;
+    private @FXML Slider slMainSaturation, slMainHue, slMainBrightness, slMainRotate;
     private @FXML Button cmdMainImageEditSave;
     private @FXML TableView<TemporaryEdited> tblMainImageHistory;
 
@@ -316,11 +317,12 @@ public class MainController implements Initializable {
         this.slMainHue.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
         this.slMainSaturation.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
         this.slMainBrightness.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
+        this.slMainRotate.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
 
         this.tblMainImageHistory.getSelectionModel().selectedItemProperty().addListener((observableValue, temporaryEdited, t1) -> {
             if(!this.tblMainImageHistory.getSelectionModel().isEmpty()) {
                 long id = this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId();
-                int hue = 100, saturation = 100, brightness = 100;
+                int hue = 100, saturation = 100, brightness = 100, rotation = 0;
 
                 for(TemporaryEdited temp : this.tblMainImageHistory.getItems()) {
                     if(temp.getChangeType()!=null) {
@@ -334,13 +336,15 @@ public class MainController implements Initializable {
                             case Brightness:
                                 brightness = (int) temp.getValue();
                                 break;
+                            case Rotate:
+                                rotation = (int) temp.getValue();
+                                break;
                         }
 
                         BufferedImage image = SwingFXUtils.fromFXImage(this.ivMainImage.getImage(), null);
-                        ImageHelper.changeHSB(image, SwingFXUtils.fromFXImage(this.currentImage, null),
-                                hue, saturation, brightness);
-                        System.out.println(hue + ": " + saturation + ": " + brightness);
-                        this.ivMainImage.setImage(SwingFXUtils.toFXImage(image, null));
+                        ImageHelper.changeHSB(image, SwingFXUtils.fromFXImage(this.currentImage, null), hue, saturation, brightness);
+                        javafx.scene.image.Image img = SwingFXUtils.toFXImage(ImageHelper.rotate(image, rotation), null);
+                        this.ivMainImage.setImage(img);
 
                         if(id== temp.getId()) {
                             break;
@@ -370,6 +374,12 @@ public class MainController implements Initializable {
                         TemporaryEdited temporaryEdited = new TemporaryEdited();
                         temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Brightness);
                         temporaryEdited.setValue(this.slMainBrightness.getValue());
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
+                    }
+                    if(this.slMainRotate.getValue()!=0) {
+                        TemporaryEdited temporaryEdited = new TemporaryEdited();
+                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Rotate);
+                        temporaryEdited.setValue(this.slMainRotate.getValue());
                         PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
                     }
 
@@ -451,6 +461,7 @@ public class MainController implements Initializable {
                 template.getPreferences().put(Template.Preference.HUE.toString(), String.valueOf(this.slMainHue.getValue()));
                 template.getPreferences().put(Template.Preference.BRIGHTNESS.toString(), String.valueOf(this.slMainBrightness.getValue()));
                 template.getPreferences().put(Template.Preference.SATURATION.toString(), String.valueOf(this.slMainSaturation.getValue()));
+                template.getPreferences().put(Template.Preference.Rotation.toString(), String.valueOf(this.slMainRotate.getValue()));
                 PhotoManager.GLOBALS.getDatabase().insertOrUpdateTemplate(template);
                 this.fillTemplates();
             } catch (Exception ex) {
@@ -475,6 +486,7 @@ public class MainController implements Initializable {
                         this.slMainHue.setValue(100.0);
                         this.slMainBrightness.setValue(100.0);
                         this.slMainSaturation.setValue(100.0);
+                        this.slMainRotate.setValue(0.0);
                     } else {
                         List<Template> templates = PhotoManager.GLOBALS.getDatabase().getTemplates("name='" + newValue + "'");
                         if(!templates.isEmpty()) {
@@ -483,6 +495,7 @@ public class MainController implements Initializable {
                             this.slMainHue.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.HUE.toString(), "100.0")));
                             this.slMainBrightness.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.BRIGHTNESS.toString(), "100.0")));
                             this.slMainSaturation.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.SATURATION.toString(), "100.0")));
+                            this.slMainRotate.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.Rotation.toString(), "0.0")));
                         }
                     }
                     this.cmdMainImageZoom.fire();
@@ -493,22 +506,22 @@ public class MainController implements Initializable {
         });
 
         this.cmdMainImageUnsplashSearch.setOnAction(event -> {
-            String query = this.txtMainImageUnsplashSearch.getText();
-            UnsplashTask unsplashTask = new UnsplashTask(this.pbMain, this.lblMessages, query);
-            unsplashTask.setOnSucceeded(evt ->
-                Platform.runLater(() -> {
-                    try {
-                        this.pbMain.getScene().setCursor(Cursor.DEFAULT);
-                        this.lvMainImageUnsplash.getItems().addAll(unsplashTask.get());
-                    } catch (Exception e) {
-                        Dialogs.printException(e);
-                    }
-                })
-            );
-            unsplashTask.setOnFailed(unsplashTask.getOnSucceeded());
-            unsplashTask.setOnCancelled(unsplashTask.getOnSucceeded());
-            this.pbMain.getScene().setCursor(Cursor.WAIT);
-            new Thread(unsplashTask).start();
+            lblMainImageUnsplashPage.setText("1");
+            executeUnsplashTask(1);
+        });
+
+        this.cmdMainImageUnsplashNext.setOnAction(actionEvent -> {
+            int current = Integer.parseInt(lblMainImageUnsplashPage.getText());
+            current++;
+            executeUnsplashTask(current);
+            lblMainImageUnsplashPage.setText(String.valueOf(current));
+        });
+
+        this.cmdMainImageUnsplashPrevious.setOnAction(actionEvent -> {
+            int current = Integer.parseInt(lblMainImageUnsplashPage.getText());
+            current--;
+            executeUnsplashTask(current);
+            lblMainImageUnsplashPage.setText(String.valueOf(current));
         });
 
         this.ctxMainDelete.setOnAction(event -> {
@@ -642,6 +655,10 @@ public class MainController implements Initializable {
 
     private void reloadHistory(long id) throws Exception {
         this.tblMainImageHistory.getItems().clear();
+        TemporaryEdited root = new TemporaryEdited();
+        root.setChangeType(TemporaryEdited.ChangeType.None);
+        root.setValue(0.0);
+        this.tblMainImageHistory.getItems().add(root);
         for(TemporaryEdited temporaryEdited : PhotoManager.GLOBALS.getDatabase().getTemporaryEdited(id)) {
             this.tblMainImageHistory.getItems().add(temporaryEdited);
         }
@@ -752,9 +769,11 @@ public class MainController implements Initializable {
         int hue = (int) this.slMainHue.getValue();
         int saturation = (int) this.slMainSaturation.getValue();
         int brightness = (int) this.slMainBrightness.getValue();
+        int rotation = (int) this.slMainRotate.getValue();
 
         if(this.cache.getOriginalPreview()!=null && this.cache.getPreviewImage()!=null) {
             ImageHelper.changeHSB(this.cache.getPreviewImage(), this.cache.getOriginalPreview(), hue, saturation, brightness);
+            this.cache.setPreviewImage(ImageHelper.rotate(this.cache.getPreviewImage(), rotation));
             return SwingFXUtils.toFXImage(this.cache.getPreviewImage(), null);
         }
 
@@ -1001,5 +1020,25 @@ public class MainController implements Initializable {
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }
+    }
+
+    private void executeUnsplashTask(int page) {
+        String query = this.txtMainImageUnsplashSearch.getText();
+        UnsplashTask unsplashTask = new UnsplashTask(this.pbMain, this.lblMessages, query, page);
+        unsplashTask.setOnSucceeded(evt ->
+                Platform.runLater(() -> {
+                    try {
+                        this.pbMain.getScene().setCursor(Cursor.DEFAULT);
+                        this.lvMainImageUnsplash.getItems().clear();
+                        this.lvMainImageUnsplash.getItems().addAll(unsplashTask.get());
+                    } catch (Exception e) {
+                        Dialogs.printException(e);
+                    }
+                })
+        );
+        unsplashTask.setOnFailed(unsplashTask.getOnSucceeded());
+        unsplashTask.setOnCancelled(unsplashTask.getOnSucceeded());
+        this.pbMain.getScene().setCursor(Cursor.WAIT);
+        new Thread(unsplashTask).start();
     }
 }

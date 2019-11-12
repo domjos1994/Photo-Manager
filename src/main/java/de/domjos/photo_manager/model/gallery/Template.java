@@ -51,7 +51,8 @@ public class Template extends BaseObject {
         ZOOM,
         HUE,
         BRIGHTNESS,
-        SATURATION
+        SATURATION,
+        Rotation
     }
 
     @Override

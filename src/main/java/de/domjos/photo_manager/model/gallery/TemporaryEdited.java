@@ -37,10 +37,12 @@ public class TemporaryEdited {
 
 
     public enum ChangeType {
+        None,
         Hue,
         Saturation,
         Brightness,
         Width,
-        Height
+        Height,
+        Rotate
     }
 }
