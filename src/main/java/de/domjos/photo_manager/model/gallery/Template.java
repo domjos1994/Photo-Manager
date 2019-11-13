@@ -52,7 +52,9 @@ public class Template extends BaseObject {
         HUE,
         BRIGHTNESS,
         SATURATION,
-        Rotation
+        Rotation,
+        Watermark,
+        Resize
     }
 
     @Override

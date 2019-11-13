@@ -13,10 +13,11 @@ import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -209,15 +210,26 @@ public class ImageHelper {
         }
     }
 
-    public static BufferedImage rotate(BufferedImage bufferedImage, int rotation) {
-        double rotationRequired = Math.toRadians (rotation);
-        double locationX = bufferedImage.getWidth() / 2.0;
-        double locationY = bufferedImage.getHeight() / 2.0;
-        AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
-        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-        BufferedImage newImage =new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
-        op.filter(bufferedImage, newImage);
-        return(newImage);
+    public static BufferedImage rotate(BufferedImage img, int degrees) {
+        double rads = Math.toRadians(degrees);
+        int w = img.getWidth();
+        int h = img.getHeight();
+
+        BufferedImage rotated = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = rotated.createGraphics();
+        AffineTransform at = new AffineTransform();
+
+        int x = w / 2;
+        int y = h / 2;
+
+        at.rotate(rads, x, y);
+        g2d.setTransform(at);
+        g2d.drawImage(img, 0, 0, null);
+        g2d.setColor(Color.RED);
+        g2d.drawRect(0, 0, w - 1, h - 1);
+        g2d.dispose();
+
+        return rotated;
     }
 
     public static BufferedImage deepCopy(BufferedImage bi) {
@@ -228,22 +240,61 @@ public class ImageHelper {
     }
 
     public static BufferedImage addWaterMark(BufferedImage bufferedImage, String text) {
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+
         int imageType = ImageHelper.checkImageHasAlpha(bufferedImage) ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
-        BufferedImage watermarked = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), imageType);
+        BufferedImage watermarked = new BufferedImage(width, height, imageType);
 
         Graphics2D w = (Graphics2D) watermarked.getGraphics();
         w.drawImage(bufferedImage, 0, 0, null);
         AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f);
         w.setComposite(alphaChannel);
         w.setColor(Color.GRAY);
-        w.setFont(new Font(Font.SANS_SERIF, Font.BOLD, bufferedImage.getWidth() / 25));
-        FontMetrics fontMetrics = w.getFontMetrics();
-        w.drawString(text, bufferedImage.getWidth() / 50, bufferedImage.getHeight() - ((bufferedImage.getWidth() / 50) * 3));
+        w.setFont(new Font(Font.SANS_SERIF, Font.BOLD, height / 25));
+        w.drawString(text, width / 25, height - (height / 25));
         return watermarked;
     }
 
-    private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
-        return bufferedImage.getColorModel().hasAlpha();
+    public static BufferedImage resize(BufferedImage img, javafx.scene.image.Image original, int newW, int newH) {
+        if(newW == 0 || newH == 0) {
+            return img;
+        } else {
+            double wFactor = original.getWidth() / newW;
+            double hFactor = original.getHeight() / newH;
+            int newWidth = (int) (img.getWidth() / wFactor);
+            int newHeight = (int) (img.getHeight() / hFactor);
+
+            Image tmp = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+            BufferedImage newImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = newImg.createGraphics();
+            g2d.drawImage(tmp, 0, 0, null);
+            g2d.dispose();
+
+            return newImg;
+        }
+    }
+
+    public static void save(String path, String save, BufferedImage bufferedImage) throws Exception {
+        ImageInputStream iis = ImageIO.createImageInputStream(new File(path));
+        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(iis);
+
+        if(imageReaders.hasNext()) {
+            ImageReader reader = imageReaders.next();
+            ImageWriter imageWriter = ImageIO.getImageWriter(reader);
+            imageWriter.setOutput(new FileImageOutputStream(new File(save)));
+            bufferedImage = ImageHelper.convertColorspace(bufferedImage, BufferedImage.TYPE_INT_RGB);
+            imageWriter.write(bufferedImage);
+        }
+    }
+
+    private static BufferedImage convertColorspace(BufferedImage image, int newType) throws Exception {
+        BufferedImage raw_image = image;
+        image = new BufferedImage(raw_image.getWidth(), raw_image.getHeight(), newType);
+        ColorConvertOp xformOp = new ColorConvertOp(null);
+        xformOp.filter(raw_image, image);
+        return image;
     }
 
     private static Object getValue(final JpegImageMetadata jpegMetadata, final TagInfo tagInfo) throws Exception {
@@ -283,5 +334,9 @@ public class ImageHelper {
             return pixels;
         }
         return null;
+    }
+
+    private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
+        return bufferedImage.getColorModel().hasAlpha();
     }
 }

@@ -50,7 +50,15 @@
                         </TreeView>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                        <ListView fx:id="lvMain" prefHeight="200.0" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <ListView fx:id="lvMain" prefHeight="200.0" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem fx:id="ctxMainImageApply" mnemonicParsing="false" text="%main.image.menu.apply" />
+                              <MenuItem fx:id="ctxMainImageSaveAs" mnemonicParsing="false" text="%main.image.menu.saveAs" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></ListView>
                         <SplitPane dividerPositions="0.6" layoutX="209.0" layoutY="107.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                 <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" layoutX="14.0" layoutY="437.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" text="untitled" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
@@ -140,7 +148,7 @@
                                                 </TitledPane>
                                             </AnchorPane>
                                         </TitledPane>
-                              <TitledPane animated="false" text="%main.image.edit">
+                              <TitledPane animated="false" expanded="false" text="%main.image.edit">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
@@ -155,19 +163,26 @@
                                           </Button>
                                                       <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                                                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="210.0">
-                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.hue" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="220.0" />
+                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.hue" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="220.0" />
                                                               <Slider fx:id="slMainHue" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="220.0" />
                                                               <ImageView fx:id="ivMainPreview" fitHeight="200.0" fitWidth="200.0" layoutX="30.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                   <viewport>
                                                                       <Rectangle2D height="200.0" width="200.0" />
                                                                   </viewport>
                                                               </ImageView>
-                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.saturation" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="260.0" />
+                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.saturation" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="260.0" />
                                                               <Slider fx:id="slMainSaturation" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="260.0" />
-                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.brightness" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="300.0" />
+                                                              <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.brightness" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="300.0" />
                                                               <Slider fx:id="slMainBrightness" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="300.0" />
-                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.services.rotate" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="340.0" />
+                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.rotate" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="340.0" />
                                                 <Slider fx:id="slMainRotate" layoutX="10.0" layoutY="10.0" max="360.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="0.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="340.0" />
+                                                <Label layoutX="60.0" layoutY="471.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.watermark" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="380.0" />
+                                                <TextField fx:id="txtMainWatermark" layoutX="55.0" layoutY="460.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="380.0" />
+                                                <CheckBox fx:id="chkMainResize" layoutX="24.0" layoutY="416.0" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="%main.image.edit.resize" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="420.0" />
+                                                <TextField fx:id="txtMainResizeWidth" layoutX="5.0" layoutY="445.0" promptText="%main.image.edit.width" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="450.0" />
+                                                <Label layoutX="80.0" layoutY="482.0" maxHeight="25.0" maxWidth="20.0" minHeight="25.0" minWidth="20.0" prefHeight="25.0" prefWidth="20.0" text="px" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="450.0" />
+                                                <TextField fx:id="txtMainResizeHeight" layoutX="15.0" layoutY="455.0" promptText="%main.image.edit.height" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="480.0" />
+                                                <Label layoutX="90.0" layoutY="492.0" maxHeight="25.0" maxWidth="20.0" minHeight="25.0" minWidth="20.0" prefHeight="25.0" prefWidth="20.0" text="px" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="480.0" />
                                                           </AnchorPane>
                                                       </ScrollPane>
                                        </children>
@@ -299,9 +314,6 @@
         <Tab fx:id="tbSettings" text="%main.menu.program.settings">
             <fx:include fx:id="settings" source="settings.fxml" />
         </Tab>
-        <Tab fx:id="tbApi" text="%main.menu.extras.api">
-            <fx:include fx:id="api" source="api.fxml" />
-        </Tab>
         <Tab fx:id="tbMap" text="%main.menu.extras.map">
             <fx:include fx:id="map" source="map.fxml" />
         </Tab>
@@ -323,11 +335,6 @@
             </MenuItem>
         </Menu>
         <Menu mnemonicParsing="false" text="%main.menu.extras">
-            <MenuItem fx:id="menMainApi" mnemonicParsing="false" text="%main.menu.extras.api">
-                <accelerator>
-                    <KeyCodeCombination alt="ANY" code="A" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-                </accelerator>
-            </MenuItem>
             <MenuItem fx:id="menMainMap" mnemonicParsing="false" text="%main.menu.extras.map">
                 <accelerator>
                     <KeyCodeCombination alt="ANY" code="M" control="ANY" meta="UP" shift="UP" shortcut="UP" />

@@ -4,11 +4,13 @@ public class TemporaryEdited {
     private long id;
     private ChangeType changeType;
     private double value;
+    private String stringValue;
 
     public TemporaryEdited() {
         this.id = 0;
         this.changeType = null;
         this.value = 0.0;
+        this.stringValue = "";
     }
 
     public long getId() {
@@ -33,16 +35,26 @@ public class TemporaryEdited {
 
     public void setValue(double value) {
         this.value = value;
+        if(changeType != ChangeType.Watermark && changeType != ChangeType.Resize) {
+            this.stringValue = String.valueOf(this.value);
+        }
     }
 
+    public String getStringValue() {
+        return this.stringValue;
+    }
+
+    public void setStringValue(String value) {
+        this.stringValue = value;
+    }
 
     public enum ChangeType {
         None,
         Hue,
         Saturation,
         Brightness,
-        Width,
-        Height,
-        Rotate
+        Rotate,
+        Resize,
+        Watermark
     }
 }

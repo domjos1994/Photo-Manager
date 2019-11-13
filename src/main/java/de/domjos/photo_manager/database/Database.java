@@ -277,10 +277,11 @@ public class Database {
     }
 
     public void insertOrUpdateEdited(TemporaryEdited temporaryEdited, long image) throws Exception {
-        PreparedStatement preparedStatement = this.prepare("INSERT INTO images_edited(image, type, value) VALUES(?, ?, ?)");
+        PreparedStatement preparedStatement = this.prepare("INSERT INTO images_edited(image, type, value, stringValue) VALUES(?, ?, ?, ?)");
         preparedStatement.setLong(1, image);
         preparedStatement.setString(2, temporaryEdited.getChangeType().name());
         preparedStatement.setDouble(3, temporaryEdited.getValue());
+        preparedStatement.setString(4, temporaryEdited.getStringValue());
         preparedStatement.executeUpdate();
         preparedStatement.close();
     }
@@ -290,14 +291,27 @@ public class Database {
         PreparedStatement preparedStatement = this.prepare("SELECT * FROM images_edited WHERE image=" + image);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
+            TemporaryEdited.ChangeType changeType = TemporaryEdited.ChangeType.valueOf(resultSet.getString("type"));
+
             TemporaryEdited temporaryEdited = new TemporaryEdited();
             temporaryEdited.setId(resultSet.getLong("id"));
-            temporaryEdited.setChangeType(TemporaryEdited.ChangeType.valueOf(resultSet.getString("type")));
-            temporaryEdited.setValue(resultSet.getDouble("value"));
+            temporaryEdited.setChangeType(changeType);
+            if(changeType != TemporaryEdited.ChangeType.Watermark && changeType != TemporaryEdited.ChangeType.Resize) {
+                temporaryEdited.setValue(resultSet.getDouble("value"));
+            } else {
+                temporaryEdited.setStringValue(resultSet.getString("stringValue"));
+            }
             temporaryEditedList.add(temporaryEdited);
         }
 
         return temporaryEditedList;
+    }
+
+    public void removeHistory(TemporaryEdited temporaryEdited, long image) throws Exception {
+        PreparedStatement preparedStatement = this.prepare("DELETE FROM images_edited WHERE image=? AND id=?");
+        preparedStatement.setLong(1, image);
+        preparedStatement.setLong(2, temporaryEdited.getId());
+        preparedStatement.executeUpdate();
     }
 
     public void insertOrUpdateTemplate(Template template) throws Exception {
