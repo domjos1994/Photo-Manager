@@ -28,7 +28,7 @@ public final class Dialogs {
     public static void printFXML(String path, ResourceBundle language, String header, boolean wait, Stage stage) throws Exception {
         Parent root = FXMLLoader.load(PhotoManager.class.getResource(path), language);
         Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/style.css");
+        scene.getStylesheets().add(Dialogs.class.getResource("/styles/style.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle(header);
         stage.getIcons().add(new Image(PhotoManager.class.getResourceAsStream("/images/header.png")));

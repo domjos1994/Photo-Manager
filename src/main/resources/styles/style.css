@@ -1,16 +1,78 @@
-
-#histogram .default-color0.chart-bar {
-    -fx-bar-fill: darkgray;
+.slateGray,
+.split-pane:vertical > .split-pane-divider,
+.split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: #708090;
 }
 
-#histogram .default-color1.chart-bar {
-    -fx-bar-fill: red;
+.split-pane:vertical > .split-pane-divider {
+   -fx-border-width: 1 0 1 0;
+   -fx-border-color: white;
 }
 
-#histogram .default-color1.chart-bar {
-    -fx-bar-fill: green;
+.split-pane:horizontal > .split-pane-divider {
+   -fx-border-width: 0 1 0 1;
+   -fx-border-color: white;
 }
 
-#histogram .default-color1.chart-bar {
-    -fx-bar-fill: blue;
+.button {
+    -fx-background-color: #708090;
+    -fx-text-fill: white;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.titled-pane > *.content,
+.titled-pane > .title {
+    -fx-background-color: #708090;
+    -fx-text-fill: white;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.tree-view, .tree-cell,
+.list-view, .list-cell,
+.titled-pane > *.content {
+     -fx-background-color: #2f4f4f;
+     -fx-text-fill: white;
+}
+
+.list-view, .tree-view {
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.slider .axis { -fx-tick-label-fill: white; }
+
+.scroll-pane {
+   -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+   -fx-background-color: transparent;
+}
+
+.scroll-bar:horizontal, .scroll-bar:vertical,
+.scroll-pane > .corner {
+    -fx-background-color: #708090;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #2f4f4f;
+    -fx-border-width: 1 1 1 1;
+        -fx-border-color: white;
+}
+
+.label {
+    -fx-text-fill: white;
+}
+
+.darkSlateGray {
+    -fx-background-color: #2f4f4f;
+}
+
+.whiteColor {
+    -fx-text-fill: white;
 }
