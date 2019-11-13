@@ -44,6 +44,7 @@
                                     <items>
                                         <MenuItem fx:id="ctxMainDelete" mnemonicParsing="false" text="%sys.delete" />
                                         <MenuItem fx:id="ctxMainRecreate" mnemonicParsing="false" text="%main.ctx.thumbnails" />
+                                        <MenuItem fx:id="ctxMainSlideshow" mnemonicParsing="false" text="%main.ctx.slideshow" />
                                     </items>
                                 </ContextMenu>
                             </contextMenu>
@@ -316,6 +317,9 @@
         </Tab>
         <Tab fx:id="tbMap" text="%main.menu.extras.map">
             <fx:include fx:id="map" source="map.fxml" />
+        </Tab>
+        <Tab fx:id="tbSlideshow" text="%main.menu.program.settings">
+            <fx:include fx:id="slideshow" source="slideshow.fxml" />
         </Tab>
         <Tab fx:id="tbHelp" text="%main.menu.help">
             <fx:include fx:id="help" source="help.fxml" />

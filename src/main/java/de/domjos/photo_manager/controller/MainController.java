@@ -43,9 +43,9 @@ import java.util.*;
 
 public class MainController implements Initializable {
     private @FXML TabPane tbpMain;
-    private @FXML Tab tbMain, tbSettings, tbMap, tbHelp;
+    private @FXML Tab tbMain, tbSettings, tbMap, tbSlideshow, tbHelp;
     private @FXML MenuItem menMainSettings, menMainClose, menMainMap, menMainHelp;
-    private @FXML MenuItem ctxMainDelete, ctxMainRecreate;
+    private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow;
     private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs;
 
     private @FXML TreeView<Directory> tvMain;
@@ -106,6 +106,8 @@ public class MainController implements Initializable {
     private @FXML SettingsController settingsController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML MapController mapController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML SlideshowController slideshowController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML HelpController helpController;
 
@@ -610,6 +612,13 @@ public class MainController implements Initializable {
             }
         });
 
+        this.ctxMainSlideshow.setOnAction(event -> {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                this.slideshowController.getImages(this.lvMain.getItems());
+                this.tbpMain.getSelectionModel().select(this.tbSlideshow);
+            }
+        });
+
         this.cmdMainImageSearch.setOnAction(event -> {
             if(!this.txtMainImageSearch.isVisible()) {
                 this.txtMainImageSearch.setVisible(true);
@@ -707,6 +716,7 @@ public class MainController implements Initializable {
     private void initControllers() {
         this.settingsController.init(this);
         this.mapController.init(this);
+        this.slideshowController.init(this);
         this.helpController.init(this);
     }
 

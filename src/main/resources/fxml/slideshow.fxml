@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<?import javafx.scene.control.CheckBox?>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SlideshowController">
+   <children>
+      <ToolBar layoutX="67.0" layoutY="69.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <items>
+            <Button fx:id="cmdSlideshowHome" mnemonicParsing="false">
+                <graphic>
+                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../images/icons/home.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="cmdSlideshowPrevious" mnemonicParsing="false" text="&lt;&lt;" />
+            <Button fx:id="cmdSlideshowNext" mnemonicParsing="false" text="&gt;&gt;" />
+            <TextField fx:id="txtSlideshowLength" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="5" />
+            <Button fx:id="cmdSlideshowPlay" mnemonicParsing="false" text="Play" />
+            <Button fx:id="cmdSlideshowStop" mnemonicParsing="false" text="Stop" />
+             <CheckBox fx:id="chkSlideshowFullscreen" mnemonicParsing="false" text="%main.ctx.slideshow.full"/>
+         </items>
+      </ToolBar>
+      <ImageView fx:id="ivSlideshow" layoutX="124.0" layoutY="83.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+         <viewport>
+            <Rectangle2D />
+         </viewport>
+      </ImageView>
+   </children>
+</AnchorPane>
