@@ -118,8 +118,10 @@ public class InitializationHelper {
      * @return the header
      */
     public static String getHeader() {
-        URL[] urls = new URL[]{InitializationHelper.class.getResource("/properties/")};
+        /*URL[] urls = new URL[]{InitializationHelper.class.getResource("/properties/")};
         ResourceBundle bundle = ResourceBundle.getBundle("pom", Locale.getDefault(), new URLClassLoader(urls));
-        return bundle.getString("app.name") + " - " + bundle.getString("app.version");
+        return bundle.getString("app.name") + " - " + bundle.getString("app.version");*/
+
+        return "PhotoManager";
     }
 }

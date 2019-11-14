@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.domjos</groupId>
-  <artifactId>photo_manager</artifactId>
+  <artifactId>PhotoManager</artifactId>
   <name>${application.name}</name>
   <version>0.1.alpha.1</version>
   <url>${application.website}</url>
@@ -44,31 +44,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
-        <executions>
-          <execution>
-            <id>default-compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <source>${java.version}</source>
-              <target>${java.version}</target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-testCompile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-            <configuration>
-              <source>${java.version}</source>
-              <target>${java.version}</target>
-            </configuration>
-          </execution>
-        </executions>
+        <version>3.8.1</version>
         <configuration>
           <release>${java.version}</release>
         </configuration>
@@ -90,11 +66,12 @@
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
         <configuration>
           <archive>
             <manifestEntries>
               <Multi-Release>true</Multi-Release>
-              <Main-Class>com.example.Main</Main-Class>
+              <Main-Class>de.domjos.photo_manager.PhotoManager</Main-Class>
             </manifestEntries>
           </archive>
         </configuration>
@@ -132,7 +109,6 @@
     <log4j.version>2.12.0</log4j.version>
     <commons.io.version>2.6</commons.io.version>
     <application.website>https://domjos.de</application.website>
-    <jpackage.path>C:\Users\hae\Documents\Entwicklung\Java\JavaFX\jdk-14</jpackage.path>
     <application.email>developing@domjos.de</application.email>
     <sqlite.version>3.28.0</sqlite.version>
     <application.name>Photo-Manager</application.name>

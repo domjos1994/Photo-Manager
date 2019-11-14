@@ -59,10 +59,12 @@
                               <MenuItem fx:id="ctxMainImageSaveAs" mnemonicParsing="false" text="%main.image.menu.saveAs" />
                           </items>
                         </ContextMenu>
-                     </contextMenu></ListView>
+                     </contextMenu>
+                        </ListView>
                         <SplitPane dividerPositions="0.6" layoutX="209.0" layoutY="107.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
-                                <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" layoutX="14.0" layoutY="437.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" text="untitled" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" layoutX="14.0" layoutY="437.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0"
+                                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                         <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="darkSlateGray" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
                                             <Button fx:id="cmdMainImageSave" mnemonicParsing="false">
@@ -235,7 +237,7 @@
                                     </AnchorPane>
                                 </content>
                               </TitledPane>
-                              <TitledPane animated="false" text="%main.image.history">
+                              <TitledPane animated="false" expanded="false" text="%main.image.history">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
@@ -254,7 +256,7 @@
                         </SplitPane>
                     </AnchorPane>
                 </SplitPane>
-                <ToolBar prefHeight="40.0" styleClass="darkSlateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <ToolBar id="toolBarTop" prefHeight="39.0" styleClass="darkSlateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <Button fx:id="cmdMainAddFolder" mnemonicParsing="false">
                         <graphic>
                             <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
@@ -325,7 +327,7 @@
             <fx:include fx:id="help" source="help.fxml" />
         </Tab>
     </TabPane>
-    <MenuBar layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <MenuBar id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>
@@ -345,10 +347,12 @@
                 </accelerator>
             </MenuItem>
         </Menu>
-        <Menu fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help">
-            <accelerator>
-                <KeyCodeCombination alt="ANY" code="H" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-            </accelerator>
+        <Menu  mnemonicParsing="false" text="%main.menu.help">
+            <MenuItem fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="H" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
         </Menu>
     </MenuBar>
     <ToolBar layoutY="360.0" nodeOrientation="RIGHT_TO_LEFT" styleClass="slateGray" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

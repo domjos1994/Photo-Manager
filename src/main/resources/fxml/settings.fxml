@@ -15,11 +15,11 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SettingsController">
 
-    <ToolBar layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <ToolBar styleClass="darkSlateGray" layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="39.0"  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
             <Button fx:id="cmdSettingsHome" mnemonicParsing="false">
                 <graphic>
-                    <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
                         <Image url="@../images/icons/home.png" />
                     </ImageView>
                 </graphic>
@@ -27,7 +27,7 @@
             <HBox HBox.hgrow="ALWAYS" />
             <Button fx:id="cmdSettingsSave" mnemonicParsing="false">
                 <graphic>
-                    <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
                         <Image url="@../images/icons/save.png" />
                     </ImageView>
                 </graphic>

@@ -1,3 +1,7 @@
+.root {
+    -fx-background-color: #2f4f4f;
+}
+
 .slateGray,
 .split-pane:vertical > .split-pane-divider,
 .split-pane:horizontal > .split-pane-divider {
@@ -62,11 +66,65 @@
 .scroll-bar:vertical .thumb {
     -fx-background-color: #2f4f4f;
     -fx-border-width: 1 1 1 1;
-        -fx-border-color: white;
+    -fx-border-color: white;
 }
 
-.label {
+.label,
+.table-view .column-header .label,
+.check-box,
+.chart-legend,
+.axis-label{
     -fx-text-fill: white;
+}
+
+.chart-legend .label {
+    -fx-text-fill: black;
+}
+
+.axis {
+    -fx-tick-label-fill: white;
+}
+
+.axis-tick-mark {
+    -fx-stroke: white;
+    -fx-stroke-width: 3;
+}
+
+.table-view {
+    -fx-background-color: #2f4f4f;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: white;
+}
+
+.table-row-cell{
+    -fx-background-color: #2f4f4f;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+.table-row-cell:odd{
+    -fx-background-color: #708090;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+
+.table-view .column-header .label,
+.menu-item {
+    -fx-font-weight: bold;
+    -fx-background-color: #708090;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: white;
+}
+
+#toolBarTop,
+#menMain {
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: white;
 }
 
 .darkSlateGray {

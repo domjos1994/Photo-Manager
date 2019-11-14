@@ -6,6 +6,7 @@ import de.domjos.photo_manager.services.MapTask;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -15,9 +16,12 @@ public class MapController implements Initializable {
 
 
     private @FXML GoogleMapView gvMap;
+    private @FXML Button cmdMapHome;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        this.cmdMapHome.setOnAction(actionEvent -> mainController.back());
     }
 
     void init() {
