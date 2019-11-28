@@ -40,6 +40,10 @@
      -fx-text-fill: white;
 }
 
+.list-cell:filled:selected {
+    -fx-background-color: #708090;
+}
+
 .list-view, .tree-view {
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;

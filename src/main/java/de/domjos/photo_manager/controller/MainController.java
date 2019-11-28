@@ -749,6 +749,8 @@ public class MainController implements Initializable {
         value.setCellValueFactory(new PropertyValueFactory<>("stringValue"));
         this.tblMainImageHistory.getColumns().add(changeType);
         this.tblMainImageHistory.getColumns().add(value);
+
+        this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     void initTinify() {
