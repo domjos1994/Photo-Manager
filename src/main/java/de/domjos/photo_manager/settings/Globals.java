@@ -36,6 +36,11 @@ public class Globals {
     public final static String UNSPLASH_KEY = "UNSPLASH_KEY";
     public final static String UNSPLASH_SECRET_KEY = "UNSPLASH_SECRET_KEY";
 
+    // Keys of Split-Pane-Positions
+    public final static String POSITION_DIRECTORIES = "POSITION_DIRECTORIES";
+    public final static String POSITION_IMAGES = "POSITION_IMAGES";
+    public final static String POSITION_IMAGE = "POSITION_IMAGE";
+
     public Globals() {
         this.debugMode = false;
         this.stage = null;

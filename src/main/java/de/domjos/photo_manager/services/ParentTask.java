@@ -15,9 +15,15 @@ public abstract class ParentTask<T> extends Task<T> {
         this.exceptionProperty().addListener((observable, oldValue, newValue) -> Dialogs.printException(newValue));
 
         if(progressBar!=null) {
+            if(progressBar.progressProperty().isBound()) {
+                progressBar.progressProperty().unbind();
+            }
             progressBar.progressProperty().bind(this.progressProperty());
         }
         if(messages!=null) {
+            if(messages.textProperty().isBound()) {
+                messages.textProperty().unbind();
+            }
             messages.textProperty().bind(this.messageProperty());
         }
 
@@ -26,10 +32,14 @@ public abstract class ParentTask<T> extends Task<T> {
                 this.onFinish.run();
             }
             if(progressBar!=null) {
-                progressBar.progressProperty().unbind();
+                if(progressBar.progressProperty().isBound()) {
+                    progressBar.progressProperty().unbind();
+                }
             }
             if(messages!=null) {
-                messages.textProperty().unbind();
+                if(messages.textProperty().isBound()) {
+                    messages.textProperty().unbind();
+                }
             }
             PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
         }));
@@ -39,13 +49,18 @@ public abstract class ParentTask<T> extends Task<T> {
                 this.onFailed.run();
             }
             if(progressBar!=null) {
-                progressBar.progressProperty().unbind();
+                if(progressBar.progressProperty().isBound()) {
+                    progressBar.progressProperty().unbind();
+                }
             }
             if(messages!=null) {
-                messages.textProperty().unbind();
+                if(messages.textProperty().isBound()) {
+                    messages.textProperty().unbind();
+                }
             }
             PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
         }));
+        this.setOnCancelled(this.getOnFailed());
     }
 
     public T call() throws Exception {

@@ -12,22 +12,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class MapTask extends ParentTask<List<Image>> {
+    private Directory directory;
 
-    public MapTask(ProgressBar progressBar, Label messages) {
+    public MapTask(ProgressBar progressBar, Label messages, Directory directory) {
         super(progressBar, messages);
+        this.directory = directory;
     }
 
     @Override
     List<Image> runBody() throws Exception {
         List<Image> allImages = new LinkedList<>();
-        List<Image> images = this.getAllImages(null, new LinkedList<>());
+        List<Image> images = this.getAllImages(this.directory, new LinkedList<>());
         this.updateProgress(0, images.size());
 
         for(int i = 0; i<=images.size()-1; i++) {
             MetaData metaData = ImageHelper.readMetaData(images.get(i).getPath());
 
             if(metaData.getLongitude()!=0 && metaData.getLongitude()!=0) {
-               allImages.add(images.get(0));
+               allImages.add(images.get(i));
             }
 
             this.updateProgress(i+1, images.size());
@@ -45,7 +47,7 @@ public final class MapTask extends ParentTask<List<Image>> {
             images = this.getAllImages(child, images);
         }
 
-        images.addAll(directory.getImages());
+        images.addAll(PhotoManager.GLOBALS.getDatabase().getImages(directory, false));
         return images;
     }
 }

@@ -12,6 +12,11 @@ import java.util.ResourceBundle;
 public class PhotoManager extends Application {
     public static final Globals GLOBALS = new Globals();
 
+    static {
+        System.setProperty("javafx.platform" , "Desktop");
+        System.setProperty("http.agent", "Mozilla/5.0");
+    }
+
     public void start(Stage primaryStage) throws Exception {
         // initialize basic properties
         PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));

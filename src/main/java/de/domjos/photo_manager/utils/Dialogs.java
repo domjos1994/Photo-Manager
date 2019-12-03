@@ -2,6 +2,7 @@ package de.domjos.photo_manager.utils;
 
 import de.domjos.photo_manager.PhotoManager;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -142,5 +143,154 @@ public final class Dialogs {
             }
         }
         return files;
+    }
+
+    public static Dialog<AssembleResult> createAssembleDialog() {
+        Dialog<AssembleResult> dialog = new Dialog<>();
+        dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.together.size"));
+        ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+
+        TextField width = new TextField();
+        width.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.width"));
+        TextField height = new TextField();
+        height.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.height"));
+
+        Label label = new Label();
+        label.setText(PhotoManager.GLOBALS.getLanguage().getString("settings.tiny.file"));
+        TextField name = new TextField();
+
+        CheckBox chkResizeImages = new CheckBox();
+        chkResizeImages.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.together.resize"));
+        TextField resizedHeight = new TextField();
+        resizedHeight.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.height"));
+        resizedHeight.setDisable(true);
+
+        CheckBox chkResizeFit = new CheckBox();
+        chkResizeFit.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.together.fit"));
+
+        chkResizeImages.selectedProperty().addListener(observable -> {
+            boolean selected = chkResizeImages.isSelected();
+
+            if(selected) {
+                chkResizeFit.setSelected(false);
+            }
+            resizedHeight.setDisable(!selected);
+            chkResizeFit.setDisable(selected);
+        });
+
+        chkResizeFit.selectedProperty().addListener(observable -> {
+            boolean selected = chkResizeFit.isSelected();
+            if(selected) {
+                resizedHeight.setText("");
+                resizedHeight.setDisable(true);
+            } else {
+                resizedHeight.setDisable(!chkResizeImages.isSelected());
+            }
+            chkResizeImages.setDisable(selected);
+        });
+
+        dialog.getDialogPane().setContent(
+            Dialogs.addControls(
+                Arrays.asList(
+                    Arrays.asList(width, height),
+                    Arrays.asList(label, name),
+                    Arrays.asList(chkResizeImages, resizedHeight),
+                    Collections.singletonList(chkResizeFit)
+                )
+            )
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loginButtonType) {
+                try {
+                    AssembleResult assembleResult = new AssembleResult();
+                    assembleResult.width = Integer.parseInt(width.getText());
+                    assembleResult.height = Integer.parseInt(height.getText());
+                    assembleResult.name = name.getText();
+                    assembleResult.scaledHeight = 0;
+
+                    if(chkResizeImages.isSelected()) {
+                        if(!resizedHeight.getText().trim().isEmpty()) {
+                            assembleResult.scaledHeight = Integer.parseInt(resizedHeight.getText());
+                        }
+                    } else {
+                        if(chkResizeFit.isSelected()) {
+                            assembleResult.scaledHeight = -1;
+                        }
+                    }
+                    return assembleResult;
+                } catch (Exception ignored) {}
+            }
+            return null;
+        });
+        return dialog;
+    }
+
+    public static Dialog<ResizeResult> createResizeDialog() {
+        Dialog<ResizeResult> dialog = new Dialog<>();
+        dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.resize"));
+
+        ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        TextField width = new TextField();
+        width.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.width"));
+        TextField height = new TextField();
+        height.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.height"));
+
+        dialog.getDialogPane().setContent(
+            Dialogs.addControls(
+                Collections.singletonList(
+                    Arrays.asList(width, height)
+                )
+            )
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if(dialogButton == loginButtonType) {
+                ResizeResult resizeResult = new ResizeResult();
+                resizeResult.width = -1;
+                resizeResult.height = -1;
+                try {
+                    if(!width.getText().trim().isEmpty()) {
+                        resizeResult.width = Integer.parseInt(width.getText());
+                    }
+                } catch (Exception ignored) {}
+                try {
+                    if(!height.getText().trim().isEmpty()) {
+                        resizeResult.height = Integer.parseInt(height.getText());
+                    }
+                } catch (Exception ignored) {}
+                return resizeResult;
+            }
+            return null;
+        });
+
+        return dialog;
+    }
+
+    private static GridPane addControls(List<List<Control>> controls) {
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(20, 150, 10, 10));
+
+        for(int i = 0; i<=controls.size()-1; i++) {
+            for(int j = 0; j<=controls.get(i).size()-1; j++) {
+                gridPane.add(controls.get(i).get(j), j, i);
+            }
+        }
+        return gridPane;
+    }
+
+    public static class AssembleResult {
+        public int width, height, scaledHeight;
+        public String name;
+    }
+
+    public static class ResizeResult {
+        public int width, height;
     }
 }

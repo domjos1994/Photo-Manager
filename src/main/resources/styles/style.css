@@ -40,7 +40,8 @@
      -fx-text-fill: white;
 }
 
-.list-cell:filled:selected {
+.list-cell:filled:selected,
+.tree-cell:selected {
     -fx-background-color: #708090;
 }
 

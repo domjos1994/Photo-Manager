@@ -38,18 +38,6 @@ public class ImageHelper {
         };
     }
 
-    private static ImageReader getImageReader(String path) {
-        for(String extension : ImageHelper.EXTENSIONS) {
-            if(path.endsWith(extension)) {
-                Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByFormatName(extension);
-                if ( imageReaders.hasNext() ) {
-                    return imageReaders.next();
-                }
-            }
-        }
-        return null;
-    }
-
     public static BufferedImage getImage(String path) throws Exception {
         ImageReader imageReader = ImageHelper.getImageReader(path);
         if(imageReader!=null) {
@@ -59,6 +47,10 @@ public class ImageHelper {
             return imageReader.read(0, param);
         }
         return null;
+    }
+
+    public static BufferedImage createImage(int width, int height) {
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     }
 
     public static BufferedImage scale(BufferedImage imageToScale, int dWidth, int dHeight) {
@@ -234,9 +226,9 @@ public class ImageHelper {
 
     public static BufferedImage deepCopy(BufferedImage bi) {
         ColorModel cm = bi.getColorModel();
-        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        boolean isAlphaPreMultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = bi.copyData(null);
-        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+        return new BufferedImage(cm, raster, isAlphaPreMultiplied, null);
     }
 
     public static BufferedImage addWaterMark(BufferedImage bufferedImage, String text) {
@@ -276,6 +268,28 @@ public class ImageHelper {
         }
     }
 
+    public static BufferedImage addFilter(BufferedImage bufferedImage, Filter.Type type) {
+        Filter filter;
+        switch (type) {
+            case ColorFilter:
+                filter = new ColorFilter();
+                break;
+            case InvertFilter:
+                filter = new InvertFilter();
+                break;
+            case SharpenFilter:
+                filter = new SharpenFilter();
+                break;
+            case BlurFilter:
+                filter = new BlurFilter();
+                break;
+            default:
+                filter = null;
+                break;
+        }
+        return filter.processImage(bufferedImage);
+    }
+
     public static void save(String path, String save, BufferedImage bufferedImage) throws Exception {
         ImageInputStream iis = ImageIO.createImageInputStream(new File(path));
         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(iis);
@@ -284,16 +298,28 @@ public class ImageHelper {
             ImageReader reader = imageReaders.next();
             ImageWriter imageWriter = ImageIO.getImageWriter(reader);
             imageWriter.setOutput(new FileImageOutputStream(new File(save)));
-            bufferedImage = ImageHelper.convertColorspace(bufferedImage, BufferedImage.TYPE_INT_RGB);
+            bufferedImage = ImageHelper.convertColorSpace(bufferedImage);
             imageWriter.write(bufferedImage);
         }
     }
 
-    private static BufferedImage convertColorspace(BufferedImage image, int newType) throws Exception {
+    private static ImageReader getImageReader(String path) {
+        for(String extension : ImageHelper.EXTENSIONS) {
+            if(path.endsWith(extension)) {
+                Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByFormatName(extension);
+                if ( imageReaders.hasNext() ) {
+                    return imageReaders.next();
+                }
+            }
+        }
+        return null;
+    }
+
+    private static BufferedImage convertColorSpace(BufferedImage image) {
         BufferedImage raw_image = image;
-        image = new BufferedImage(raw_image.getWidth(), raw_image.getHeight(), newType);
-        ColorConvertOp xformOp = new ColorConvertOp(null);
-        xformOp.filter(raw_image, image);
+        image = new BufferedImage(raw_image.getWidth(), raw_image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        ColorConvertOp xFormOp = new ColorConvertOp(null);
+        xFormOp.filter(raw_image, image);
         return image;
     }
 
@@ -338,5 +364,59 @@ public class ImageHelper {
 
     private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
         return bufferedImage.getColorModel().hasAlpha();
+    }
+
+    public interface Filter {
+        BufferedImage processImage(BufferedImage image);
+
+        enum Type {
+            ColorFilter,
+            InvertFilter,
+            SharpenFilter,
+            BlurFilter
+        }
+    }
+
+    private static class ColorFilter implements Filter {
+        public BufferedImage processImage(BufferedImage image) {
+            float[][] colorMatrix = { { 1f, 0f, 0f }, { 0.5f, 1.0f, 0.5f }, { 0.2f, 0.4f, 0.6f } };
+            BandCombineOp changeColors = new BandCombineOp(colorMatrix, null);
+            Raster sourceRaster = image.getRaster();
+            WritableRaster displayRaster = sourceRaster.createCompatibleWritableRaster();
+            changeColors.filter(sourceRaster, displayRaster);
+            return new BufferedImage(image.getColorModel(), displayRaster, true, null);
+        }
+    }
+
+    private static class InvertFilter implements Filter {
+        public BufferedImage processImage(BufferedImage image) {
+            byte[] invertArray = new byte[256];
+
+            for (int counter = 0; counter < 256; counter++)
+                invertArray[counter] = (byte) (255 - counter);
+
+            BufferedImageOp invertFilter = new LookupOp(new ByteLookupTable(0, invertArray), null);
+            return invertFilter.filter(image, null);
+
+        }
+    }
+
+    private static class SharpenFilter implements Filter {
+        public BufferedImage processImage(BufferedImage image) {
+            float[] sharpenMatrix = { 0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f };
+            BufferedImageOp sharpenFilter = new ConvolveOp(new Kernel(3, 3, sharpenMatrix),
+                    ConvolveOp.EDGE_NO_OP, null);
+            return sharpenFilter.filter(image, null);
+        }
+    }
+
+    private static class BlurFilter implements Filter {
+        public BufferedImage processImage(BufferedImage image) {
+            float[] blurMatrix = { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f,
+                    1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
+            BufferedImageOp blurFilter = new ConvolveOp(new Kernel(3, 3, blurMatrix),
+                    ConvolveOp.EDGE_NO_OP, null);
+            return blurFilter.filter(image, null);
+        }
     }
 }

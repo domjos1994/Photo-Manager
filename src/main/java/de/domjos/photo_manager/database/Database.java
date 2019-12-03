@@ -134,6 +134,12 @@ public class Database {
         this.executeUpdate("DELETE FROM directories WHERE id=" + directory.getId());
     }
 
+    public void deleteImage(Image image) throws Exception {
+        this.executeUpdate("DELETE FROM images WHERE ID=" + image.getId());
+        this.executeUpdate("DELETE FROM images_tags WHERE image=" + image.getId());
+        this.executeUpdate("DELETE FROM images_edited WHERE image=" + image.getId());
+    }
+
     public void addRoot() throws Exception {
         boolean exists = false;
         PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories WHERE isRoot=1");

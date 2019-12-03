@@ -10,7 +10,9 @@ module PhotoManager {
     requires javafx.web;
     requires javafx.graphics;
 
-    requires GMapsFX;
+    requires com.gluonhq.maps;
+    requires com.gluonhq.attach.storage;
+    requires com.gluonhq.attach.util;
     requires org.controlsfx.controls;
     requires sqlite.jdbc;
 

@@ -66,22 +66,33 @@
         </license>
     </licenses>
 
+    <repositories>
+        <repository>
+            <id>1</id>
+            <name>GluonHQ</name>
+            <url>http://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- JavaFX - Dependencies -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${jfx.version}</version>
+            <classifier>win</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${jfx.version}</version>
+            <classifier>win</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <version>${jfx.version}</version>
+            <classifier>win</classifier>
         </dependency>
 
         <!-- extended components -->
@@ -91,9 +102,20 @@
             <version>${cfx.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.lynden</groupId>
-            <artifactId>GMapsFX</artifactId>
-            <version>2.12.0</version>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>util</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>storage</artifactId>
+            <version>4.0.2</version>
+            <classifier>desktop</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq</groupId>
+            <artifactId>maps</artifactId>
+            <version>2.0.0-ea+1</version>
         </dependency>
 
         <!-- Database - Dependencies -->
@@ -228,6 +250,25 @@
                                 </transformer>
                             </transformers>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>BuildSetup</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/createSetup.bat"  failonerror="false"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

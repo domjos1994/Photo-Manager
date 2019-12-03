@@ -1,8 +1,8 @@
 package de.domjos.photo_manager.controller;
 
 import com.github.sardine.DavResource;
-import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.gluonhq.maps.MapPoint;
+import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
@@ -42,11 +42,15 @@ import java.net.URL;
 import java.util.*;
 
 public class MainController implements Initializable {
+    private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
+
     private @FXML TabPane tbpMain;
     private @FXML Tab tbMain, tbSettings, tbMap, tbSlideshow, tbHelp;
     private @FXML MenuItem menMainSettings, menMainClose, menMainMap, menMainHelp;
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow;
-    private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs;
+
+    private @FXML ContextMenu ctxMainImage;
+    private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs, ctxMainImageAssemble, ctxMainImageScale;
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
@@ -75,7 +79,7 @@ public class MainController implements Initializable {
     private @FXML TextField txtMainMetaDataDPIX, txtMainMetaDataDPIY, txtMainMetaDataPXX, txtMainMetaDataPXY;
     private @FXML TextField txtMainMetaDataISO, txtMainMetaDataAperture, txtMainMetaDataExposureTime;
     private @FXML TextField txtMainMetaDataSoftware, txtMainMetaDataCamera;
-    private @FXML GoogleMapView gvMainMetaDataLocation;
+    private @FXML MapView gvMainMetaDataLocation;
 
     private @FXML TextField txtMainCloudPath;
     private @FXML TreeView<DavItem> tvMainCloudDirectories;
@@ -126,6 +130,7 @@ public class MainController implements Initializable {
         this.initListView();
         this.fillTemplates();
         this.pnlMainImageUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
+        this.loadSplitPanePositions();
 
         PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
             if(importTask!=null) {
@@ -187,6 +192,11 @@ public class MainController implements Initializable {
         this.lvMain.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 if(newValue !=null) {
+                    if(this.lblMessages.textProperty().isBound()) {
+                        this.lblMessages.textProperty().unbind();
+                    }
+                    this.lblMessages.setText(String.format(resources.getString("main.image.selected"), this.lvMain.getSelectionModel().getSelectedItems().size(), this.lvMain.getItems().size()));
+
                     File img = new File(newValue.getPath());
                     if(img.exists()) {
                         this.fillImage(new javafx.scene.image.Image(new FileInputStream(img)));
@@ -209,6 +219,11 @@ public class MainController implements Initializable {
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
+        });
+
+        this.ctxMainImage.setOnShowing(event -> {
+            this.ctxMainImageAssemble.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
+            this.ctxMainImageScale.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
         });
 
         this.ctxMainImageApply.setOnAction(event -> {
@@ -260,6 +275,39 @@ public class MainController implements Initializable {
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
+        });
+
+        this.ctxMainImageAssemble.setOnAction(event -> {
+            Dialog<Dialogs.AssembleResult> dialog = Dialogs.createAssembleDialog();
+            Optional<Dialogs.AssembleResult> result = dialog.showAndWait();
+            result.ifPresent(assembleResult -> {
+                this.lvMain.getScene().setCursor(Cursor.WAIT);
+
+                Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                List<Image> images = this.lvMain.getSelectionModel().getSelectedItems();
+
+                CreateAssembledImage createAssembledImage = new CreateAssembledImage(this.pbMain, this.lblMessages, assembleResult, directory, images);
+                createAssembledImage.onFinish(() -> fillImageList(directory));
+                new Thread(createAssembledImage).start();
+            });
+        });
+
+        this.ctxMainImageScale.setOnAction(event -> {
+            Dialog<Dialogs.ResizeResult> dialog = Dialogs.createResizeDialog();
+            Optional<Dialogs.ResizeResult> result = dialog.showAndWait();
+            result.ifPresent(resizeResult -> {
+                int width = resizeResult.width;
+                int height = resizeResult.height;
+
+                this.lvMain.getScene().setCursor(Cursor.WAIT);
+
+                Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                List<Image> images = this.lvMain.getSelectionModel().getSelectedItems();
+
+                ScaleImages scaleImages = new ScaleImages(this.pbMain, this.lblMessages, width, height, directory, images);
+                scaleImages.onFinish(()->fillImageList(directory));
+                new Thread(scaleImages).start();
+            });
         });
 
         this.slMainImageZoom.valueProperty().addListener((observable, oldValue, newValue) -> this.lblMainImageZoom.setText(newValue.intValue() + " %"));
@@ -694,11 +742,19 @@ public class MainController implements Initializable {
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
         this.menMainMap.setOnAction(event -> {
-            this.mapController.init();
             this.tbpMain.getSelectionModel().select(this.tbMap);
+            if(this.tvMain.getSelectionModel().isEmpty()) {
+                this.mapController.initMap(null);
+            } else {
+                this.mapController.initMap(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+            }
         });
         this.menMainHelp.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbHelp));
         this.menMainClose.setOnAction(event -> Platform.exit());
+
+        this.splPaneDirectories.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
+        this.splPaneImages.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
+        this.splPaneImage.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
     }
 
     void back() {
@@ -872,6 +928,11 @@ public class MainController implements Initializable {
             if(directory!=null) {
                 this.lvMain.getItems().clear();
                 for(Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
+                    if(!new File(image.getPath()).exists()) {
+                        PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+                        continue;
+                    }
+
                     boolean foundItem = true;
                     if(!search.isEmpty()) {
                         foundItem = false;
@@ -916,7 +977,7 @@ public class MainController implements Initializable {
            if(metaData.getLatitude()!=0 && metaData.getLongitude()!=0) {
                this.gvMainMetaDataLocation.setVisible(true);
 
-               MapHelper mapHelper = new MapHelper(this.gvMainMetaDataLocation, new LatLong(metaData.getLatitude(), metaData.getLongitude()));
+               MapHelper mapHelper = new MapHelper(this.gvMainMetaDataLocation, new MapPoint(metaData.getLatitude(), metaData.getLongitude()));
                mapHelper.init(Collections.singletonList(image));
            } else {
                this.gvMainMetaDataLocation.setVisible(false);
@@ -1191,5 +1252,17 @@ public class MainController implements Initializable {
         this.lvMain.getItems().set(index, image);
         this.lvMain.getSelectionModel().clearSelection();
         this.lvMain.getSelectionModel().select(index);
+    }
+
+    private void saveSplitPanePositions() {
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0], false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0], false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0], false);
+    }
+
+    private void loadSplitPanePositions() {
+        this.splPaneDirectories.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0]));
+        this.splPaneImages.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0]));
+        this.splPaneImage.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0]));
     }
 }

@@ -1,39 +1,66 @@
 package de.domjos.photo_manager.helper;
 
-import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.javascript.object.*;
+import com.gluonhq.maps.MapLayer;
+import com.gluonhq.maps.MapPoint;
+import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.MetaData;
-import org.apache.commons.io.FileUtils;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.image.ImageView;
+import javafx.util.Pair;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import static com.lynden.gmapsfx.javascript.object.MapTypeIdEnum.SATELLITE;
-
 public class MapHelper {
-    private GoogleMap map;
+    private MapView mapView;
 
-    public MapHelper(GoogleMapView mapView, LatLong center) {
-        MapOptions mapOptions = new MapOptions();
+    public MapHelper(MapView mapView, MapPoint center) {
         if(center!=null) {
-            mapOptions.center(center);
+            mapView.setCenter(center);
         }
-        mapOptions.mapType(SATELLITE).zoom(12);
-        this.map = mapView.createMap(mapOptions);
-        mapView.getWebview().setContextMenuEnabled(true);
+        this.mapView = mapView;
     }
 
     public void init(List<Image> images) throws Exception {
+        PoiLayer poiLayer = new PoiLayer();
+
         for(Image image : images) {
             MetaData metaData = ImageHelper.readMetaData(image.getPath());
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(new LatLong(metaData.getLatitude(), metaData.getLongitude()));
-            File file = File.createTempFile(image.getPath(), image.getTitle());
-            FileUtils.writeByteArrayToFile(file, image.getThumbnail());
-            markerOptions.icon(file.getAbsolutePath());
-            markerOptions.title(image.getTitle());
-            this.map.addMarker(new Marker(markerOptions));
+            MapPoint mapPoint = new MapPoint(metaData.getLatitude(), metaData.getLongitude());
+            ImageView imageView = new ImageView();
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(image.getThumbnail());
+            imageView.setImage(new javafx.scene.image.Image(byteArrayInputStream));
+            byteArrayInputStream.close();
+            poiLayer.addPoint(mapPoint, imageView);
+        }
+        this.mapView.addLayer(poiLayer);
+    }
+
+    public static class PoiLayer extends MapLayer {
+        private final ObservableList<Pair<MapPoint, Node>> points = FXCollections.observableArrayList();
+
+        public PoiLayer() {}
+
+        public void addPoint(MapPoint p, Node icon) {
+            this.points.add(new Pair<>(p, icon));
+            this.getChildren().add(icon);
+            this.markDirty();
+        }
+
+        @Override
+        protected void layoutLayer() {
+            for (Pair<MapPoint, Node> candidate : this.points) {
+                MapPoint point = candidate.getKey();
+                Node icon = candidate.getValue();
+                Point2D mapPoint = getMapPoint(point.getLatitude(), point.getLongitude());
+                icon.setVisible(true);
+                icon.setTranslateX(mapPoint.getX());
+                icon.setTranslateY(mapPoint.getY());
+            }
         }
     }
 }
