@@ -24,9 +24,19 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Iterator;
 
+/**
+ * Class which contains helper and useful functions
+ * for the images!
+ * @author Dominic Joas
+ * @version 0.1
+ */
 public class ImageHelper {
     private final static String[] EXTENSIONS = new String[]{"gif", "png", "bmp", "PNG", "jpg", "jpeg", "JPG"};
 
+    /**
+     * Returns Supported Image-Extension-Filters
+     * @return FileNameFilter
+     */
     public static FilenameFilter getFilter() {
         return  (dir, name) -> {
             for (final String ext : ImageHelper.EXTENSIONS) {
@@ -379,7 +389,7 @@ public class ImageHelper {
 
     private static class ColorFilter implements Filter {
         public BufferedImage processImage(BufferedImage image) {
-            float[][] colorMatrix = { { 1f, 0f, 0f }, { 0.5f, 1.0f, 0.5f }, { 0.2f, 0.4f, 0.6f } };
+            float[][] colorMatrix = { { 1f, 0f, 0f, 1f }, { 0.5f, 1.0f, 0.5f, 1f }, { 0.2f, 0.4f, 0.6f, 1f }, {1f, 1f, 1f, 1f}};
             BandCombineOp changeColors = new BandCombineOp(colorMatrix, null);
             Raster sourceRaster = image.getRaster();
             WritableRaster displayRaster = sourceRaster.createCompatibleWritableRaster();

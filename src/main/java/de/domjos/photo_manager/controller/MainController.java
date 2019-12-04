@@ -31,6 +31,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -102,6 +103,7 @@ public class MainController implements Initializable {
     private @FXML TextField txtMainResizeHeight;
     private @FXML Button cmdMainImageEditSave;
     private @FXML TableView<TemporaryEdited> tblMainImageHistory;
+    private @FXML ComboBox<String> cmbMainFilter;
 
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
@@ -252,8 +254,7 @@ public class MainController implements Initializable {
 
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
                     File f = new File(image.getPath());
-                    String[] spl = f.getName().split("\\.");
-                    String extension = spl[spl.length - 1];
+                    String extension = FilenameUtils.getExtension(image.getPath());
                     int index = this.lvMain.getSelectionModel().getSelectedIndex();
 
                     FileChooser fileChooser = new FileChooser();
@@ -265,11 +266,11 @@ public class MainController implements Initializable {
                     fileChooser.setSelectedExtensionFilter(extensionFilter);
                     File file = fileChooser.showSaveDialog(null);
 
-                    if(file!=null) {
-                        image.setId(0);
+                    if(file != null) {
                         image.setTitle(file.getName());
-                        this.saveFile(file, image, index, false);
-                        this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                        image.setPath(file.getAbsolutePath());
+                        image.setId(0);
+                        this.saveFile(file, image, index, true);
                     }
                 }
             } catch (Exception ex) {
@@ -431,6 +432,7 @@ public class MainController implements Initializable {
         this.txtMainWatermark.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
         this.txtMainResizeHeight.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
         this.txtMainResizeWidth.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
+        this.cmbMainFilter.getSelectionModel().selectedItemProperty().addListener(((observableValue, s, t1) -> this.ivMainPreview.setImage(this.editImage())));
 
         this.tblMainImageHistory.getSelectionModel().selectedItemProperty().addListener((observableValue, temporaryEdited, t1) -> {
             if(!this.tblMainImageHistory.getSelectionModel().isEmpty()) {
@@ -476,6 +478,12 @@ public class MainController implements Initializable {
                         TemporaryEdited temporaryEdited = new TemporaryEdited();
                         temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Resize);
                         temporaryEdited.setStringValue("W:" + this.txtMainResizeWidth.getText().trim() + ";H:" + this.txtMainResizeHeight.getText().trim());
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
+                    }
+                    if(!this.cmbMainFilter.getSelectionModel().isEmpty()) {
+                        TemporaryEdited temporaryEdited = new TemporaryEdited();
+                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Filter);
+                        temporaryEdited.setStringValue(this.cmbMainFilter.getSelectionModel().getSelectedItem());
                         PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
                     }
 
@@ -558,6 +566,7 @@ public class MainController implements Initializable {
                 template.getPreferences().put(Template.Preference.BRIGHTNESS.toString(), String.valueOf(this.slMainBrightness.getValue()));
                 template.getPreferences().put(Template.Preference.SATURATION.toString(), String.valueOf(this.slMainSaturation.getValue()));
                 template.getPreferences().put(Template.Preference.Rotation.toString(), String.valueOf(this.slMainRotate.getValue()));
+                template.getPreferences().put(Template.Preference.Filter.toString(), this.cmbMainFilter.getSelectionModel().getSelectedItem());
                 PhotoManager.GLOBALS.getDatabase().insertOrUpdateTemplate(template);
                 this.fillTemplates();
             } catch (Exception ex) {
@@ -586,6 +595,7 @@ public class MainController implements Initializable {
                         this.txtMainWatermark.setText("");
                         this.txtMainResizeWidth.setText(String.valueOf(this.cache.getOriginal().getWidth()));
                         this.txtMainResizeHeight.setText(String.valueOf(this.cache.getOriginal().getHeight()));
+                        this.cmbMainFilter.getSelectionModel().clearSelection();
                     } else {
                         List<Template> templates = PhotoManager.GLOBALS.getDatabase().getTemplates("name='" + newValue + "'");
                         if(!templates.isEmpty()) {
@@ -596,6 +606,7 @@ public class MainController implements Initializable {
                             this.slMainSaturation.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.SATURATION.toString(), "100.0")));
                             this.slMainRotate.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.Rotation.toString(), "0.0")));
                             this.txtMainWatermark.setText(template.getPreferences().getOrDefault(Template.Preference.Watermark.toString(), ""));
+                            this.cmbMainFilter.getSelectionModel().select(template.getPreferences().getOrDefault(Template.Preference.Filter.toString(), ""));
 
                             String resize = template.getPreferences().getOrDefault(Template.Preference.Resize.toString(), "");
                             if(!resize.isEmpty()) {
@@ -807,6 +818,16 @@ public class MainController implements Initializable {
         this.tblMainImageHistory.getColumns().add(value);
 
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        this.reloadFilter();
+    }
+
+    private void reloadFilter() {
+        this.cmbMainFilter.getItems().clear();
+
+        for(ImageHelper.Filter.Type type : ImageHelper.Filter.Type.values()) {
+            String name = type.name().trim().toLowerCase().replace("filter", "");
+            this.cmbMainFilter.getItems().add(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.filter." + name));
+        }
     }
 
     void initTinify() {
@@ -912,9 +933,35 @@ public class MainController implements Initializable {
             if(this.chkMainResize.isSelected()) {
                 this.cache.setPreviewImage(ImageHelper.resize(this.cache.getOriginalPreview(), this.cache.getOriginal(), (int) Double.parseDouble(strWidth), (int) Double.parseDouble(strHeight)));
             }
+            if(!this.cmbMainFilter.getSelectionModel().isEmpty()) {
+                String selectedFilter = this.cmbMainFilter.getSelectionModel().getSelectedItem();
+                ImageHelper.Filter.Type type = this.getFilterTypeBySelectedItem(selectedFilter);
+                if(type!=null) {
+                    this.cache.setPreviewImage(ImageHelper.addFilter(this.cache.getPreviewImage(), type));
+                }
+            }
             return SwingFXUtils.toFXImage(this.cache.getPreviewImage(), null);
         }
 
+        return null;
+    }
+
+    private ImageHelper.Filter.Type getFilterTypeBySelectedItem(String item) {
+        ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
+        String keyPart = "main.image.edit.filter.";
+
+        if(item.equals(lang.getString(keyPart + "color"))) {
+            return ImageHelper.Filter.Type.ColorFilter;
+        }
+        if(item.equals(lang.getString(keyPart + "invert"))) {
+            return ImageHelper.Filter.Type.InvertFilter;
+        }
+        if(item.equals(lang.getString(keyPart + "sharpen"))) {
+            return ImageHelper.Filter.Type.SharpenFilter;
+        }
+        if(item.equals(lang.getString(keyPart + "blur"))) {
+            return ImageHelper.Filter.Type.BlurFilter;
+        }
         return null;
     }
 
@@ -1189,7 +1236,7 @@ public class MainController implements Initializable {
         BufferedImage bufferedImage = null;
         long id = this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId();
         int hue = 100, saturation = 100, brightness = 100, rotation = 0, width = 0, height = 0;
-        String watermark = "";
+        String watermark = "", filter = "";
 
         for(TemporaryEdited temp : this.tblMainImageHistory.getItems()) {
             if(temp.getChangeType()!=null) {
@@ -1209,6 +1256,9 @@ public class MainController implements Initializable {
                     case Watermark:
                         watermark = temp.getStringValue();
                         break;
+                    case Filter:
+                        filter = temp.getStringValue();
+                        break;
                 }
 
                 BufferedImage image = SwingFXUtils.fromFXImage(this.ivMainImage.getImage(), null);
@@ -1218,6 +1268,11 @@ public class MainController implements Initializable {
                 }
                 image = ImageHelper.resize(image, this.currentImage, width, height);
                 bufferedImage = ImageHelper.rotate(image, rotation);
+
+                ImageHelper.Filter.Type type = this.getFilterTypeBySelectedItem(filter);
+                if(type!=null) {
+                    bufferedImage = ImageHelper.addFilter(bufferedImage, type);
+                }
 
                 javafx.scene.image.Image img = SwingFXUtils.toFXImage(bufferedImage, null);
 

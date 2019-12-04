@@ -15,6 +15,7 @@ public class PhotoManager extends Application {
     static {
         System.setProperty("javafx.platform" , "Desktop");
         System.setProperty("http.agent", "Mozilla/5.0");
+        System.setProperty("nashorn.args", "--no-deprecation-warning");
     }
 
     public void start(Stage primaryStage) throws Exception {
@@ -52,6 +53,7 @@ public class PhotoManager extends Application {
                 if(PhotoManager.GLOBALS.isClose()) {
                     PhotoManager.GLOBALS.getDatabase().close();
                     Platform.exit();
+                    System.exit(0);
                 } else {
                     event.consume();
                 }

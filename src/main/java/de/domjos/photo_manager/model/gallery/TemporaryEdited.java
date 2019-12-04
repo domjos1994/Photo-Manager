@@ -55,6 +55,7 @@ public class TemporaryEdited {
         Brightness,
         Rotate,
         Resize,
-        Watermark
+        Watermark,
+        Filter
     }
 }

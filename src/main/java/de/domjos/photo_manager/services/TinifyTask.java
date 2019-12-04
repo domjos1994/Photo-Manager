@@ -91,7 +91,7 @@ public final class TinifyTask extends ParentTask<Void> {
         File originalFile = new File(path);
         String fileWithoutName = originalFile.getAbsolutePath().replace(originalFile.getName(), "");
         String[] name = originalFile.getName().split("\\.");
-        return fileWithoutName + PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, "").replace("[old]", name[0]) + "." + name[1];
+        return fileWithoutName + PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_FILE, "").replace("[old]", name[0]) + "." + name[1];
     }
 
     private void saveImage(String file, Image image) throws Exception {

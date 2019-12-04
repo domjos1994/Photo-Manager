@@ -43,7 +43,9 @@ public class MapHelper {
     public static class PoiLayer extends MapLayer {
         private final ObservableList<Pair<MapPoint, Node>> points = FXCollections.observableArrayList();
 
-        public PoiLayer() {}
+        public PoiLayer() {
+
+        }
 
         public void addPoint(MapPoint p, Node icon) {
             this.points.add(new Pair<>(p, icon));

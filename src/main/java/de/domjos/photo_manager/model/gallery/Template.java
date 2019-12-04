@@ -54,7 +54,8 @@ public class Template extends BaseObject {
         SATURATION,
         Rotation,
         Watermark,
-        Resize
+        Resize,
+        Filter
     }
 
     @Override

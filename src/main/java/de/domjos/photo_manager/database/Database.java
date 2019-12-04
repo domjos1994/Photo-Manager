@@ -302,7 +302,7 @@ public class Database {
             TemporaryEdited temporaryEdited = new TemporaryEdited();
             temporaryEdited.setId(resultSet.getLong("id"));
             temporaryEdited.setChangeType(changeType);
-            if(changeType != TemporaryEdited.ChangeType.Watermark && changeType != TemporaryEdited.ChangeType.Resize) {
+            if(changeType != TemporaryEdited.ChangeType.Watermark && changeType != TemporaryEdited.ChangeType.Resize && changeType != TemporaryEdited.ChangeType.Filter) {
                 temporaryEdited.setValue(resultSet.getDouble("value"));
             } else {
                 temporaryEdited.setStringValue(resultSet.getString("stringValue"));

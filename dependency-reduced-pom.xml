@@ -100,7 +100,7 @@
         <version>1.6</version>
         <executions>
           <execution>
-            <id>BuildSetup</id>
+            <id>BuildSetup-Linux</id>
             <phase>package</phase>
             <goals>
               <goal>run</goal>
@@ -109,6 +109,31 @@
               <target>
                 <exec />
               </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>Zip</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/assembly/zip.xml</descriptor>
+              </descriptors>
+              <archive>
+                <manifest>
+                  <mainClass>de.domjos.photo_manager.PhotoManager</mainClass>
+                </manifest>
+              </archive>
+              <workDirectory>${application.out}</workDirectory>
             </configuration>
           </execution>
         </executions>
