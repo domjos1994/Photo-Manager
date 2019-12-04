@@ -46,6 +46,7 @@ public final class Dialogs {
             Dialogs.printNotification(type, title, header);
         } else {
             Alert alert = new Alert(type);
+            Dialogs.setIcon(alert);
             alert.setTitle(title);
             alert.setHeaderText(header);
             alert.setContentText(content);
@@ -55,6 +56,7 @@ public final class Dialogs {
 
     public static boolean printConfirmDialog(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type, title, ButtonType.YES, ButtonType.NO);
+        Dialogs.setIcon(alert);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
@@ -68,6 +70,7 @@ public final class Dialogs {
             Dialogs.printNotification(Alert.AlertType.ERROR, "Unhandled " + ex.getClass().getName(), ex.toString());
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            Dialogs.setIcon(alert);
             alert.setTitle("Unhandled " + ex.getClass().getName());
             alert.setHeaderText(ex.getLocalizedMessage());
             alert.setContentText(ex.toString());
@@ -147,6 +150,7 @@ public final class Dialogs {
 
     public static Dialog<AssembleResult> createAssembleDialog() {
         Dialog<AssembleResult> dialog = new Dialog<>();
+        Dialogs.setIcon(dialog);
         dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.together.size"));
         ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
@@ -228,8 +232,14 @@ public final class Dialogs {
         return dialog;
     }
 
+    private static void setIcon(Dialog dialog) {
+        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(Dialogs.class.getResourceAsStream("/images/header.png")));
+    }
+
     public static Dialog<ResizeResult> createResizeDialog() {
         Dialog<ResizeResult> dialog = new Dialog<>();
+        Dialogs.setIcon(dialog);
         dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.resize"));
 
         ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
