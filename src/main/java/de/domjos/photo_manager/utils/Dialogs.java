@@ -234,7 +234,6 @@ public final class Dialogs {
 
     private static void setIcon(Dialog dialog) {
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        dialog.getDialogPane().getScene().getStylesheets().add(Dialogs.class.getResource("/styles/style.css").toExternalForm());
         stage.getIcons().add(new Image(Dialogs.class.getResourceAsStream("/images/header.png")));
     }
 

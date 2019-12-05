@@ -1,11 +1,10 @@
 package de.domjos.photo_manager.controller;
 
 import com.github.sardine.DavResource;
-import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.controller.mainController.Histogram;
 import de.domjos.photo_manager.helper.ImageHelper;
-import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
@@ -21,7 +20,6 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
@@ -72,15 +70,19 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainTemplate, cmdMainTemplateAdd, cmdMainTemplateDelete;
     private @FXML ComboBox<String> cmbMainTemplates;
 
+    // histogram
     private @FXML BarChart<String, Integer> bcMainHistogram;
     private @FXML CheckBox chkMainHistogram, chkMainHistogramRed, chkMainHistogramGreen, chkMainHistogramBlue;
+    private Histogram histogram;
 
+    // meta-data
     private @FXML TextField txtMainMetaDataDate;
     private @FXML TextField txtMainMetaDataLongitude, txtMainMetaDataLatitude;
     private @FXML TextField txtMainMetaDataDPIX, txtMainMetaDataDPIY, txtMainMetaDataPXX, txtMainMetaDataPXY;
     private @FXML TextField txtMainMetaDataISO, txtMainMetaDataAperture, txtMainMetaDataExposureTime;
     private @FXML TextField txtMainMetaDataSoftware, txtMainMetaDataCamera;
-    private @FXML MapView gvMainMetaDataLocation;
+    private @FXML MapView gvMainServicesLocation;
+    private de.domjos.photo_manager.controller.mainController.MetaData metaData;
 
     private @FXML TextField txtMainCloudPath;
     private @FXML TreeView<DavItem> tvMainCloudDirectories;
@@ -126,6 +128,7 @@ public class MainController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         this.initControllers();
+        this.initSubClasses();
         this.initBindings();
         this.initTinify();
         this.initTreeView();
@@ -206,9 +209,9 @@ public class MainController implements Initializable {
                         this.fillImage(new javafx.scene.image.Image(new ByteArrayInputStream(newValue.getThumbnail())));
                     }
 
+                    this.histogram.setImage(newValue);
+                    this.metaData.setImage(newValue);
                     this.reloadHistory(newValue.getId());
-                    this.fillBarChart();
-                    this.fillMetaData();
                     this.fillCategoryAndTags();
                     this.fillCloudWithDefault();
                     this.getCloudPath();
@@ -238,7 +241,7 @@ public class MainController implements Initializable {
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
                     int index = this.lvMain.getSelectionModel().getSelectedIndex();
 
-                    this.saveFile(new File(image.getPath()), image, index, true);
+                    this.saveFile(new File(image.getPath()), image, index);
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -270,7 +273,7 @@ public class MainController implements Initializable {
                         image.setTitle(file.getName());
                         image.setPath(file.getAbsolutePath());
                         image.setId(0);
-                        this.saveFile(file, image, index, true);
+                        this.saveFile(file, image, index);
                     }
                 }
             } catch (Exception ex) {
@@ -398,11 +401,6 @@ public class MainController implements Initializable {
                 Dialogs.printException(ex);
             }
         });
-
-        this.chkMainHistogram.selectedProperty().addListener((observable)-> this.fillBarChart());
-        this.chkMainHistogramRed.selectedProperty().addListener((observable)-> this.fillBarChart());
-        this.chkMainHistogramGreen.selectedProperty().addListener((observable)-> this.fillBarChart());
-        this.chkMainHistogramBlue.selectedProperty().addListener((observable)-> this.fillBarChart());
 
         this.cmdMainTinifyUpload.setOnAction(event -> {
             try {
@@ -648,6 +646,12 @@ public class MainController implements Initializable {
                     Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
                     if(!directory.isRoot()) {
                         PhotoManager.GLOBALS.getDatabase().deleteDirectory(directory);
+                        this.lvMain.getSelectionModel().clearSelection();
+                        this.lvMain.getItems().clear();
+                        this.ivMainImage.setImage(null);
+                        this.histogram.setImage(null);
+                        this.metaData.setImage(null);
+                        this.ivMainPreview.setImage(null);
                         this.initTreeView();
                     }
                 }
@@ -785,6 +789,20 @@ public class MainController implements Initializable {
         this.mapController.init(this);
         this.slideshowController.init(this);
         this.helpController.init(this);
+    }
+
+    private void initSubClasses() {
+        this.histogram = new Histogram(
+            this.bcMainHistogram, this.chkMainHistogram, this.chkMainHistogramRed,
+            this.chkMainHistogramGreen, this.chkMainHistogramBlue
+        );
+
+        this.metaData = new de.domjos.photo_manager.controller.mainController.MetaData(
+            this.txtMainMetaDataDate, this.txtMainMetaDataLongitude, this.txtMainMetaDataLatitude,
+            this.txtMainMetaDataDPIX, this.txtMainMetaDataDPIY, this.txtMainMetaDataPXX, this.txtMainMetaDataPXY,
+            this.txtMainMetaDataISO, this.txtMainMetaDataAperture, this.txtMainMetaDataExposureTime,
+            this.txtMainMetaDataSoftware, this.txtMainMetaDataCamera, this.gvMainServicesLocation
+        );
     }
 
     private void reloadHistory(long id) throws Exception {
@@ -1009,85 +1027,6 @@ public class MainController implements Initializable {
         }
     }
 
-    private void fillMetaData() {
-       try {
-           // image-date
-           Image image = this.lvMain.getSelectionModel().getSelectedItem();
-           MetaData metaData = ImageHelper.readMetaData(image.getPath());
-           if(metaData.getOriginal()!=null) {
-               this.txtMainMetaDataDate.setText(metaData.getOriginal());
-           }
-
-           // gps-data
-           this.txtMainMetaDataLongitude.setText(String.valueOf(metaData.getLongitude()));
-           this.txtMainMetaDataLatitude.setText(String.valueOf(metaData.getLatitude()));
-           if(metaData.getLatitude()!=0 && metaData.getLongitude()!=0) {
-               this.gvMainMetaDataLocation.setVisible(true);
-
-               MapHelper mapHelper = new MapHelper(this.gvMainMetaDataLocation, new MapPoint(metaData.getLatitude(), metaData.getLongitude()));
-               mapHelper.init(Collections.singletonList(image));
-           } else {
-               this.gvMainMetaDataLocation.setVisible(false);
-           }
-
-           // resolution-data
-           this.txtMainMetaDataDPIX.setText(String.valueOf(metaData.getXResolutionInDPI()));
-           this.txtMainMetaDataDPIY.setText(String.valueOf(metaData.getYResolutionInDPI()));
-           this.txtMainMetaDataPXX.setText(String.valueOf(metaData.getXResolutionInPX()));
-           this.txtMainMetaDataPXY.setText(String.valueOf(metaData.getYResolutionInPX()));
-
-           // exif-data
-           this.txtMainMetaDataISO.setText(String.valueOf(metaData.getIso()));
-           this.txtMainMetaDataAperture.setText(String.valueOf(metaData.getAperture()));
-           this.txtMainMetaDataExposureTime.setText(String.valueOf(metaData.getExposureTime()));
-           this.txtMainMetaDataSoftware.setText(metaData.getEditedWith());
-           this.txtMainMetaDataCamera.setText(metaData.getCamera());
-       } catch (Exception ex) {
-           Dialogs.printException(ex);
-       }
-    }
-
-    private void fillBarChart() {
-        try {
-            BufferedImage bufferedImage = ImageHelper.getImage(this.lvMain.getSelectionModel().getSelectedItem().getPath());
-            this.bcMainHistogram.getData().clear();
-
-            if(bufferedImage!=null) {
-                ResourceBundle ln = PhotoManager.GLOBALS.getLanguage();
-
-                Map<Integer, String> typeMap = new LinkedHashMap<>();
-                if(this.chkMainHistogram.isSelected()) {
-                    typeMap.put(0, ln.getString("main.image.histogram"));
-                }
-                if(this.chkMainHistogramRed.isSelected()) {
-                    typeMap.put(1, ln.getString("main.image.histogram.red"));
-                }
-                if(this.chkMainHistogramGreen.isSelected()) {
-                    typeMap.put(2, ln.getString("main.image.histogram.green"));
-                }
-                if(this.chkMainHistogramBlue.isSelected()) {
-                    typeMap.put(3, ln.getString("main.image.histogram.blue"));
-                }
-
-                for(Map.Entry<Integer, String> entry : typeMap.entrySet()) {
-                    int[] histogram = ImageHelper.getHistogram(bufferedImage, entry.getKey());
-
-                    XYChart.Series<String, Integer> series = new XYChart.Series<>();
-                    series.setName(entry.getValue());
-                    List<XYChart.Data<String, Integer>> data = new LinkedList<>();
-                    for(int j = 0; j<=histogram.length-1; j++) {
-                        data.add(new XYChart.Data<>(String.valueOf(j), histogram[j]));
-                    }
-                    series.getData().addAll(data);
-                    this.bcMainHistogram.getData().add(series);
-                }
-            }
-            this.bcMainHistogram.setLegendVisible(true);
-        } catch (Exception ex) {
-            Dialogs.printException(ex);
-        }
-    }
-
     private void fillCategoryAndTags() {
         if(!this.lvMain.getSelectionModel().isEmpty()) {
             Image image = this.lvMain.getSelectionModel().getSelectedItem();
@@ -1288,17 +1227,15 @@ public class MainController implements Initializable {
         return bufferedImage;
     }
 
-    private void saveFile(File file, Image image, int index, boolean deleteEdited) throws Exception {
+    private void saveFile(File file, Image image, int index) throws Exception {
         BufferedImage bufferedImage = this.getEditedImage(false);
 
         ImageHelper.save(image.getPath(), file.getAbsolutePath(), bufferedImage);
-        if(deleteEdited) {
-            for (int row = 0; row <= this.tblMainImageHistory.getSelectionModel().getSelectedIndex(); row++) {
-                TemporaryEdited temporaryEdited = this.tblMainImageHistory.getItems().get(row);
-                if (temporaryEdited != null) {
-                    if (temporaryEdited.getId() != 0) {
-                        PhotoManager.GLOBALS.getDatabase().removeHistory(temporaryEdited, image.getId());
-                    }
+        for (int row = 0; row <= this.tblMainImageHistory.getSelectionModel().getSelectedIndex(); row++) {
+            TemporaryEdited temporaryEdited = this.tblMainImageHistory.getItems().get(row);
+            if (temporaryEdited != null) {
+                if (temporaryEdited.getId() != 0) {
+                    PhotoManager.GLOBALS.getDatabase().removeHistory(temporaryEdited, image.getId());
                 }
             }
         }
