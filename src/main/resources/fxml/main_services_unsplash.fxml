@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<TitledPane fx:id="pnlUnsplash" animated="false" expanded="false" text="%main.image.unsplash" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.domjos.photo_manager.controller.subController.UnsplashController">
+    <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <children>
+                <TextField fx:id="txtSearch" layoutX="14.0" layoutY="116.0" promptText="%main.image.unsplash.search" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
+                <Button fx:id="cmdSearch" layoutX="107.0" layoutY="189.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/icons/search.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <ListView fx:id="lvUnsplash" layoutX="16.0" layoutY="109.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="60.0" />
+                <Button fx:id="cmdPrevious" layoutX="44.0" layoutY="35.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&lt;&lt;" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                <Button fx:id="cmdNext" layoutX="116.0" layoutY="40.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&gt;&gt;" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                <Label fx:id="lblPage" layoutX="82.0" layoutY="44.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" textAlignment="CENTER" AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="30.0" />
+            </children>
+        </AnchorPane>
+    </content>
+</TitledPane>

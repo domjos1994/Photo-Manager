@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TitledPane animated="false" text="%main.image.metadata" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.domjos.photo_manager.controller.subController.MetaDataController">
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+        <Label layoutX="55.0" layoutY="66.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.date" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+        <TextField fx:id="txtDate" editable="false" layoutX="38.0" layoutY="197.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+        <TitledPane animated="false" collapsible="false" layoutX="-23.0" layoutY="53.0" prefHeight="80.0" text="%main.image.metadata.resolution" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="20.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <Label layoutX="33.0" layoutY="30.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.resolution.dpi" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                <Label layoutX="102.0" layoutY="117.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.resolution.px" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                <TextField fx:id="txtDpiX" editable="false" layoutX="68.0" layoutY="50.0" minHeight="20.0" prefHeight="20.0" prefWidth="75.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="-5.0" />
+                <TextField fx:id="txtDpiY" editable="false" layoutX="23.0" layoutY="78.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                <TextField fx:id="txtPxX" editable="false" layoutY="90.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="75.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="20.0" />
+                <TextField fx:id="txtPxY" editable="false" layoutX="41.0" layoutY="110.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+            </AnchorPane>
+        </TitledPane>
+        <TitledPane animated="false" collapsible="false" layoutX="5.0" layoutY="110.0" prefHeight="55.0" text="%main.image.metadata.gps" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="100.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <TextField fx:id="txtLong" editable="false" layoutX="68.0" layoutY="8.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="100.0" promptText="%main.image.metadata.gps.longitude" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                <TextField fx:id="txtLat" editable="false" layoutX="82.0" layoutY="3.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" promptText="%main.image.metadata.gps.latitude" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+            </AnchorPane>
+        </TitledPane>
+        <TitledPane animated="false" collapsible="false" layoutX="5.0" layoutY="193.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" text="%main.image.metadata.exif" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="155.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.iso" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                <TextField fx:id="txtIso" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.aperture" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                <TextField fx:id="txtAperture" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.exposureTime" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="45.0" />
+                <TextField fx:id="txtExposureTime" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="45.0" />
+                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.camera" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="70.0" />
+                <TextField fx:id="txtCamera" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="70.0" />
+                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.editedWith" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="95.0" />
+                <TextField fx:id="txtSoftware" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="95.0" />
+            </AnchorPane>
+        </TitledPane>
+    </AnchorPane>
+</TitledPane>
