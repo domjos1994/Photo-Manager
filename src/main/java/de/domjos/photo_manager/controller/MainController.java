@@ -1,9 +1,8 @@
 package de.domjos.photo_manager.controller;
 
-import com.github.sardine.DavResource;
 import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.mainController.Histogram;
+import de.domjos.photo_manager.controller.subController.*;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
@@ -11,7 +10,6 @@ import de.domjos.photo_manager.model.gallery.Template;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
-import de.domjos.photo_manager.model.services.DavItem;
 import de.domjos.photo_manager.services.*;
 import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
@@ -22,11 +20,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
-import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
@@ -64,7 +60,7 @@ public class MainController implements Initializable {
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
-    private @FXML ImageView ivMainImage, ivMainPreview;
+    private @FXML ImageView ivMainImage;
 
     private @FXML Slider slMainImageZoom;
     private @FXML Label lblMainImageZoom;
@@ -81,42 +77,11 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainTemplate, cmdMainTemplateAdd, cmdMainTemplateDelete;
     private @FXML ComboBox<String> cmbMainTemplates;
 
-    // histogram
-    private @FXML BarChart<String, Integer> bcMainHistogram;
-    private @FXML CheckBox chkMainHistogram, chkMainHistogramRed, chkMainHistogramGreen, chkMainHistogramBlue;
-    private Histogram histogram;
-
-    // meta-data
-    private @FXML TextField txtMainMetaDataDate;
-    private @FXML TextField txtMainMetaDataLongitude, txtMainMetaDataLatitude;
-    private @FXML TextField txtMainMetaDataDPIX, txtMainMetaDataDPIY, txtMainMetaDataPXX, txtMainMetaDataPXY;
-    private @FXML TextField txtMainMetaDataISO, txtMainMetaDataAperture, txtMainMetaDataExposureTime;
-    private @FXML TextField txtMainMetaDataSoftware, txtMainMetaDataCamera;
     private @FXML MapView gvMainServicesLocation;
-    private de.domjos.photo_manager.controller.mainController.MetaData metaData;
 
-    private @FXML TextField txtMainCloudPath;
-    private @FXML TreeView<DavItem> tvMainCloudDirectories;
-    private @FXML Button cmdMainCloudUpload;
+    private @FXML TitledPane pnlMainImage;
 
-    private @FXML TitledPane pnlMainTinify, pnlMainImage;
-    private @FXML TextField txtMainTinifyWidth, txtMainTinifyHeight;
-    private @FXML Button cmdMainTinifyUpload;
-
-    private @FXML TitledPane pnlMainImageUnsplash;
-    private @FXML TextField txtMainImageUnsplashSearch;
-    private @FXML Button cmdMainImageUnsplashSearch, cmdMainImageUnsplashPrevious, cmdMainImageUnsplashNext;
-    private @FXML Label lblMainImageUnsplashPage;
-    private @FXML ListView<Image> lvMainImageUnsplash;
-
-    private @FXML Slider slMainSaturation, slMainHue, slMainBrightness, slMainRotate;
-    private @FXML TextField txtMainWatermark;
-    private @FXML CheckBox chkMainResize;
-    private @FXML TextField txtMainResizeWidth;
-    private @FXML TextField txtMainResizeHeight;
-    private @FXML Button cmdMainImageEditSave;
     private @FXML TableView<TemporaryEdited> tblMainImageHistory;
-    private @FXML ComboBox<String> cmbMainFilter;
 
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
@@ -130,23 +95,33 @@ public class MainController implements Initializable {
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML HelpController helpController;
 
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML HistogramController histogramController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML MetaDataController metaDataController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML TinifyController tinifyController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML UnsplashController unsplashController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML CloudController cloudController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML EditController editController;
+
     private long rootID;
     private Directory directory;
     private javafx.scene.image.Image currentImage;
     private final Cache cache = new Cache();
-    private WebDav webDav;
     private SaveFolderTask importTask;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.dirRows = new LinkedList<>();
         this.initControllers();
-        this.initSubClasses();
         this.initBindings();
         this.initTinify();
         this.initTreeView();
         this.initListView();
         this.fillTemplates();
-        this.pnlMainImageUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
         this.loadSplitPanePositions();
 
         PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
@@ -198,8 +173,8 @@ public class MainController implements Initializable {
             try {
                 if(newValue!=null) {
                     this.fillImageList(newValue.getValue());
-                    this.fillCloudWithDefault();
-                    this.getCloudPath();
+                    this.cloudController.fillCloudWithDefault();
+                    this.cloudController.getCloudPath();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -225,15 +200,13 @@ public class MainController implements Initializable {
                         byteArrayInputStream.close();
                     }
 
-                    this.histogram.setImage(newValue);
-                    this.metaData.setImage(newValue);
+                    this.histogramController.setImage(newValue);
+                    this.metaDataController.setImage(newValue);
                     this.reloadHistory(newValue.getId());
                     this.fillCategoryAndTags();
-                    this.fillCloudWithDefault();
-                    this.getCloudPath();
-
-                    this.txtMainResizeWidth.setText(String.valueOf(this.cache.getOriginal().getWidth()));
-                    this.txtMainResizeHeight.setText(String.valueOf(this.cache.getOriginal().getHeight()));
+                    this.cloudController.fillCloudWithDefault();
+                    this.cloudController.getCloudPath();
+                    this.editController.setCache(this.cache);
 
                     this.tblMainImageHistory.getSelectionModel().select(this.tblMainImageHistory.getItems().size() - 1);
                 }
@@ -330,10 +303,10 @@ public class MainController implements Initializable {
                 if(image!=null) {
                     this.currentImage = null;
                     PhotoManager.GLOBALS.getDatabase().deleteImage(image);
-                    this.ivMainPreview.setImage(null);
+                    this.editController.getPreview().setImage(null);
                     this.ivMainImage.setImage(null);
-                    this.histogram.setImage(null);
-                    this.metaData.setImage(null);
+                    this.histogramController.setImage(null);
+                    this.metaDataController.setImage(null);
 
                     if(moveToPath.isEmpty()) {
                         Files.delete(Paths.get(image.getPath()));
@@ -451,9 +424,9 @@ public class MainController implements Initializable {
                 } else {
                     if(!this.tvMain.getSelectionModel().isEmpty()) {
                         Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
-                        if(!this.tvMainCloudDirectories.getSelectionModel().isEmpty()) {
+                        if(!this.cloudController.getTreeView().getSelectionModel().isEmpty()) {
                             Cloud cloud = new Cloud();
-                            cloud.setPath(this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get().getPath());
+                            cloud.setPath(this.cloudController.getWebDav().getBaseUrl() + this.cloudController.getTreeView().getSelectionModel().getSelectedItem().getValue().get().getPath());
                             if (directory.getCloud()!=null) {
                                 cloud.setId(directory.getCloud().getId());
                             }
@@ -468,149 +441,9 @@ public class MainController implements Initializable {
             }
         });
 
-        this.cmdMainTinifyUpload.setOnAction(event -> {
-            try {
-                TinifyTask tinifyTask = null;
-                String width = this.txtMainTinifyWidth.getText();
-                String height = this.txtMainTinifyHeight.getText();
-                if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    tinifyTask = new TinifyTask(this.pbMain, this.lblMessages, width, height, this.lvMain.getSelectionModel().getSelectedItem());
-                } else {
-                    if(!this.tvMain.getSelectionModel().isEmpty()) {
-                        tinifyTask = new TinifyTask(this.pbMain, this.lblMessages, width, height, this.tvMain.getSelectionModel().getSelectedItem().getValue());
-                    }
-                }
-                assert tinifyTask != null;
-                tinifyTask.onFinish(()->this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue()));
-                new Thread(tinifyTask).start();
-            } catch (Exception ex) {
-                Dialogs.printException(ex);
-            }
-        });
-
-        this.slMainHue.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.slMainSaturation.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.slMainBrightness.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.slMainRotate.valueProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.txtMainWatermark.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.txtMainResizeHeight.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.txtMainResizeWidth.textProperty().addListener((observable, oldValue, newValue) -> this.ivMainPreview.setImage(this.editImage()));
-        this.cmbMainFilter.getSelectionModel().selectedItemProperty().addListener(((observableValue, s, t1) -> this.ivMainPreview.setImage(this.editImage())));
-
         this.tblMainImageHistory.getSelectionModel().selectedItemProperty().addListener((observableValue, temporaryEdited, t1) -> {
             if(!this.tblMainImageHistory.getSelectionModel().isEmpty()) {
                 this.getEditedImage(true);
-            }
-        });
-
-        this.cmdMainImageEditSave.setOnAction(actionEvent -> {
-            try {
-                if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    long id = this.lvMain.getSelectionModel().getSelectedItem().getId();
-                    if(this.slMainHue.getValue()!=100) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Hue);
-                        temporaryEdited.setValue(this.slMainHue.getValue());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(this.slMainSaturation.getValue()!=100) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Saturation);
-                        temporaryEdited.setValue(this.slMainSaturation.getValue());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(this.slMainBrightness.getValue()!=100) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Brightness);
-                        temporaryEdited.setValue(this.slMainBrightness.getValue());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(this.slMainRotate.getValue()!=0) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Rotate);
-                        temporaryEdited.setValue(this.slMainRotate.getValue());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(!this.txtMainWatermark.getText().trim().isEmpty()) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Watermark);
-                        temporaryEdited.setStringValue(this.txtMainWatermark.getText().trim());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(this.chkMainResize.isSelected()) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Resize);
-                        temporaryEdited.setStringValue("W:" + this.txtMainResizeWidth.getText().trim() + ";H:" + this.txtMainResizeHeight.getText().trim());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-                    if(!this.cmbMainFilter.getSelectionModel().isEmpty()) {
-                        TemporaryEdited temporaryEdited = new TemporaryEdited();
-                        temporaryEdited.setChangeType(TemporaryEdited.ChangeType.Filter);
-                        temporaryEdited.setStringValue(this.cmbMainFilter.getSelectionModel().getSelectedItem());
-                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
-                    }
-
-                    this.reloadHistory(id);
-                }
-            } catch (Exception ex) {
-                Dialogs.printException(ex);
-            }
-        });
-
-        this.tvMainCloudDirectories.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            try {
-                if(newValue!=null) {
-                    if(newValue.getValue().get().isDirectory()) {
-                        String path = this.webDav.getBaseUrl() + newValue.getValue().get().getPath();
-                        this.txtMainCloudPath.setText(path);
-                        this.webDav.readDirectory(path);
-
-                        if(newValue.getChildren().isEmpty()) {
-                            if(!path.equals(PhotoManager.GLOBALS.getSetting(Globals.CLOUD_PATH, ""))) {
-                                this.webDav.readDirectory(path);
-                                this.addChildren(newValue);
-                                newValue.setExpanded(true);
-                                this.setCloudPath();
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                Dialogs.printException(ex);
-            }
-        });
-
-        this.cmdMainCloudUpload.setOnAction(event -> {
-            try {
-                if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    DavResource davResource = this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get();
-                    Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                    UploadTask uploadTask = new UploadTask(this.pbMain, this.lblMessages, image, this.webDav, davResource);
-                    uploadTask.onFinish(()->
-                            Dialogs.printNotification(
-                                    Alert.AlertType.INFORMATION,
-                                    resources.getString("main.image.services.cloud.finish"),
-                                    resources.getString("main.image.services.cloud.finish")
-                            )
-                    );
-                    new Thread(uploadTask).start();
-                } else {
-                    if(!this.tvMain.getSelectionModel().isEmpty()) {
-                        DavResource davResource = this.tvMainCloudDirectories.getSelectionModel().getSelectedItem().getValue().get();
-                        Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
-                        UploadTask uploadTask = new UploadTask(this.pbMain, this.lblMessages, directory, this.webDav, davResource);
-                        uploadTask.onFinish(()->
-                                Dialogs.printNotification(
-                                        Alert.AlertType.INFORMATION,
-                                        resources.getString("main.image.services.cloud.finish"),
-                                        resources.getString("main.image.services.cloud.finish")
-                                )
-                        );
-                        new Thread(uploadTask).start();
-                    }
-                }
-            } catch (Exception ex) {
-                Dialogs.printException(ex);
             }
         });
 
@@ -625,11 +458,7 @@ public class MainController implements Initializable {
                     template.setId(templates.get(0).getId());
                 }
                 template.getPreferences().put(Template.Preference.ZOOM.toString(), String.valueOf(this.slMainImageZoom.getValue()));
-                template.getPreferences().put(Template.Preference.HUE.toString(), String.valueOf(this.slMainHue.getValue()));
-                template.getPreferences().put(Template.Preference.BRIGHTNESS.toString(), String.valueOf(this.slMainBrightness.getValue()));
-                template.getPreferences().put(Template.Preference.SATURATION.toString(), String.valueOf(this.slMainSaturation.getValue()));
-                template.getPreferences().put(Template.Preference.Rotation.toString(), String.valueOf(this.slMainRotate.getValue()));
-                template.getPreferences().put(Template.Preference.Filter.toString(), this.cmbMainFilter.getSelectionModel().getSelectedItem());
+                template = editController.updateTemplate(template);
                 PhotoManager.GLOBALS.getDatabase().insertOrUpdateTemplate(template);
                 this.fillTemplates();
             } catch (Exception ex) {
@@ -651,32 +480,13 @@ public class MainController implements Initializable {
                 if(newValue!=null) {
                     if(newValue.isEmpty()) {
                         this.slMainImageZoom.setValue(100.0);
-                        this.slMainHue.setValue(100.0);
-                        this.slMainBrightness.setValue(100.0);
-                        this.slMainSaturation.setValue(100.0);
-                        this.slMainRotate.setValue(0.0);
-                        this.txtMainWatermark.setText("");
-                        this.txtMainResizeWidth.setText(String.valueOf(this.cache.getOriginal().getWidth()));
-                        this.txtMainResizeHeight.setText(String.valueOf(this.cache.getOriginal().getHeight()));
-                        this.cmbMainFilter.getSelectionModel().clearSelection();
+                        this.editController.reset();
                     } else {
                         List<Template> templates = PhotoManager.GLOBALS.getDatabase().getTemplates("name='" + newValue + "'");
                         if(!templates.isEmpty()) {
                             Template template = templates.get(0);
                             this.slMainImageZoom.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.ZOOM.toString(), "100.0")));
-                            this.slMainHue.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.HUE.toString(), "100.0")));
-                            this.slMainBrightness.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.BRIGHTNESS.toString(), "100.0")));
-                            this.slMainSaturation.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.SATURATION.toString(), "100.0")));
-                            this.slMainRotate.setValue(Double.parseDouble(template.getPreferences().getOrDefault(Template.Preference.Rotation.toString(), "0.0")));
-                            this.txtMainWatermark.setText(template.getPreferences().getOrDefault(Template.Preference.Watermark.toString(), ""));
-                            this.cmbMainFilter.getSelectionModel().select(template.getPreferences().getOrDefault(Template.Preference.Filter.toString(), ""));
-
-                            String resize = template.getPreferences().getOrDefault(Template.Preference.Resize.toString(), "");
-                            if(!resize.isEmpty()) {
-                                String[] content = resize.split(":");
-                                this.txtMainResizeWidth.setText(content[0].trim());
-                                this.txtMainResizeHeight.setText(content[1].trim());
-                            }
+                            this.editController.setTemplate(template);
                         }
                     }
                     this.cmdMainImageZoom.fire();
@@ -684,25 +494,6 @@ public class MainController implements Initializable {
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
-        });
-
-        this.cmdMainImageUnsplashSearch.setOnAction(event -> {
-            lblMainImageUnsplashPage.setText("1");
-            executeUnsplashTask(1);
-        });
-
-        this.cmdMainImageUnsplashNext.setOnAction(actionEvent -> {
-            int current = Integer.parseInt(lblMainImageUnsplashPage.getText());
-            current++;
-            executeUnsplashTask(current);
-            lblMainImageUnsplashPage.setText(String.valueOf(current));
-        });
-
-        this.cmdMainImageUnsplashPrevious.setOnAction(actionEvent -> {
-            int current = Integer.parseInt(lblMainImageUnsplashPage.getText());
-            current--;
-            executeUnsplashTask(current);
-            lblMainImageUnsplashPage.setText(String.valueOf(current));
         });
 
         this.ctxMainDelete.setOnAction(event -> {
@@ -714,9 +505,9 @@ public class MainController implements Initializable {
                         this.lvMain.getSelectionModel().clearSelection();
                         this.lvMain.getItems().clear();
                         this.ivMainImage.setImage(null);
-                        this.histogram.setImage(null);
-                        this.metaData.setImage(null);
-                        this.ivMainPreview.setImage(null);
+                        this.histogramController.setImage(null);
+                        this.metaDataController.setImage(null);
+                        this.editController.getPreview().setImage(null);
                         this.initTreeView();
                     }
                 }
@@ -760,19 +551,7 @@ public class MainController implements Initializable {
             }
         });
 
-        this.lvMainImageUnsplash.setOnDragDetected(mouseEvent -> {
-            Dragboard db = this.lvMainImageUnsplash.startDragAndDrop(TransferMode.ANY);
 
-            ClipboardContent content = new ClipboardContent();
-            StringBuilder strContent = new StringBuilder();
-            for(int index : this.lvMainImageUnsplash.getSelectionModel().getSelectedIndices()) {
-                strContent.append(index);
-                strContent.append(";");
-            }
-            content.putString(strContent.toString());
-            db.setContent(content);
-            mouseEvent.consume();
-        });
 
         this.tvMain.setOnDragOver(mouseEvent -> {
             if(mouseEvent.getGestureSource() != this.tvMain && mouseEvent.getDragboard().hasString()) {
@@ -790,7 +569,7 @@ public class MainController implements Initializable {
                     for(String strIndex : content.split(";")) {
                         if(!strIndex.trim().isEmpty()) {
                             int index = Integer.parseInt(strIndex.trim());
-                            Image image = this.lvMainImageUnsplash.getItems().get(index);
+                            Image image = this.unsplashController.getUnsplashListView().getItems().get(index);
 
                             if(!this.tvMain.getSelectionModel().isEmpty()) {
                                 Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
@@ -841,12 +620,32 @@ public class MainController implements Initializable {
         this.tbpMain.getSelectionModel().select(this.tbMain);
     }
 
-    ProgressBar getProgressBar() {
+    public ProgressBar getProgressBar() {
         return this.pbMain;
+    }
+
+    public Label getMessages() {
+        return this.lblMessages;
     }
 
     void setMessage(String msg) {
         this.lblMessages.setText(msg);
+    }
+
+    public Directory getDirectory() {
+        return this.directory;
+    }
+
+    public MapView getMapView() {
+        return this.gvMainServicesLocation;
+    }
+
+    public ListView<Image> getLvMain() {
+        return this.lvMain;
+    }
+
+    public TreeView<Directory> getTvMain() {
+        return this.tvMain;
     }
 
     private void initControllers() {
@@ -854,23 +653,16 @@ public class MainController implements Initializable {
         this.mapController.init(this);
         this.slideshowController.init(this);
         this.helpController.init(this);
+
+        this.histogramController.init(this);
+        this.metaDataController.init(this);
+        this.tinifyController.init(this);
+        this.unsplashController.init(this);
+        this.cloudController.init(this);
+        this.editController.init(this);
     }
 
-    private void initSubClasses() {
-        this.histogram = new Histogram(
-            this.bcMainHistogram, this.chkMainHistogram, this.chkMainHistogramRed,
-            this.chkMainHistogramGreen, this.chkMainHistogramBlue
-        );
-
-        this.metaData = new de.domjos.photo_manager.controller.mainController.MetaData(
-            this.txtMainMetaDataDate, this.txtMainMetaDataLongitude, this.txtMainMetaDataLatitude,
-            this.txtMainMetaDataDPIX, this.txtMainMetaDataDPIY, this.txtMainMetaDataPXX, this.txtMainMetaDataPXY,
-            this.txtMainMetaDataISO, this.txtMainMetaDataAperture, this.txtMainMetaDataExposureTime,
-            this.txtMainMetaDataSoftware, this.txtMainMetaDataCamera, this.gvMainServicesLocation
-        );
-    }
-
-    private void reloadHistory(long id) throws Exception {
+    public void reloadHistory(long id) throws Exception {
         this.tblMainImageHistory.getItems().clear();
         TemporaryEdited root = new TemporaryEdited();
         root.setChangeType(TemporaryEdited.ChangeType.None);
@@ -888,9 +680,6 @@ public class MainController implements Initializable {
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmdMainTemplateDelete.visibleProperty());
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
 
-        this.txtMainResizeWidth.disableProperty().bind(this.chkMainResize.selectedProperty().not());
-        this.txtMainResizeHeight.disableProperty().bind(this.chkMainResize.selectedProperty().not());
-
         TableColumn<TemporaryEdited, String> changeType = new TableColumn<>("ChangeType");
         changeType.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.type"));
         changeType.setCellValueFactory(new PropertyValueFactory<>("changeType"));
@@ -901,20 +690,10 @@ public class MainController implements Initializable {
         this.tblMainImageHistory.getColumns().add(value);
 
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        this.reloadFilter();
-    }
-
-    private void reloadFilter() {
-        this.cmbMainFilter.getItems().clear();
-
-        for(ImageHelper.Filter.Type type : ImageHelper.Filter.Type.values()) {
-            String name = type.name().trim().toLowerCase().replace("filter", "");
-            this.cmbMainFilter.getItems().add(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.filter." + name));
-        }
     }
 
     void initTinify() {
-        this.pnlMainTinify.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "").equals(""));
+        this.tinifyController.initTinify();
     }
 
     private void initTreeView() {
@@ -937,8 +716,8 @@ public class MainController implements Initializable {
 
     private void initListView() {
         this.lvMain.setCellFactory(param ->  this.initListCell());
-        this.lvMainImageUnsplash.setCellFactory(param -> this.initListCell());
-        this.lvMainImageUnsplash.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        this.unsplashController.getUnsplashListView().setCellFactory(param -> this.initListCell());
+        this.unsplashController.getUnsplashListView().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     private ListCell<Image> initListCell() {
@@ -986,69 +765,17 @@ public class MainController implements Initializable {
         javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
         this.cache.setOriginalPreview(SwingFXUtils.fromFXImage(preview, null));
         this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
-        this.ivMainPreview.setImage(preview);
+        this.editController.getPreview().setImage(preview);
         this.ivMainImage.setFitWidth(image.getWidth());
         this.ivMainImage.setFitHeight(image.getHeight());
         this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));
         this.ivMainImage.setPreserveRatio(true);
         this.ivMainImage.setImage(image);
         this.slMainImageZoom.setValue(100.0);
-        this.txtMainWatermark.setText("");
+        this.editController.getWatermark().setText("");
     }
 
-    private javafx.scene.image.Image editImage() {
-        // change saturation
-        int hue = (int) this.slMainHue.getValue();
-        int saturation = (int) this.slMainSaturation.getValue();
-        int brightness = (int) this.slMainBrightness.getValue();
-        int rotation = (int) this.slMainRotate.getValue();
-        String waterMark = this.txtMainWatermark.getText();
-        String strWidth = this.txtMainResizeWidth.getText().trim();
-        String strHeight = this.txtMainResizeHeight.getText().trim();
-
-        if(this.cache.getOriginalPreview()!=null && this.cache.getPreviewImage()!=null) {
-            ImageHelper.changeHSB(this.cache.getPreviewImage(), this.cache.getOriginalPreview(), hue, saturation, brightness);
-            this.cache.setPreviewImage(ImageHelper.rotate(this.cache.getPreviewImage(), rotation));
-
-            if(!waterMark.trim().isEmpty()) {
-                this.cache.setPreviewImage(ImageHelper.addWaterMark(this.cache.getPreviewImage(), waterMark.trim()));
-            }
-            if(this.chkMainResize.isSelected()) {
-                this.cache.setPreviewImage(ImageHelper.resize(this.cache.getOriginalPreview(), this.cache.getOriginal(), (int) Double.parseDouble(strWidth), (int) Double.parseDouble(strHeight)));
-            }
-            if(!this.cmbMainFilter.getSelectionModel().isEmpty()) {
-                String selectedFilter = this.cmbMainFilter.getSelectionModel().getSelectedItem();
-                ImageHelper.Filter.Type type = this.getFilterTypeBySelectedItem(selectedFilter);
-                if(type!=null) {
-                    this.cache.setPreviewImage(ImageHelper.addFilter(this.cache.getPreviewImage(), type));
-                }
-            }
-            return SwingFXUtils.toFXImage(this.cache.getPreviewImage(), null);
-        }
-
-        return null;
-    }
-
-    private ImageHelper.Filter.Type getFilterTypeBySelectedItem(String item) {
-        ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
-        String keyPart = "main.image.edit.filter.";
-
-        if(item.equals(lang.getString(keyPart + "color"))) {
-            return ImageHelper.Filter.Type.ColorFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "invert"))) {
-            return ImageHelper.Filter.Type.InvertFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "sharpen"))) {
-            return ImageHelper.Filter.Type.SharpenFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "blur"))) {
-            return ImageHelper.Filter.Type.BlurFilter;
-        }
-        return null;
-    }
-
-    private void fillImageList(Directory directory) {
+    public void fillImageList(Directory directory) {
         this.fillImageList(directory, "");
     }
 
@@ -1112,26 +839,6 @@ public class MainController implements Initializable {
         }
     }
 
-    private void fillCloudWithDefault() {
-        try {
-            TreeItem<DavItem> treeItem = new TreeItem<>();
-
-            String path = PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PATH, "");
-            String user = PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_USER, "");
-            String pwd = PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PWD, "");
-
-            this.webDav = new WebDav(user, pwd, path);
-            if(this.webDav.testConnection()) {
-                this.txtMainCloudPath.setText(path);
-                treeItem.setValue(new DavItem(this.webDav.listDirectoriesRecursive().get(0)));
-                this.addChildren(treeItem);
-                this.tvMainCloudDirectories.setRoot(treeItem);
-            }
-        } catch (Exception ex) {
-            Dialogs.printException(ex);
-        }
-    }
-
     private void fillTemplates() {
         try {
             this.cmbMainTemplates.getItems().clear();
@@ -1142,98 +849,6 @@ public class MainController implements Initializable {
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }
-    }
-
-    private void addChildren(TreeItem<DavItem> parent) {
-        for(int i = 1; i<=this.webDav.listDirectoriesRecursive().size()-1; i++) {
-            TreeItem<DavItem> child = new TreeItem<>();
-            child.setValue(new DavItem(this.webDav.listDirectoriesRecursive().get(i)));
-            parent.getChildren().add(child);
-        }
-    }
-
-    private void setCloudPath() {
-        Cloud cloud = new Cloud();
-        cloud.setPath(this.txtMainCloudPath.getText());
-        if(!this.lvMain.getSelectionModel().isEmpty()) {
-            this.lvMain.getSelectionModel().getSelectedItem().setCloud(cloud);
-        } else {
-            if(!this.tvMain.getSelectionModel().isEmpty()) {
-                this.tvMain.getSelectionModel().getSelectedItem().getValue().setCloud(cloud);
-                if(this.directory!=null) {
-                    this.directory.setCloud(cloud);
-                }
-            }
-        }
-    }
-
-    private void getCloudPath() {
-        String path = "";
-        if(!this.lvMain.getSelectionModel().isEmpty()) {
-            if(this.lvMain.getSelectionModel().getSelectedItem().getCloud()!=null) {
-                path = this.lvMain.getSelectionModel().getSelectedItem().getCloud().getPath();
-            }
-        } else {
-            if(!this.tvMain.getSelectionModel().isEmpty()) {
-                if(this.tvMain.getSelectionModel().getSelectedItem().getValue().getCloud()!=null) {
-                    path = this.tvMain.getSelectionModel().getSelectedItem().getValue().getCloud().getPath();
-                }
-            }
-        }
-
-        this.findPath(null, path);
-    }
-
-    private void findPath(TreeItem<DavItem> item, String path) {
-        try {
-            if(!path.trim().isEmpty()) {
-                if(item==null) {
-                    String completeUrl = this.webDav.getBaseUrl() + this.tvMainCloudDirectories.getRoot().getValue().get().getPath();
-                    while(!completeUrl.equals(path)) {
-                        for(TreeItem<DavItem> davResourceTreeItem : this.tvMainCloudDirectories.getRoot().getChildren()) {
-                            if(path.contains(davResourceTreeItem.getValue().get().getPath())) {
-                                this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
-                                this.findPath(davResourceTreeItem, path);
-                                return;
-                            }
-                        }
-                    }
-                } else {
-                    String completeUrl = this.webDav.getBaseUrl() + item.getValue().get().getPath();
-                    while(!completeUrl.equals(path)) {
-                        for(TreeItem<DavItem> davResourceTreeItem : item.getChildren()) {
-                            if(path.contains(davResourceTreeItem.getValue().get().getPath())) {
-                                this.tvMainCloudDirectories.getSelectionModel().select(davResourceTreeItem);
-                                this.findPath(davResourceTreeItem, path);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Dialogs.printException(ex);
-        }
-    }
-
-    private void executeUnsplashTask(int page) {
-        String query = this.txtMainImageUnsplashSearch.getText();
-        UnsplashTask unsplashTask = new UnsplashTask(this.pbMain, this.lblMessages, query, page);
-        unsplashTask.setOnSucceeded(evt ->
-                Platform.runLater(() -> {
-                    try {
-                        this.pbMain.getScene().setCursor(Cursor.DEFAULT);
-                        this.lvMainImageUnsplash.getItems().clear();
-                        this.lvMainImageUnsplash.getItems().addAll(unsplashTask.get());
-                    } catch (Exception e) {
-                        Dialogs.printException(e);
-                    }
-                })
-        );
-        unsplashTask.setOnFailed(unsplashTask.getOnSucceeded());
-        unsplashTask.setOnCancelled(unsplashTask.getOnSucceeded());
-        this.pbMain.getScene().setCursor(Cursor.WAIT);
-        new Thread(unsplashTask).start();
     }
 
     private BufferedImage getEditedImage(boolean updateIV) {
@@ -1273,7 +888,7 @@ public class MainController implements Initializable {
                 image = ImageHelper.resize(image, this.currentImage, width, height);
                 bufferedImage = ImageHelper.rotate(image, rotation);
 
-                ImageHelper.Filter.Type type = this.getFilterTypeBySelectedItem(filter);
+                ImageHelper.Filter.Type type = this.editController.getFilterTypeBySelectedItem(filter);
                 if(type!=null) {
                     bufferedImage = ImageHelper.addFilter(bufferedImage, type);
                 }

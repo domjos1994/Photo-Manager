@@ -32,10 +32,15 @@ module PhotoManager {
     requires org.json;
 
     opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml, javafx.base;
+    opens de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager.model.gallery to javafx.base;
 
     exports de.domjos.photo_manager.controller to javafx.controls, javafx.fxml;
+    exports de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
     exports de.domjos.photo_manager.settings;
+    exports de.domjos.photo_manager.model.gallery;
+    exports de.domjos.photo_manager.model.services;
+    exports de.domjos.photo_manager.helper;
     exports de.domjos.photo_manager;
 }

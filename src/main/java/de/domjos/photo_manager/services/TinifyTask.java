@@ -44,6 +44,10 @@ public final class TinifyTask extends ParentTask<Void> {
             this.images.add((Image) img);
         } else if(img instanceof Directory) {
             loadImagesFromDirectory((Directory) img);
+        } else if(img instanceof List) {
+            for(Object obj : (List) img) {
+                this.images.add((Image) obj);
+            }
         }
     }
 
@@ -106,13 +110,17 @@ public final class TinifyTask extends ParentTask<Void> {
 
     private Source scaleImage(Source source) {
         updateMessage(PhotoManager.GLOBALS.getLanguage().getString("main.image.services.tinify.scale"));
-        if(this.width!=-1 || this.height!=-1) {
-            Options options = new Options();
+        Options options = new Options();
+        if(this.width!=-1 && this.height!=-1) {
             options.with("method", "fit");
+            options.with("width", this.width);
+            options.with("height", this.height);
+            return source.resize(options);
+        } else if(this.width!=-1 || this.height!=-1) {
+            options.with("method", "scale");
             if(this.width!=-1) {
                 options.with("width", this.width);
-            }
-            if(this.height!=-1) {
+            } else {
                 options.with("height", this.height);
             }
             return source.resize(options);
