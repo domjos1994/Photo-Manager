@@ -12,14 +12,18 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -38,6 +42,11 @@ public class SettingsController implements Initializable {
     private @FXML TextField txtSettingsCloudPath, txtSettingsCloudUserName;
     private @FXML PasswordField txtSettingsCloudPassword;
     private @FXML Button cmdSettingsCloudTest;
+
+    private @FXML CheckBox chkSettingsDirectoriesDelete;
+    private @FXML TextField txtSettingsDirectoriesDelete;
+    private @FXML Button cmdSettingsDirectoriesDelete;
+    private @FXML TableView<DirRow> tblSettingsDirectories;
 
     public void initialize(URL location, ResourceBundle resources) {
         this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, ""));
@@ -90,6 +99,16 @@ public class SettingsController implements Initializable {
             }
         });
 
+        this.chkSettingsDirectoriesDelete.selectedProperty().addListener(((observableValue, aBoolean, t1) -> this.cmdSettingsDirectoriesDelete.setDisable(!t1)));
+        this.cmdSettingsDirectoriesDelete.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.path"));
+            File file = directoryChooser.showDialog(null);
+            if(file!=null) {
+                this.txtSettingsDirectoriesDelete.setText(file.getAbsolutePath());
+            }
+        });
+
         this.cmdSettingsHome.setOnAction(event -> this.mainController.back());
 
         this.cmdSettingsSave.setOnAction(event -> {
@@ -101,6 +120,12 @@ public class SettingsController implements Initializable {
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText(), true);
+            if(!this.chkSettingsDirectoriesDelete.isSelected() || this.txtSettingsDirectoriesDelete.getText().trim().isEmpty()) {
+                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_DELETE_KEY, "", false);
+            } else {
+                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_DELETE_KEY, this.txtSettingsDirectoriesDelete.getText().trim(), false);
+            }
+            this.saveRowsToSettings();
 
             PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
             if(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false)) {
@@ -109,6 +134,8 @@ public class SettingsController implements Initializable {
                 PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader());
             }
             mainController.initTinify();
+
+            Dialogs.printNotification(Alert.AlertType.INFORMATION, PhotoManager.GLOBALS.getLanguage().getString("settings.saved"), PhotoManager.GLOBALS.getLanguage().getString("settings.saved.text"));
         });
 
         this.cmdSettingsCloudTest.setOnAction(event -> {
@@ -121,6 +148,7 @@ public class SettingsController implements Initializable {
     }
 
     private void fillData() {
+        this.cmdSettingsDirectoriesDelete.setDisable(true);
         this.chkSettingsDebugMode.setSelected(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         this.txtSettingsTinyKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
         this.txtSettingsTinyFile.setText(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, ""));
@@ -129,10 +157,110 @@ public class SettingsController implements Initializable {
         this.txtSettingsCloudPath.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PATH, ""));
         this.txtSettingsCloudUserName.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_USER, ""));
         this.txtSettingsCloudPassword.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PWD, ""));
+        SettingsController.getRowsFromSettings().forEach(this.tblSettingsDirectories.getItems()::add);
+
+        String deleteDir = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
+        this.chkSettingsDirectoriesDelete.setSelected(!deleteDir.trim().isEmpty());
+        if(deleteDir.trim().isEmpty()) {
+            this.txtSettingsDirectoriesDelete.setText("");
+        } else {
+            this.txtSettingsDirectoriesDelete.setText(deleteDir);
+        }
+    }
+
+    public static List<DirRow> getRowsFromSettings() {
+        List<DirRow> dirRows = new LinkedList<>();
+
+        int index = 1;
+        while(!PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_TITLE + "_" + index, "").equals("")) {
+            String title = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_TITLE + "_" + index, "");
+            String path = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_PATH + "_" + index, "");
+
+            if(!path.trim().isEmpty()) {
+                DirRow dirRow = new DirRow();
+                dirRow.setTitle(title);
+                dirRow.setPath(path);
+                dirRows.add(dirRow);
+            }
+            index++;
+        }
+        return dirRows;
+    }
+
+    private void saveRowsToSettings() {
+        int index = 1;
+        for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
+            if(!dirRow.getTitle().trim().isEmpty() && !dirRow.getPath().trim().isEmpty()) {
+                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_TITLE + "_" + index, dirRow.getTitle().trim(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_PATH + "_" + index, dirRow.getPath().trim(), false);
+            }
+            index++;
+        }
+    }
+
+    private void initDirTableView() {
+        TableColumn<DirRow, String> colSettingsDirectoriesTitle = new TableColumn<>(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.title"));
+        colSettingsDirectoriesTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        colSettingsDirectoriesTitle.setCellFactory(TextFieldTableCell.forTableColumn());
+        colSettingsDirectoriesTitle.setOnEditCommit(event -> {
+            String val = event.getNewValue();
+            event.getRowValue().setTitle(val);
+            this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
+            this.tblSettingsDirectories.getItems().add(new DirRow());
+        });
+        colSettingsDirectoriesTitle.setEditable(true);
+        colSettingsDirectoriesTitle.setMinWidth(150);
+        colSettingsDirectoriesTitle.setPrefWidth(150);
+
+        TableColumn<DirRow, String> colSettingsDirectoriesPath = new TableColumn<>(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.path"));
+        colSettingsDirectoriesPath.setCellValueFactory(new PropertyValueFactory<>("path"));
+        colSettingsDirectoriesPath.setEditable(true);
+        colSettingsDirectoriesPath.setOnEditStart(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.path"));
+            File file = directoryChooser.showDialog(null);
+            if(file!=null) {
+                event.getRowValue().setPath(file.getAbsolutePath());
+                this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
+            }
+        });
+        colSettingsDirectoriesPath.setMinWidth(350);
+        colSettingsDirectoriesPath.setPrefWidth(500);
+
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
+        this.tblSettingsDirectories.getItems().add(new DirRow());
     }
 
     void init(MainController mainController) {
         this.mainController = mainController;
         this.fillData();
+        this.initDirTableView();
+    }
+
+    public static class DirRow {
+        private String title, path;
+
+        public DirRow() {
+            super();
+            this.title = "";
+            this.path = "";
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
     }
 }

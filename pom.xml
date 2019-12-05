@@ -6,7 +6,7 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>PhotoManager</artifactId>
-    <version>0.1.alpha.1</version>
+    <version>0.1</version>
 
     <properties>
         <!-- Information of the project -->
@@ -17,14 +17,14 @@
         <application.out>build</application.out>
 
         <!-- Dependency-Versions -->
+        <java.version>11</java.version>
         <jfx.version>11</jfx.version>
         <cfx.version>11.0.0</cfx.version>
 
         <sqlite.version>3.28.0</sqlite.version>
-        <log4j.version>2.12.0</log4j.version>
+        <log4j.version>2.12.1</log4j.version>
         <commons.io.version>2.6</commons.io.version>
         <commons.imaging.version>1.0-alpha1</commons.imaging.version>
-        <java.version>11</java.version>
 
         <!-- Language-Level -->
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -258,7 +258,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.6</version>
                 <executions>
-                    <execution>
+                    <!--<execution>
                         <id>BuildSetup-Windows</id>
                         <phase>package</phase>
                         <configuration>
@@ -269,8 +269,8 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                    </execution>
-                    <execution>
+                    </execution>-->
+                    <!--<execution>
                         <id>BuildSetup-Linux</id>
                         <phase>package</phase>
                         <configuration>
@@ -281,7 +281,7 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                    </execution>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

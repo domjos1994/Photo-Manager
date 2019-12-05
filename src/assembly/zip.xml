@@ -21,23 +21,23 @@
     <files>
         <file>
             <source>${project.basedir}/README.md</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>./</outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/pom.xml</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>./</outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/LICENSE</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>./</outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/dependency-reduced-pom.xml</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>./</outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/.gitignore</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>./</outputDirectory>
         </file>
     </files>
 </assembly>

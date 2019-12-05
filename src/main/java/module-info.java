@@ -31,7 +31,7 @@ module PhotoManager {
     requires httpcore;
     requires org.json;
 
-    opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml;
+    opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml, javafx.base;
     opens de.domjos.photo_manager to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager.model.gallery to javafx.base;
 

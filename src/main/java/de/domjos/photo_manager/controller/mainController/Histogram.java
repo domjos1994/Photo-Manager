@@ -4,6 +4,7 @@ import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;
+import javafx.application.Platform;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
@@ -32,14 +33,14 @@ public class Histogram {
 
     public void setImage(Image image) {
         this.image = image;
-        this.fillBarChart();
+        new Thread(this::fillBarChart).start();
     }
 
     private void fillBarChart() {
         try {
             if(this.image!=null) {
                 BufferedImage bufferedImage = ImageHelper.getImage(this.image.getPath());
-                this.bcHistogram.getData().clear();
+                Platform.runLater(()->this.bcHistogram.getData().clear());
 
                 if(bufferedImage!=null) {
                     ResourceBundle ln = PhotoManager.GLOBALS.getLanguage();
@@ -68,16 +69,18 @@ public class Histogram {
                             data.add(new XYChart.Data<>(String.valueOf(j), histogram[j]));
                         }
                         series.getData().addAll(data);
-                        this.bcHistogram.getData().add(series);
+                        Platform.runLater(()->this.bcHistogram.getData().add(series));
                     }
                 }
-                this.bcHistogram.setLegendVisible(true);
+                Platform.runLater(()->this.bcHistogram.setLegendVisible(true));
             } else {
-                this.chkHistogram.setSelected(true);
-                this.chkRed.setSelected(true);
-                this.chkBlue.setSelected(true);
-                this.chkGreen.setSelected(true);
-                this.bcHistogram.getData().clear();
+                Platform.runLater(()-> {
+                    this.chkHistogram.setSelected(true);
+                    this.chkRed.setSelected(true);
+                    this.chkBlue.setSelected(true);
+                    this.chkGreen.setSelected(true);
+                    this.bcHistogram.getData().clear();
+                });
             }
         } catch (Exception ex) {
             Dialogs.printException(ex);

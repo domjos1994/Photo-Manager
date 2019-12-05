@@ -4,7 +4,7 @@
   <groupId>de.domjos</groupId>
   <artifactId>PhotoManager</artifactId>
   <name>${application.name}</name>
-  <version>0.1.alpha.1</version>
+  <version>0.1</version>
   <url>${application.website}</url>
   <developers>
     <developer>
@@ -98,20 +98,6 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.6</version>
-        <executions>
-          <execution>
-            <id>BuildSetup-Linux</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec />
-              </target>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -156,7 +142,7 @@
     <jfx.version>11</jfx.version>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <log4j.version>2.12.0</log4j.version>
+    <log4j.version>2.12.1</log4j.version>
     <commons.io.version>2.6</commons.io.version>
     <application.website>https://domjos.de</application.website>
     <application.email>developing@domjos.de</application.email>

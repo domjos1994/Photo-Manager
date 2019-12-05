@@ -5,7 +5,10 @@ import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.mainController.Histogram;
 import de.domjos.photo_manager.helper.ImageHelper;
-import de.domjos.photo_manager.model.gallery.*;
+import de.domjos.photo_manager.model.gallery.Directory;
+import de.domjos.photo_manager.model.gallery.Image;
+import de.domjos.photo_manager.model.gallery.Template;
+import de.domjos.photo_manager.model.gallery.TemporaryEdited;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.model.services.DavItem;
@@ -38,7 +41,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
     private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
@@ -50,6 +58,9 @@ public class MainController implements Initializable {
 
     private @FXML ContextMenu ctxMainImage;
     private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs, ctxMainImageAssemble, ctxMainImageScale;
+    private @FXML MenuItem ctxMainImageDelete;
+    private @FXML Menu ctxMainImageMove;
+    private List<SettingsController.DirRow> dirRows;
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
@@ -127,6 +138,7 @@ public class MainController implements Initializable {
     private SaveFolderTask importTask;
 
     public void initialize(URL location, ResourceBundle resources) {
+        this.dirRows = new LinkedList<>();
         this.initControllers();
         this.initSubClasses();
         this.initBindings();
@@ -204,9 +216,13 @@ public class MainController implements Initializable {
 
                     File img = new File(newValue.getPath());
                     if(img.exists()) {
-                        this.fillImage(new javafx.scene.image.Image(new FileInputStream(img)));
+                        FileInputStream fileInputStream = new FileInputStream(img);
+                        this.fillImage(new javafx.scene.image.Image(fileInputStream));
+                        fileInputStream.close();
                     } else {
-                        this.fillImage(new javafx.scene.image.Image(new ByteArrayInputStream(newValue.getThumbnail())));
+                        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(newValue.getThumbnail());
+                        this.fillImage(new javafx.scene.image.Image(byteArrayInputStream));
+                        byteArrayInputStream.close();
                     }
 
                     this.histogram.setImage(newValue);
@@ -275,6 +291,56 @@ public class MainController implements Initializable {
                         image.setId(0);
                         this.saveFile(file, image, index);
                     }
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+
+        this.ctxMainImageMove.setOnAction(event -> {
+            this.ctxMainImageMove.getItems().clear();
+            this.dirRows = SettingsController.getRowsFromSettings();
+            for(SettingsController.DirRow dirRow : this.dirRows) {
+                MenuItem menuItem = new MenuItem(dirRow.getTitle());
+                menuItem.setOnAction(itemEvent -> {
+                    try {
+                        Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                        BufferedImage bufferedImage = this.getEditedImage(false);
+                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                    } catch (Exception ex) {
+                        Dialogs.printException(ex);
+                    }
+                });
+                this.ctxMainImageMove.getItems().add(menuItem);
+            }
+            this.ctxMainImageMove.show();
+        });
+
+        this.ctxMainImageDelete.setOnAction(event -> {
+            try {
+                String path = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
+                String moveToPath = "";
+                if(path!=null) {
+                    if(!path.trim().isEmpty()) {
+                        moveToPath = path.trim();
+                    }
+                }
+
+                Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                if(image!=null) {
+                    this.currentImage = null;
+                    PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+                    this.ivMainPreview.setImage(null);
+                    this.ivMainImage.setImage(null);
+                    this.histogram.setImage(null);
+                    this.metaData.setImage(null);
+
+                    if(moveToPath.isEmpty()) {
+                        Files.delete(Paths.get(image.getPath()));
+                    } else {
+                        Files.move(Paths.get(image.getPath()), Paths.get(moveToPath + File.separatorChar + new File(image.getPath()).getName()));
+                    }
+                    this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -414,10 +480,9 @@ public class MainController implements Initializable {
                         tinifyTask = new TinifyTask(this.pbMain, this.lblMessages, width, height, this.tvMain.getSelectionModel().getSelectedItem().getValue());
                     }
                 }
-
-                if(tinifyTask!=null) {
-                    new Thread(tinifyTask).start();
-                }
+                assert tinifyTask != null;
+                tinifyTask.onFinish(()->this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue()));
+                new Thread(tinifyTask).start();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
@@ -988,37 +1053,37 @@ public class MainController implements Initializable {
     }
 
     private void fillImageList(Directory directory, String search) {
+        String finalSearch = search.trim();
         try {
-            search = search.trim();
-            if(directory!=null) {
-                this.lvMain.getItems().clear();
-                for(Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
-                    if(!new File(image.getPath()).exists()) {
+            if (directory != null) {
+                Platform.runLater(this.lvMain.getItems()::clear);
+                for (Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
+                    if (!new File(image.getPath()).exists()) {
                         PhotoManager.GLOBALS.getDatabase().deleteImage(image);
                         continue;
                     }
 
                     boolean foundItem = true;
-                    if(!search.isEmpty()) {
+                    if (!finalSearch.isEmpty()) {
                         foundItem = false;
-                        if(image.getCategory()!=null) {
+                        if (image.getCategory() != null) {
                             System.out.println(image.getCategory().getTitle());
-                            if(image.getCategory().getTitle().trim().toLowerCase().contains(search)) {
+                            if (image.getCategory().getTitle().trim().toLowerCase().contains(finalSearch)) {
                                 foundItem = true;
                             }
                         }
-                        if(!image.getTags().isEmpty()) {
-                            for(DescriptionObject descriptionObject : image.getTags()) {
+                        if (!image.getTags().isEmpty()) {
+                            for (DescriptionObject descriptionObject : image.getTags()) {
                                 System.out.println(descriptionObject.getTitle());
-                                if(descriptionObject.getTitle().trim().toLowerCase().contains(search)) {
+                                if (descriptionObject.getTitle().trim().toLowerCase().contains(finalSearch)) {
                                     foundItem = true;
                                 }
                             }
                         }
                     }
 
-                    if(foundItem) {
-                        this.lvMain.getItems().add(image);
+                    if (foundItem) {
+                        Platform.runLater(()->this.lvMain.getItems().add(image));
                     }
                 }
             }

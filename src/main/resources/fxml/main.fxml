@@ -35,6 +35,8 @@
                                             <items>
                                                 <MenuItem fx:id="ctxMainImageApply" mnemonicParsing="false" text="%main.image.menu.apply" />
                                                 <MenuItem fx:id="ctxMainImageSaveAs" mnemonicParsing="false" text="%main.image.menu.saveAs" />
+                                                <Menu fx:id="ctxMainImageMove" mnemonicParsing="false" text="%main.image.menu.move"/>
+                                                <MenuItem fx:id="ctxMainImageDelete" mnemonicParsing="false" text="%main.image.menu.delete" />
                                                 <MenuItem fx:id="ctxMainImageAssemble" mnemonicParsing="false" text="%main.image.menu.together" />
                                                 <MenuItem fx:id="ctxMainImageScale" mnemonicParsing="false" text="%main.image.menu.resize" />
                                             </items>
@@ -171,7 +173,7 @@
                                                 </TitledPane>
                                                 <TitledPane animated="false" text="%main.image.services">
                                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                        <MapView fx:id="gvMainMetaDataLocation" maxHeight="200.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
+                                                        <MapView fx:id="gvMainServicesLocation" maxHeight="200.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
                                                         <TitledPane fx:id="pnlMainTinify" animated="false" collapsible="false" layoutX="30.0" layoutY="45.0" prefHeight="130.0" text="%settings.tiny" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="190.0">
                                                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                 <TextField fx:id="txtMainTinifyWidth" layoutY="42.0" promptText="%main.image.services.tinify.width" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
