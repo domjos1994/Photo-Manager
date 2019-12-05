@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.maps.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="pane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
+    <TabPane fx:id="tbpMain" layoutX="35.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-6.0">
+        <Tab fx:id="tbMain" text="Main">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <SplitPane fx:id="splPaneDirectories" dividerPositions="0.25" layoutX="169.0" layoutY="49.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="38.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                        <TreeView fx:id="tvMain" layoutY="23.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
+                            <contextMenu>
+                                <ContextMenu>
+                                    <items>
+                                        <MenuItem fx:id="ctxMainDelete" mnemonicParsing="false" text="%sys.delete" />
+                                        <MenuItem fx:id="ctxMainRecreate" mnemonicParsing="false" text="%main.ctx.thumbnails" />
+                                        <MenuItem fx:id="ctxMainSlideshow" mnemonicParsing="false" text="%main.ctx.slideshow" />
+                                    </items>
+                                </ContextMenu>
+                            </contextMenu>
+                        </TreeView>
+                    </AnchorPane>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                        <SplitPane fx:id="splPaneImages" dividerPositions="0.2" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <ListView fx:id="lvMain" prefHeight="200.0" prefWidth="148.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <contextMenu>
+                                        <ContextMenu fx:id="ctxMainImage">
+                                            <items>
+                                                <MenuItem fx:id="ctxMainImageApply" mnemonicParsing="false" text="%main.image.menu.apply" />
+                                                <MenuItem fx:id="ctxMainImageSaveAs" mnemonicParsing="false" text="%main.image.menu.saveAs" />
+                                                <MenuItem fx:id="ctxMainImageAssemble" mnemonicParsing="false" text="%main.image.menu.together" />
+                                                <MenuItem fx:id="ctxMainImageScale" mnemonicParsing="false" text="%main.image.menu.resize" />
+                                            </items>
+                                        </ContextMenu>
+                                    </contextMenu>
+                                </ListView>
+                            </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <SplitPane fx:id="splPaneImage" dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
+                                        <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" layoutX="14.0" layoutY="437.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="darkSlateGray" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
+                                                    <Button fx:id="cmdMainImageSave" mnemonicParsing="false">
+                                                        <graphic>
+                                                            <ImageView fitHeight="16" fitWidth="16">
+                                                                <Image url="@../images/icons/save.png" />
+                                                            </ImageView>
+                                                        </graphic>
+                                                    </Button>
+                                                </ToolBar>
+                                                <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                            </AnchorPane>
+                                        </TitledPane>
+                                        <ScrollPane hbarPolicy="ALWAYS" hvalue="1.0" layoutX="14.0" layoutY="63.0" pannable="true" prefHeight="200.0" prefWidth="200.0" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="235.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <ImageView fx:id="ivMainImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="darkSlateGray" />
+                                        </ScrollPane>
+                                        <Slider fx:id="slMainImageZoom" layoutX="22.0" layoutY="481.0" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" styleClass="whiteColor" value="100.0" AnchorPane.bottomAnchor="205.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" />
+                                        <Label fx:id="lblMainImageZoom" layoutX="14.0" layoutY="479.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" styleClass="whiteColor" text="Label" AnchorPane.bottomAnchor="205.0" AnchorPane.leftAnchor="5.0" />
+                                        <Button fx:id="cmdMainImageZoom" layoutX="293.0" layoutY="475.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="50.0" AnchorPane.bottomAnchor="205.0" AnchorPane.rightAnchor="5.0">
+                                            <graphic>
+                                                <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                                                    <Image url="@../images/icons/search.png" />
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                    </AnchorPane>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
+                                        <Accordion layoutX="16.0" layoutY="93.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <panes>
+                                                <TitledPane animated="false" text="%main.image.histogram">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                        <BarChart id="histogram" fx:id="bcMainHistogram" barGap="0.0" categoryGap="0.0" layoutX="-174.0" layoutY="-28.0" maxHeight="0.0" minHeight="200.0" prefHeight="200.0" title="%main.image.histogram" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                            <xAxis>
+                                                                <CategoryAxis side="BOTTOM" />
+                                                            </xAxis>
+                                                            <yAxis>
+                                                                <NumberAxis side="LEFT" />
+                                                            </yAxis>
+                                                        </BarChart>
+                                                        <TitledPane animated="false" collapsible="false" layoutX="15.0" layoutY="409.0" maxHeight="150.0" text="%main.image.histogram.legend" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                <CheckBox fx:id="chkMainHistogram" layoutX="43.0" layoutY="73.0" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" selected="true" text="%main.image.histogram" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                <CheckBox fx:id="chkMainHistogramRed" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" selected="true" text="%main.image.histogram.red" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                <CheckBox fx:id="chkMainHistogramGreen" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" selected="true" text="%main.image.histogram.green" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
+                                                                <CheckBox fx:id="chkMainHistogramBlue" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" selected="true" text="%main.image.histogram.blue" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
+                                                            </AnchorPane>
+                                                        </TitledPane>
+                                                    </AnchorPane>
+                                                </TitledPane>
+                                                <TitledPane animated="false" text="%main.image.metadata">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                        <Label layoutX="55.0" layoutY="66.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.date" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                        <TextField fx:id="txtMainMetaDataDate" editable="false" layoutX="38.0" layoutY="197.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                        <TitledPane animated="false" collapsible="false" layoutX="-23.0" layoutY="53.0" prefHeight="80.0" text="%main.image.metadata.resolution" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="20.0">
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                <Label layoutX="33.0" layoutY="30.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.resolution.dpi" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                                <Label layoutX="102.0" layoutY="117.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.resolution.px" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                                                                <TextField fx:id="txtMainMetaDataDPIX" editable="false" layoutX="68.0" layoutY="50.0" minHeight="20.0" prefHeight="20.0" prefWidth="75.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="-5.0" />
+                                                                <TextField fx:id="txtMainMetaDataDPIY" editable="false" layoutX="23.0" layoutY="78.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                                <TextField fx:id="txtMainMetaDataPXX" editable="false" layoutY="90.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="75.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="20.0" />
+                                                                <TextField fx:id="txtMainMetaDataPXY" editable="false" layoutX="41.0" layoutY="110.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                                                            </AnchorPane>
+                                                        </TitledPane>
+                                                        <TitledPane animated="false" collapsible="false" layoutX="5.0" layoutY="110.0" prefHeight="55.0" text="%main.image.metadata.gps" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="100.0">
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                <TextField fx:id="txtMainMetaDataLongitude" editable="false" layoutX="68.0" layoutY="8.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="100.0" promptText="%main.image.metadata.gps.longitude" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                                <TextField fx:id="txtMainMetaDataLatitude" editable="false" layoutX="82.0" layoutY="3.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" promptText="%main.image.metadata.gps.latitude" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                            </AnchorPane>
+                                                        </TitledPane>
+                                                        <TitledPane animated="false" collapsible="false" layoutX="5.0" layoutY="193.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" text="%main.image.metadata.exif" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="155.0">
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.iso" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                                <TextField fx:id="txtMainMetaDataISO" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="-5.0" />
+                                                                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.aperture" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                                                                <TextField fx:id="txtMainMetaDataAperture" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="20.0" />
+                                                                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.exposureTime" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="45.0" />
+                                                                <TextField fx:id="txtMainMetaDataExposureTime" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="45.0" />
+                                                                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.camera" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="70.0" />
+                                                                <TextField fx:id="txtMainMetaDataCamera" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="70.0" />
+                                                                <Label layoutX="132.0" layoutY="101.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="50.0" text="%main.image.metadata.exif.editedWith" AnchorPane.leftAnchor="-5.0" AnchorPane.topAnchor="95.0" />
+                                                                <TextField fx:id="txtMainMetaDataSoftware" editable="false" layoutX="55.0" layoutY="44.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="95.0" />
+                                                            </AnchorPane>
+                                                        </TitledPane>
+                                                    </AnchorPane>
+                                                </TitledPane>
+                                                <TitledPane animated="false" text="%main.image.edit">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                        <Button fx:id="cmdMainImageEditSave" mnemonicParsing="false" AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-5.0">
+                                                            <graphic>
+                                                                <ImageView fitHeight="16" fitWidth="16">
+                                                                    <Image url="@../images/icons/save.png" />
+                                                                </ImageView>
+                                                            </graphic>
+                                                        </Button>
+                                                        <ScrollPane fitToWidth="true" prefHeight="400" prefWidth="400" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
+                                                            <AnchorPane>
+                                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.hue" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="220.0" />
+                                                                <Slider fx:id="slMainHue" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="220.0" />
+                                                                <ImageView fx:id="ivMainPreview" fitHeight="200.0" fitWidth="200.0" layoutX="30.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                    <viewport>
+                                                                        <Rectangle2D height="200.0" width="200.0" />
+                                                                    </viewport>
+                                                                </ImageView>
+                                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.saturation" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="260.0" />
+                                                                <Slider fx:id="slMainSaturation" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="260.0" />
+                                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.brightness" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="300.0" />
+                                                                <Slider fx:id="slMainBrightness" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="300.0" />
+                                                                <Label maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.rotate" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="340.0" />
+                                                                <Slider fx:id="slMainRotate" layoutX="10.0" layoutY="10.0" max="360.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="340.0" />
+                                                                <Label layoutX="60.0" layoutY="471.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.watermark" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="380.0" />
+                                                                <TextField fx:id="txtMainWatermark" layoutX="55.0" layoutY="460.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="380.0" />
+                                                                <CheckBox fx:id="chkMainResize" layoutX="24.0" layoutY="416.0" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="%main.image.edit.resize" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="420.0" />
+                                                                <TextField fx:id="txtMainResizeWidth" layoutX="5.0" layoutY="445.0" promptText="%main.image.edit.width" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="450.0" />
+                                                                <Label layoutX="80.0" layoutY="482.0" maxHeight="25.0" maxWidth="20.0" minHeight="25.0" minWidth="20.0" prefHeight="25.0" prefWidth="20.0" text="px" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="450.0" />
+                                                                <TextField fx:id="txtMainResizeHeight" layoutX="15.0" layoutY="455.0" promptText="%main.image.edit.height" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="480.0" />
+                                                                <Label layoutX="90.0" layoutY="492.0" maxHeight="25.0" maxWidth="20.0" minHeight="25.0" minWidth="20.0" prefHeight="25.0" prefWidth="20.0" text="px" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="480.0" />
+                                                                <Label layoutX="90.0" layoutY="492.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" text="%main.image.edit.filter" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="520.0" />
+                                                                <ComboBox fx:id="cmbMainFilter" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="520.0" />
+                                                            </AnchorPane>
+                                                        </ScrollPane>
+                                                    </AnchorPane>
+                                                </TitledPane>
+                                                <TitledPane animated="false" text="%main.image.services">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                        <MapView fx:id="gvMainServicesLocation" maxHeight="200.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
+                                                        <TitledPane fx:id="pnlMainTinify" animated="false" collapsible="false" layoutX="30.0" layoutY="45.0" prefHeight="130.0" text="%settings.tiny" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="190.0">
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                <TextField fx:id="txtMainTinifyWidth" layoutY="42.0" promptText="%main.image.services.tinify.width" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                <TextField fx:id="txtMainTinifyHeight" layoutX="50.0" layoutY="107.0" promptText="%main.image.services.tinify.height" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                <Button fx:id="cmdMainTinifyUpload" layoutX="57.0" layoutY="65.0" mnemonicParsing="false" text="%main.image.services.tinify.upload" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
+                                                            </AnchorPane>
+                                                        </TitledPane>
+                                                        <TitledPane animated="false" collapsible="false" layoutX="15.0" layoutY="338.0" text="%settings.cloud" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="320.0">
+                                                            <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                    <children>
+                                                                        <TreeView fx:id="tvMainCloudDirectories" layoutX="-9.0" layoutY="-25.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="25.0" />
+                                                                        <TextField fx:id="txtMainCloudPath" editable="false" layoutX="14.0" layoutY="14.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="-5.0" />
+                                                                        <Button fx:id="cmdMainCloudUpload" layoutX="24.0" layoutY="184.0" mnemonicParsing="false" text="%main.image.services.cloud.upload" AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-5.0" />
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            </content>
+                                                        </TitledPane>
+                                                    </AnchorPane>
+                                                </TitledPane>
+                                                <TitledPane fx:id="pnlMainImageUnsplash" animated="false" expanded="false" text="%main.image.unsplash">
+                                                    <content>
+                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <children>
+                                                                <TextField fx:id="txtMainImageUnsplashSearch" layoutX="14.0" layoutY="116.0" promptText="%main.image.unsplash.search" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
+                                                                <Button fx:id="cmdMainImageUnsplashSearch" layoutX="107.0" layoutY="189.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                    <graphic>
+                                                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                                            <image>
+                                                                                <Image url="@../images/icons/search.png" />
+                                                                            </image>
+                                                                        </ImageView>
+                                                                    </graphic>
+                                                                </Button>
+                                                                <ListView fx:id="lvMainImageUnsplash" layoutX="16.0" layoutY="109.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="60.0" />
+                                                                <Button fx:id="cmdMainImageUnsplashPrevious" layoutX="44.0" layoutY="35.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&lt;&lt;" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                <Button fx:id="cmdMainImageUnsplashNext" layoutX="116.0" layoutY="40.0" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0" text="&gt;&gt;" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                <Label fx:id="lblMainImageUnsplashPage" layoutX="82.0" layoutY="44.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" textAlignment="CENTER" AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="30.0" />
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </TitledPane>
+                                                <TitledPane animated="false" expanded="false" text="%main.image.history">
+                                                    <content>
+                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <children>
+                                                                <TableView fx:id="tblMainImageHistory" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
+                                                                    <columnResizePolicy>
+                                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                                    </columnResizePolicy>
+                                                                </TableView>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </TitledPane>
+                                            </panes>
+                                        </Accordion>
+                                    </AnchorPane>
+                                </SplitPane>
+                            </AnchorPane>
+                        </SplitPane>
+                    </AnchorPane>
+                </SplitPane>
+                <ToolBar id="toolBarTop" prefHeight="39.0" styleClass="darkSlateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <Button fx:id="cmdMainAddFolder" mnemonicParsing="false">
+                        <graphic>
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@../images/icons/folder.png" />
+                            </ImageView>
+                        </graphic>
+                    </Button>
+                    <TextField fx:id="txtMainFolderName" prefWidth="150" promptText="%sys.name" visible="false" />
+                    <CheckBox fx:id="chkMainRecursive" mnemonicParsing="false" text="%main.dir.recursive" visible="false" />
+                    <Button fx:id="cmdMainFolder" mnemonicParsing="false" text="..." visible="false" />
+                    <Button fx:id="cmdMainFolderSave" mnemonicParsing="false" visible="false">
+                        <graphic>
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@../images/icons/save.png" />
+                            </ImageView>
+                        </graphic>
+                    </Button>
+                    <HBox HBox.hgrow="ALWAYS" />
+               <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false" visible="false">
+                  <graphic>
+                     <ImageView fitHeight="16" fitWidth="16">
+                        <image>
+                           <Image url="@../images/icons/save.png" />
+                        </image>
+                     </ImageView>
+                  </graphic>
+               </Button>
+               <Button fx:id="cmdMainTemplateDelete" mnemonicParsing="false" visible="false">
+                  <graphic>
+                     <ImageView fitHeight="16" fitWidth="16">
+                        <image>
+                           <Image url="@../images/icons/delete.png" />
+                        </image>
+                     </ImageView>
+                  </graphic>
+               </Button>
+               <ComboBox fx:id="cmbMainTemplates" editable="true" prefWidth="150.0" promptText="%main.templates" visible="false" />
+               <Button fx:id="cmdMainTemplate" mnemonicParsing="false">
+                  <graphic>
+                     <ImageView fitHeight="16" fitWidth="16">
+                        <image>
+                           <Image url="@../images/icons/template.png" />
+                        </image>
+                     </ImageView>
+                  </graphic>
+               </Button>
+                    <TextField fx:id="txtMainImageSearch" prefWidth="0.0" visible="false" />
+                    <Button fx:id="cmdMainImageSearch" mnemonicParsing="false">
+                        <graphic>
+                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                <Image url="@../images/icons/search.png" />
+                            </ImageView>
+                        </graphic>
+                    </Button>
+                </ToolBar>
+            </AnchorPane>
+        </Tab>
+        <Tab fx:id="tbSettings" text="%main.menu.program.settings">
+            <fx:include fx:id="settings" source="settings.fxml" />
+        </Tab>
+        <Tab fx:id="tbMap" text="%main.menu.extras.map">
+            <fx:include fx:id="map" source="map.fxml" />
+        </Tab>
+        <Tab fx:id="tbSlideshow" text="%main.menu.program.settings">
+            <fx:include fx:id="slideshow" source="slideshow.fxml" />
+        </Tab>
+        <Tab fx:id="tbHelp" text="%main.menu.help">
+            <fx:include fx:id="help" source="help.fxml" />
+        </Tab>
+    </TabPane>
+    <MenuBar id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Menu mnemonicParsing="false" text="%main.menu.program">
+            <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="S" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="menMainClose" mnemonicParsing="false" text="%main.menu.program.close">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="C" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%main.menu.extras">
+            <MenuItem fx:id="menMainMap" mnemonicParsing="false" text="%main.menu.extras.map">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="M" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%main.menu.help">
+            <MenuItem fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="H" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
+        </Menu>
+    </MenuBar>
+    <ToolBar layoutY="360.0" nodeOrientation="RIGHT_TO_LEFT" styleClass="slateGray" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <ProgressBar fx:id="pbMain" prefWidth="200.0" progress="0.0" />
+        <HBox HBox.hgrow="ALWAYS" />
+        <Label fx:id="lblMessages" />
+    </ToolBar>
+</AnchorPane>
