@@ -1,36 +1,24 @@
 package de.domjos.photo_manager.controller.subController;
 
 import com.gluonhq.maps.MapPoint;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.Collections;
 import java.util.ResourceBundle;
 
-public class MetaDataController implements Initializable {
-    private MainController mainController;
-
+public class MetaDataController extends ParentController {
     private @FXML TextField txtDate;
     private @FXML TextField txtLong, txtLat;
     private @FXML TextField txtDpiX, txtDpiY, txtPxX, txtPxY;
     private @FXML TextField txtIso, txtAperture, txtExposureTime, txtSoftware, txtCamera;
     private Image image;
-
-    public MetaDataController() {
-
-    }
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

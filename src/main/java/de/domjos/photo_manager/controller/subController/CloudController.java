@@ -2,7 +2,6 @@ package de.domjos.photo_manager.controller.subController;
 
 import com.github.sardine.DavResource;
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.services.Cloud;
@@ -12,24 +11,17 @@ import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CloudController implements Initializable {
-    private MainController mainController;
-
+public class CloudController extends ParentController {
     private @FXML TextField txtPath;
     private @FXML TreeView<DavItem> tvDirectories;
     private @FXML Button cmdUpload;
 
     private WebDav webDav;
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     public TreeView<DavItem> getTreeView() {
         return this.tvDirectories;

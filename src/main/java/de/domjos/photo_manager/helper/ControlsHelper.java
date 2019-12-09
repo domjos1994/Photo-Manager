@@ -1,6 +1,8 @@
 package de.domjos.photo_manager.helper;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.controller.MainController;
+import de.domjos.photo_manager.controller.subController.ParentController;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -16,5 +18,9 @@ public class ControlsHelper {
             stringTableColumn.setCellValueFactory(new PropertyValueFactory<>(column[2]));
             tableView.getColumns().add(stringTableColumn);
         }
+    }
+
+    public static void initController(List<ParentController> controllers, MainController mainController) {
+        controllers.forEach(controller -> controller.init(mainController));
     }
 }

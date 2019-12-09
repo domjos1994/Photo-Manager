@@ -1,14 +1,12 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.services.UnsplashTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -21,19 +19,13 @@ import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class UnsplashController implements Initializable {
-    private MainController mainController;
-
+public class UnsplashController extends ParentController {
     private @FXML TitledPane pnlUnsplash;
     private @FXML TextField txtSearch;
     private @FXML Button cmdSearch, cmdPrevious, cmdNext;
     private @FXML Label lblPage;
     private @FXML ListView<Image> lvUnsplash;
     private final PopOver popOver = new PopOver();
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     public ListView<Image> getUnsplashListView() {
         return this.lvUnsplash;

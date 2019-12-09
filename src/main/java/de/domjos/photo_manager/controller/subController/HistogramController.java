@@ -1,13 +1,11 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
@@ -16,20 +14,10 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.*;
 
-public class HistogramController implements Initializable {
-    private MainController mainController;
-
+public class HistogramController extends ParentController {
     private @FXML BarChart<String, Integer> bcHistogram;
     private @FXML CheckBox chkHistogram, chkRed, chkGreen, chkBlue;
     private @FXML Image image;
-
-    public HistogramController() {
-
-    }
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

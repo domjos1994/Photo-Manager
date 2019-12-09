@@ -1,11 +1,11 @@
 package de.domjos.photo_manager.controller;
 
+import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
@@ -23,8 +23,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SlideshowController implements Initializable {
-    private MainController mainController;
+public class SlideshowController extends ParentController {
     private List<Image> images;
     private int counter;
 
@@ -95,10 +94,6 @@ public class SlideshowController implements Initializable {
                 Platform.runLater(() -> showImage());
             }
         };
-    }
-
-    void init(MainController mainController) {
-        this.mainController = mainController;
     }
 
     private void initBindings() {

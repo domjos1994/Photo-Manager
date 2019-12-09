@@ -1,6 +1,7 @@
 package de.domjos.photo_manager.controller;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
@@ -8,7 +9,6 @@ import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
@@ -27,9 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class SettingsController implements Initializable {
-    private MainController mainController;
-
+public class SettingsController extends ParentController {
     private @FXML Button cmdSettingsSave, cmdSettingsHome, cmdSettingsPath;
     private @FXML CheckBox chkSettingsDebugMode;
     private @FXML TextField txtSettingsPath;
@@ -251,7 +249,8 @@ public class SettingsController implements Initializable {
         this.tblSettingsDirectories.getItems().add(new DirRow());
     }
 
-    void init(MainController mainController) {
+    @Override
+    public void init(MainController mainController) {
         this.mainController = mainController;
         this.fillData();
         this.initDirTableView();

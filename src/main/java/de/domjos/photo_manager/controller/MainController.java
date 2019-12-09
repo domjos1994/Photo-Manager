@@ -67,7 +67,7 @@ public class MainController implements Initializable {
     private @FXML Label lblMainImageZoom;
     private @FXML Button cmdMainImageZoom;
 
-    private @FXML Button cmdMainAddFolder, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
+    private @FXML Button cmdMainAddFolder, cmdMainReload, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
     private @FXML TextField txtMainFolderName;
     private @FXML TextField txtMainImageCategory, txtMainImageTags, txtMainImageName;
@@ -117,7 +117,9 @@ public class MainController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         this.dirRows = new LinkedList<>();
-        this.initControllers();
+        ControlsHelper.initController(Arrays.asList(settingsController, mapController, slideshowController, helpController,
+            histogramController, metaDataController, tinifyController, unsplashController,
+            cloudController, editController), this);
         this.initBindings();
         this.initTinify();
         this.initTreeView();
@@ -137,6 +139,8 @@ public class MainController implements Initializable {
                 PhotoManager.GLOBALS.setClose(true);
             }
         });
+
+        this.cmdMainReload.setOnAction(event -> this.initTreeView());
 
         this.cmdMainAddFolder.setOnAction(event -> this.enableFolderControls());
         this.cmdMainFolder.setOnAction(event -> {
@@ -689,20 +693,6 @@ public class MainController implements Initializable {
 
         AnchorPane.setTopAnchor(this.tbpMain, hide ? -30.0 : -6.0);
         AnchorPane.setBottomAnchor(this.tbpMain, hide ? 0.0 : 30.0);
-    }
-
-    private void initControllers() {
-        this.settingsController.init(this);
-        this.mapController.init(this);
-        this.slideshowController.init(this);
-        this.helpController.init(this);
-
-        this.histogramController.init(this);
-        this.metaDataController.init(this);
-        this.tinifyController.init(this);
-        this.unsplashController.init(this);
-        this.cloudController.init(this);
-        this.editController.init(this);
     }
 
     public void reloadHistory(long id) throws Exception {

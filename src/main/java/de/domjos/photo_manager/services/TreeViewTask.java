@@ -14,12 +14,16 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 
 import java.io.FileInputStream;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
+    private List<Folder> folders;
 
     public TreeViewTask(ProgressBar progressBar, Label messages) {
         super(progressBar, messages);
+        this.folders = new LinkedList<>();
     }
 
     @Override
@@ -28,30 +32,42 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
         Directory directory = PhotoManager.GLOBALS.getDatabase().getRoot();
         TreeItem<Directory> root = new TreeItem<>(directory, getIcon());
         root.setExpanded(true);
-        addChildren(directory, root);
-        addFolder(root);
+        this.getFoldersFromSettings();
+        this.addChildren(directory, root);
+        this.addFoldersToTreeView(root);
         return root;
     }
 
     private void addChildren(Directory directory, TreeItem<Directory> parent) {
         for(Directory child : directory.getChildren()) {
+            AtomicBoolean pathContained = new AtomicBoolean(false);
+            this.folders.forEach(folder -> {
+                if(folder.getPath().equals(child.getPath())) {
+                    pathContained.set(true);
+                }
+            });
+
             TreeItem<Directory> childItem = new TreeItem<>(child, this.getIcon());
             childItem.setExpanded(true);
-            parent.getChildren().add(childItem);
+            if(!pathContained.get()) {
+                parent.getChildren().add(childItem);
+            } else {
+                if(!childItem.getChildren().isEmpty()) {
+                    parent.getChildren().add(childItem);
+                }
+            }
             this.addChildren(child, childItem);
         }
     }
 
-    private void addFolder(TreeItem<Directory> parent) {
+    private void getFoldersFromSettings() {
         List<SettingsController.DirRow> dirRowList = SettingsController.getRowsFromSettings();
         for(SettingsController.DirRow dirRow : dirRowList) {
             Folder folder = new Folder();
             folder.setTitle(dirRow.getTitle());
             folder.setPath(dirRow.getPath());
             folder.setIcon(dirRow.getIcon());
-
-            TreeItem<Directory> childItem = new TreeItem<>(folder, this.getIcon(folder.getIcon()));
-            parent.getChildren().add(childItem);
+            this.folders.add(folder);
         }
 
         String deleteFolder = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
@@ -60,11 +76,23 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
             folder.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.bin"));
             folder.setPath(deleteFolder);
             folder.setIcon("/images/icons/delete.png");
-
-            TreeItem<Directory> childItem = new TreeItem<>(folder, this.getIconFromResource(folder.getIcon()));
-            parent.getChildren().add(childItem);
+            this.folders.add(folder);
         }
     }
+
+    private void addFoldersToTreeView(TreeItem<Directory> parent) {
+        this.folders.forEach(folder -> {
+            if(folder.getTitle().equals(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.bin"))) {
+                TreeItem<Directory> childItem = new TreeItem<>(folder, this.getIconFromResource(folder.getIcon()));
+                parent.getChildren().add(childItem);
+            } else {
+                TreeItem<Directory> childItem = new TreeItem<>(folder, this.getIcon(folder.getIcon()));
+                parent.getChildren().add(childItem);
+            }
+
+        });
+    }
+
 
     private Node getIcon() {
         return new ImageView(

@@ -1,7 +1,6 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Template;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
@@ -9,16 +8,13 @@ import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class EditController implements Initializable {
-    private MainController mainController;
-
+public class EditController extends ParentController {
     private @FXML ImageView ivPreview;
     private @FXML Slider slSaturation, slHue, slBrightness, slRotate;
     private @FXML TextField txtWatermark;
@@ -28,10 +24,6 @@ public class EditController implements Initializable {
     private @FXML Button cmdSave;
     private @FXML ComboBox<String> cmbFilter;
     private Cache cache;
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     public ImageView getPreview() {
         return this.ivPreview;
@@ -209,7 +201,7 @@ public class EditController implements Initializable {
             }
             if(!this.cmbFilter.getSelectionModel().isEmpty()) {
                 String selectedFilter = this.cmbFilter.getSelectionModel().getSelectedItem();
-                ImageHelper.Filter.Type type = this.getFilterTypeBySelectedItem(selectedFilter);
+                ImageHelper.Filter.Type type = EditController.getFilterTypeBySelectedItem(selectedFilter);
                 if(type!=null) {
                     this.cache.setPreviewImage(ImageHelper.addFilter(this.cache.getPreviewImage(), type));
                 }

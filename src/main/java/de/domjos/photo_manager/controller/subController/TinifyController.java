@@ -1,12 +1,10 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.services.TinifyTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -14,16 +12,10 @@ import javafx.scene.control.TitledPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class TinifyController implements Initializable {
-    private MainController mainController;
-
+public class TinifyController extends ParentController {
     private @FXML TitledPane pnlTinify;
     private @FXML TextField txtWidth, txtHeight;
     private @FXML Button cmdUpload;
-
-    public void init(MainController mainController) {
-        this.mainController = mainController;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
