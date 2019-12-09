@@ -20,6 +20,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -559,7 +560,20 @@ public class MainController implements Initializable {
             }
         });
 
+        this.lvMain.setOnDragDetected(event -> {
+            if(!this.lvMain.getSelectionModel().isEmpty()) {
+                Dragboard db = this.lvMain.startDragAndDrop(TransferMode.COPY);
 
+                ClipboardContent content = new ClipboardContent();
+                List<File> files = new LinkedList<>();
+                for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
+                    files.add(new File(image.getPath()));
+                }
+                content.putFiles(files);
+                db.setContent(content);
+                event.consume();
+            }
+        });
 
         this.tvMain.setOnDragOver(mouseEvent -> {
             if(mouseEvent.getGestureSource() != this.tvMain && mouseEvent.getDragboard().hasString()) {
