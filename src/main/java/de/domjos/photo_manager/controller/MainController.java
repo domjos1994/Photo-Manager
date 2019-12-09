@@ -278,6 +278,10 @@ public class MainController implements Initializable {
                         Image image = this.lvMain.getSelectionModel().getSelectedItem();
                         BufferedImage bufferedImage = this.getEditedImage(false);
                         ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                        Dialogs.printNotification(Alert.AlertType.INFORMATION,
+                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success"),
+                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success")
+                        );
                     } catch (Exception ex) {
                         Dialogs.printException(ex);
                     }
