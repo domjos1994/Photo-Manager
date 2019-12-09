@@ -9,7 +9,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -26,11 +28,13 @@ public class SlideshowController implements Initializable {
     private List<Image> images;
     private int counter;
 
+    private @FXML ToolBar toolbar;
     private @FXML Button cmdSlideshowHome, cmdSlideshowNext, cmdSlideshowPrevious;
     private @FXML Button cmdSlideshowPlay, cmdSlideshowStop;
     private @FXML TextField txtSlideshowLength;
     private @FXML ImageView ivSlideshow;
     private @FXML CheckBox chkSlideshowFullscreen;
+    private boolean hasListener = false;
 
     private Timer timer;
 
@@ -72,6 +76,11 @@ public class SlideshowController implements Initializable {
         });
 
         this.chkSlideshowFullscreen.setOnAction(actionEvent -> {
+            if(!this.hasListener) {
+                ((Stage) this.chkSlideshowFullscreen.getScene().getWindow()).fullScreenProperty().addListener(((observableValue, aBoolean, t1) -> this.resizeControls()));
+                this.hasListener = true;
+            }
+
             boolean full = this.chkSlideshowFullscreen.isSelected();
 
             ((Stage) this.chkSlideshowFullscreen.getScene().getWindow()).setFullScreen(full);
@@ -133,5 +142,15 @@ public class SlideshowController implements Initializable {
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }
+    }
+
+    private void resizeControls() {
+        boolean fullScreen = ((Stage) this.chkSlideshowFullscreen.getScene().getWindow()).isFullScreen();
+        this.chkSlideshowFullscreen.setSelected(fullScreen);
+
+        this.toolbar.setVisible(!fullScreen);
+        AnchorPane.setTopAnchor(this.ivSlideshow, fullScreen ? -60.0 : 40.0);
+        AnchorPane.setBottomAnchor(this.ivSlideshow, fullScreen ? -30.0 : 0.0);
+        this.mainController.hideBars(fullScreen);
     }
 }

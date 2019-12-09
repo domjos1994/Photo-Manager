@@ -175,11 +175,13 @@ public class SettingsController implements Initializable {
         while(!PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_TITLE + "_" + index, "").equals("")) {
             String title = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_TITLE + "_" + index, "");
             String path = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_PATH + "_" + index, "");
+            String icon = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_ICON + "_" + index, "");
 
             if(!path.trim().isEmpty()) {
                 DirRow dirRow = new DirRow();
                 dirRow.setTitle(title);
                 dirRow.setPath(path);
+                dirRow.setIcon(icon);
                 dirRows.add(dirRow);
             }
             index++;
@@ -193,6 +195,7 @@ public class SettingsController implements Initializable {
             if(!dirRow.getTitle().trim().isEmpty() && !dirRow.getPath().trim().isEmpty()) {
                 PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_TITLE + "_" + index, dirRow.getTitle().trim(), false);
                 PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_PATH + "_" + index, dirRow.getPath().trim(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES_ICON + "_" + index, dirRow.getIcon().trim(), false);
             }
             index++;
         }
@@ -227,8 +230,24 @@ public class SettingsController implements Initializable {
         colSettingsDirectoriesPath.setMinWidth(350);
         colSettingsDirectoriesPath.setPrefWidth(500);
 
+        TableColumn<DirRow, String> colSettingsDirectoriesIcon = new TableColumn<>(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.icon"));
+        colSettingsDirectoriesIcon.setCellValueFactory(new PropertyValueFactory<>("icon"));
+        colSettingsDirectoriesIcon.setEditable(true);
+        colSettingsDirectoriesIcon.setOnEditStart(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.icon"));
+            File file = directoryChooser.showDialog(null);
+            if(file!=null) {
+                event.getRowValue().setIcon(file.getAbsolutePath());
+                this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
+            }
+        });
+        colSettingsDirectoriesIcon.setMinWidth(350);
+        colSettingsDirectoriesIcon.setPrefWidth(500);
+
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesIcon);
         this.tblSettingsDirectories.getItems().add(new DirRow());
     }
 
@@ -239,12 +258,13 @@ public class SettingsController implements Initializable {
     }
 
     public static class DirRow {
-        private String title, path;
+        private String title, path, icon;
 
         public DirRow() {
             super();
             this.title = "";
             this.path = "";
+            this.icon = "";
         }
 
         public String getTitle() {
@@ -261,6 +281,14 @@ public class SettingsController implements Initializable {
 
         public void setPath(String path) {
             this.path = path;
+        }
+
+        public String getIcon() {
+            return this.icon;
+        }
+
+        public void setIcon(String icon) {
+            this.icon = icon;
         }
     }
 }

@@ -39,6 +39,7 @@ public class Globals {
     public final static String DIRECTORIES_DELETE_KEY = "DIRECTORIES_DELETE_KEY";
     public final static String DIRECTORIES_TITLE = "DIRECTORIES_TITLE";
     public final static String DIRECTORIES_PATH = "DIRECTORIES_PATH";
+    public final static String DIRECTORIES_ICON = "DIRECTORIES_ICON";
 
     // Keys of Split-Pane-Positions
     public final static String POSITION_DIRECTORIES = "POSITION_DIRECTORIES";

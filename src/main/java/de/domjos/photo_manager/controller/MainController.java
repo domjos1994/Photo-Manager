@@ -3,11 +3,9 @@ package de.domjos.photo_manager.controller;
 import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.*;
+import de.domjos.photo_manager.helper.ControlsHelper;
 import de.domjos.photo_manager.helper.ImageHelper;
-import de.domjos.photo_manager.model.gallery.Directory;
-import de.domjos.photo_manager.model.gallery.Image;
-import de.domjos.photo_manager.model.gallery.Template;
-import de.domjos.photo_manager.model.gallery.TemporaryEdited;
+import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.*;
@@ -21,10 +19,10 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import org.apache.commons.io.FileUtils;
@@ -39,13 +37,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class MainController implements Initializable {
     private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
+
+    private @FXML MenuBar menMain;
+    private @FXML ToolBar toolbarMain;
 
     private @FXML TabPane tbpMain;
     private @FXML Tab tbMain, tbSettings, tbMap, tbSlideshow, tbHelp;
@@ -69,7 +67,7 @@ public class MainController implements Initializable {
     private @FXML Button cmdMainAddFolder, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
     private @FXML TextField txtMainFolderName;
-    private @FXML TextField txtMainImageCategory, txtMainImageTags;
+    private @FXML TextField txtMainImageCategory, txtMainImageTags, txtMainImageName;
 
     private @FXML Button cmdMainImageSearch;
     private @FXML TextField txtMainImageSearch;
@@ -396,6 +394,10 @@ public class MainController implements Initializable {
                         image.setCategory(descriptionObject);
                     }
 
+                    if(!this.txtMainImageName.getText().trim().isEmpty()) {
+                        image.setTitle(this.txtMainImageName.getText().trim());
+                    }
+
                     if(!this.txtMainImageTags.getText().trim().isEmpty()) {
                         String tags = this.txtMainImageTags.getText().trim();
                         if(tags.contains(";")) {
@@ -421,6 +423,7 @@ public class MainController implements Initializable {
 
                     PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
                     Dialogs.printNotification(Alert.AlertType.INFORMATION, resources.getString("main.image.saved"), resources.getString("main.image.saved"));
+                    this.lvMain.getItems().set(this.lvMain.getSelectionModel().getSelectedIndex(), image);
                 } else {
                     if(!this.tvMain.getSelectionModel().isEmpty()) {
                         Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
@@ -648,6 +651,14 @@ public class MainController implements Initializable {
         return this.tvMain;
     }
 
+    public void hideBars(boolean hide) {
+        this.toolbarMain.setVisible(!hide);
+        this.menMain.setVisible(!hide);
+
+        AnchorPane.setTopAnchor(this.tbpMain, hide ? -30.0 : -6.0);
+        AnchorPane.setBottomAnchor(this.tbpMain, hide ? 0.0 : 30.0);
+    }
+
     private void initControllers() {
         this.settingsController.init(this);
         this.mapController.init(this);
@@ -680,14 +691,10 @@ public class MainController implements Initializable {
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmdMainTemplateDelete.visibleProperty());
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
 
-        TableColumn<TemporaryEdited, String> changeType = new TableColumn<>("ChangeType");
-        changeType.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.type"));
-        changeType.setCellValueFactory(new PropertyValueFactory<>("changeType"));
-        TableColumn<TemporaryEdited, String>  value = new TableColumn<>("Value");
-        value.setText(PhotoManager.GLOBALS.getLanguage().getString("main.image.history.value"));
-        value.setCellValueFactory(new PropertyValueFactory<>("stringValue"));
-        this.tblMainImageHistory.getColumns().add(changeType);
-        this.tblMainImageHistory.getColumns().add(value);
+        ControlsHelper.addColumnsToTable(this.tblMainImageHistory, Arrays.asList(
+            new String[]{"ChangeType", "main.image.history.type", "changeType"},
+            new String[]{"Value", "main.image.history.value", "stringValue"}
+        ));
 
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
@@ -783,34 +790,56 @@ public class MainController implements Initializable {
         String finalSearch = search.trim();
         try {
             if (directory != null) {
-                Platform.runLater(this.lvMain.getItems()::clear);
-                for (Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
-                    if (!new File(image.getPath()).exists()) {
-                        PhotoManager.GLOBALS.getDatabase().deleteImage(image);
-                        continue;
-                    }
-
-                    boolean foundItem = true;
-                    if (!finalSearch.isEmpty()) {
-                        foundItem = false;
-                        if (image.getCategory() != null) {
-                            System.out.println(image.getCategory().getTitle());
-                            if (image.getCategory().getTitle().trim().toLowerCase().contains(finalSearch)) {
-                                foundItem = true;
+                if(directory instanceof Folder) {
+                    Platform.runLater(this.lvMain.getItems()::clear);
+                    Folder folder = (Folder) directory;
+                    Files.list(Paths.get(folder.getPath())).forEach(path -> {
+                        try {
+                            File file = path.toFile();
+                            if(file.isFile()) {
+                                String extension = FilenameUtils.getExtension(file.getAbsolutePath());
+                                if(Arrays.asList(ImageHelper.EXTENSIONS).contains(extension)) {
+                                    Image image = new Image();
+                                    image.setPath(file.getAbsolutePath());
+                                    image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
+                                    image.setTitle(file.getName());
+                                    Platform.runLater(()->this.lvMain.getItems().add(image));
+                                }
                             }
+                        } catch (Exception ex) {
+                            Dialogs.printException(ex);
                         }
-                        if (!image.getTags().isEmpty()) {
-                            for (DescriptionObject descriptionObject : image.getTags()) {
-                                System.out.println(descriptionObject.getTitle());
-                                if (descriptionObject.getTitle().trim().toLowerCase().contains(finalSearch)) {
+                    });
+                } else {
+                    Platform.runLater(this.lvMain.getItems()::clear);
+                    for (Image image : PhotoManager.GLOBALS.getDatabase().getImages(directory, false)) {
+                        if (!new File(image.getPath()).exists()) {
+                            PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+                            continue;
+                        }
+
+                        boolean foundItem = true;
+                        if (!finalSearch.isEmpty()) {
+                            foundItem = false;
+                            if (image.getCategory() != null) {
+                                System.out.println(image.getCategory().getTitle());
+                                if (image.getCategory().getTitle().trim().toLowerCase().contains(finalSearch)) {
                                     foundItem = true;
                                 }
                             }
+                            if (!image.getTags().isEmpty()) {
+                                for (DescriptionObject descriptionObject : image.getTags()) {
+                                    System.out.println(descriptionObject.getTitle());
+                                    if (descriptionObject.getTitle().trim().toLowerCase().contains(finalSearch)) {
+                                        foundItem = true;
+                                    }
+                                }
+                            }
                         }
-                    }
 
-                    if (foundItem) {
-                        Platform.runLater(()->this.lvMain.getItems().add(image));
+                        if (foundItem) {
+                            Platform.runLater(()->this.lvMain.getItems().add(image));
+                        }
                     }
                 }
             }
@@ -824,6 +853,7 @@ public class MainController implements Initializable {
             Image image = this.lvMain.getSelectionModel().getSelectedItem();
             if(image!=null) {
                 this.pnlMainImage.setText(image.getTitle());
+                this.txtMainImageName.setText(image.getTitle());
                 if(image.getCategory()!=null) {
                     this.txtMainImageCategory.setText(image.getCategory().getTitle());
                 } else {

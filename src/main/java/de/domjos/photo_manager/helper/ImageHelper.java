@@ -31,7 +31,7 @@ import java.util.Iterator;
  * @version 0.1
  */
 public class ImageHelper {
-    private final static String[] EXTENSIONS = new String[]{"gif", "png", "bmp", "PNG", "jpg", "jpeg", "JPG"};
+    public final static String[] EXTENSIONS = new String[]{"gif", "png", "bmp", "PNG", "jpg", "jpeg", "JPG"};
 
     /**
      * Returns Supported Image-Extension-Filters

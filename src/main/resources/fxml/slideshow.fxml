@@ -11,7 +11,7 @@
 <?import javafx.scene.control.CheckBox?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SlideshowController">
    <children>
-      <ToolBar styleClass="darkSlateGray" layoutX="67.0" layoutY="69.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ToolBar fx:id="toolbar" styleClass="darkSlateGray" layoutX="67.0" layoutY="69.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <items>
             <Button fx:id="cmdSlideshowHome" mnemonicParsing="false">
                 <graphic>

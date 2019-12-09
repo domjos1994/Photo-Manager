@@ -58,8 +58,9 @@
                                                         </graphic>
                                                     </Button>
                                                 </ToolBar>
-                                                <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                <TextField fx:id="txtMainImageName" layoutX="110.0" layoutY="61.0" promptText="%sys.name" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
                                             </AnchorPane>
                                         </TitledPane>
                                         <ScrollPane hbarPolicy="ALWAYS" hvalue="1.0" layoutX="14.0" layoutY="63.0" pannable="true" prefHeight="200.0" prefWidth="200.0" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="235.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -181,7 +182,7 @@
             <fx:include fx:id="help" source="help.fxml" />
         </Tab>
     </TabPane>
-    <MenuBar id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <MenuBar fx:id="menMain" id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>
@@ -209,7 +210,7 @@
             </MenuItem>
         </Menu>
     </MenuBar>
-    <ToolBar layoutY="360.0" nodeOrientation="RIGHT_TO_LEFT" styleClass="slateGray" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+    <ToolBar fx:id="toolbarMain" layoutY="360.0" nodeOrientation="RIGHT_TO_LEFT" styleClass="slateGray" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <ProgressBar fx:id="pbMain" prefWidth="200.0" progress="0.0" />
         <HBox HBox.hgrow="ALWAYS" />
         <Label fx:id="lblMessages" />
