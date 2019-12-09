@@ -1,11 +1,29 @@
-.root {
-    -fx-background-color: #2f4f4f;
-}
-
 .slateGray,
 .split-pane:vertical > .split-pane-divider,
-.split-pane:horizontal > .split-pane-divider {
+.split-pane:horizontal > .split-pane-divider,
+.button,
+.titled-pane > *.content,
+.titled-pane > .title,
+.list-cell:filled:selected,
+.tree-cell:selected,
+.scroll-bar:horizontal, .scroll-bar:vertical,
+.scroll-pane > .corner,
+.table-row-cell:odd,
+.table-view .column-header .label,
+.menu-item {
     -fx-background-color: #708090;
+}
+
+.darkSlateGray,
+.root,
+.tree-view, .tree-cell,
+.list-view, .list-cell,
+.titled-pane > *.content,
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb,
+.table-view,
+.table-row-cell {
+    -fx-background-color: #383f46;
 }
 
 .split-pane:vertical > .split-pane-divider {
@@ -19,7 +37,6 @@
 }
 
 .button {
-    -fx-background-color: #708090;
     -fx-text-fill: white;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
@@ -27,7 +44,6 @@
 
 .titled-pane > *.content,
 .titled-pane > .title {
-    -fx-background-color: #708090;
     -fx-text-fill: white;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
@@ -36,13 +52,7 @@
 .tree-view, .tree-cell,
 .list-view, .list-cell,
 .titled-pane > *.content {
-     -fx-background-color: #2f4f4f;
      -fx-text-fill: white;
-}
-
-.list-cell:filled:selected,
-.tree-cell:selected {
-    -fx-background-color: #708090;
 }
 
 .list-view, .tree-view {
@@ -62,14 +72,12 @@
 
 .scroll-bar:horizontal, .scroll-bar:vertical,
 .scroll-pane > .corner {
-    -fx-background-color: #708090;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
 
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .thumb {
-    -fx-background-color: #2f4f4f;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
@@ -96,7 +104,6 @@
 }
 
 .table-view {
-    -fx-background-color: #2f4f4f;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
@@ -106,13 +113,11 @@
 }
 
 .table-row-cell{
-    -fx-background-color: #2f4f4f;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
 
-.table-row-cell:odd{
-    -fx-background-color: #708090;
+.table-row-cell:odd {
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
@@ -121,7 +126,6 @@
 .table-view .column-header .label,
 .menu-item {
     -fx-font-weight: bold;
-    -fx-background-color: #708090;
     -fx-border-width: 1 1 1 1;
     -fx-border-color: white;
 }
@@ -130,10 +134,6 @@
 #menMain {
     -fx-border-width: 0 0 1 0;
     -fx-border-color: white;
-}
-
-.darkSlateGray {
-    -fx-background-color: #2f4f4f;
 }
 
 .whiteColor {
