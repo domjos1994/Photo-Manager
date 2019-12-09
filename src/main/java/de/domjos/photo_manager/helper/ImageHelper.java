@@ -196,42 +196,47 @@ public class ImageHelper {
     }
 
     public static void changeHSB(BufferedImage bufferedImage, BufferedImage original, int hue, int saturation, int brightness) {
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
+        if(bufferedImage!=null) {
+            int width = bufferedImage.getWidth();
+            int height = bufferedImage.getHeight();
 
-        for(int y = 0; y<=height-1; y++) {
-            for(int x = 0; x<=width-1; x++) {
-                Color color = new Color(original.getRGB(x, y));
-                float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-                hsb[0] = ((hsb[0]/100f) * hue);
-                hsb[1] = ((hsb[1]/100f) * saturation);
-                hsb[2] = ((hsb[2]/100f) * brightness);
-                int rgb = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
-                bufferedImage.setRGB(x, y, rgb);
+            for(int y = 0; y<=height-1; y++) {
+                for(int x = 0; x<=width-1; x++) {
+                    Color color = new Color(original.getRGB(x, y));
+                    float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+                    hsb[0] = ((hsb[0]/100f) * hue);
+                    hsb[1] = ((hsb[1]/100f) * saturation);
+                    hsb[2] = ((hsb[2]/100f) * brightness);
+                    int rgb = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
+                    bufferedImage.setRGB(x, y, rgb);
+                }
             }
         }
     }
 
     public static BufferedImage rotate(BufferedImage img, int degrees) {
-        double rads = Math.toRadians(degrees);
-        int w = img.getWidth();
-        int h = img.getHeight();
+        if(img != null) {
+            double rads = Math.toRadians(degrees);
+            int w = img.getWidth();
+            int h = img.getHeight();
 
-        BufferedImage rotated = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = rotated.createGraphics();
-        AffineTransform at = new AffineTransform();
+            BufferedImage rotated = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = rotated.createGraphics();
+            AffineTransform at = new AffineTransform();
 
-        int x = w / 2;
-        int y = h / 2;
+            int x = w / 2;
+            int y = h / 2;
 
-        at.rotate(rads, x, y);
-        g2d.setTransform(at);
-        g2d.drawImage(img, 0, 0, null);
-        g2d.setColor(Color.RED);
-        g2d.drawRect(0, 0, w - 1, h - 1);
-        g2d.dispose();
+            at.rotate(rads, x, y);
+            g2d.setTransform(at);
+            g2d.drawImage(img, 0, 0, null);
+            g2d.setColor(Color.RED);
+            g2d.drawRect(0, 0, w - 1, h - 1);
+            g2d.dispose();
 
-        return rotated;
+            return rotated;
+        }
+        return null;
     }
 
     public static BufferedImage deepCopy(BufferedImage bi) {
@@ -400,33 +405,41 @@ public class ImageHelper {
 
     private static class InvertFilter implements Filter {
         public BufferedImage processImage(BufferedImage image) {
-            byte[] invertArray = new byte[256];
+            if(image!=null) {
+                byte[] invertArray = new byte[256];
 
-            for (int counter = 0; counter < 256; counter++)
-                invertArray[counter] = (byte) (255 - counter);
+                for (int counter = 0; counter < 256; counter++)
+                    invertArray[counter] = (byte) (255 - counter);
 
-            BufferedImageOp invertFilter = new LookupOp(new ByteLookupTable(0, invertArray), null);
-            return invertFilter.filter(image, null);
-
+                BufferedImageOp invertFilter = new LookupOp(new ByteLookupTable(0, invertArray), null);
+                return invertFilter.filter(image, null);
+            }
+            return null;
         }
     }
 
     private static class SharpenFilter implements Filter {
         public BufferedImage processImage(BufferedImage image) {
-            float[] sharpenMatrix = { 0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f };
-            BufferedImageOp sharpenFilter = new ConvolveOp(new Kernel(3, 3, sharpenMatrix),
-                    ConvolveOp.EDGE_NO_OP, null);
-            return sharpenFilter.filter(image, null);
+            if(image!=null) {
+                float[] sharpenMatrix = { 0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f };
+                BufferedImageOp sharpenFilter = new ConvolveOp(new Kernel(3, 3, sharpenMatrix),
+                        ConvolveOp.EDGE_NO_OP, null);
+                return sharpenFilter.filter(image, null);
+            }
+            return null;
         }
     }
 
     private static class BlurFilter implements Filter {
         public BufferedImage processImage(BufferedImage image) {
-            float[] blurMatrix = { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f,
-                    1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
-            BufferedImageOp blurFilter = new ConvolveOp(new Kernel(3, 3, blurMatrix),
-                    ConvolveOp.EDGE_NO_OP, null);
-            return blurFilter.filter(image, null);
+            if(image!=null) {
+                float[] blurMatrix = { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f,
+                        1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
+                BufferedImageOp blurFilter = new ConvolveOp(new Kernel(3, 3, blurMatrix),
+                        ConvolveOp.EDGE_NO_OP, null);
+                return blurFilter.filter(image, null);
+            }
+            return null;
         }
     }
 }

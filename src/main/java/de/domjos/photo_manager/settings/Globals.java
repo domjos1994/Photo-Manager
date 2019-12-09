@@ -45,6 +45,10 @@ public class Globals {
     public final static String POSITION_DIRECTORIES = "POSITION_DIRECTORIES";
     public final static String POSITION_IMAGES = "POSITION_IMAGES";
     public final static String POSITION_IMAGE = "POSITION_IMAGE";
+    public final static String POSITION_WINDOW_X = "POSITION_WINDOW_X";
+    public final static String POSITION_WINDOW_Y = "POSITION_WINDOW_Y";
+    public final static String POSITION_WINDOW_WIDTH = "POSITION_WINDOW_WIDTH";
+    public final static String POSITION_WINDOW_HEIGHT = "POSITION_WINDOW_HEIGHT";
 
     public Globals() {
         this.debugMode = false;

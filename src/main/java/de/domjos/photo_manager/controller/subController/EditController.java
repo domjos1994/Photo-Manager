@@ -86,7 +86,7 @@ public class EditController implements Initializable {
         }
     }
 
-    public ImageHelper.Filter.Type getFilterTypeBySelectedItem(String item) {
+    public static ImageHelper.Filter.Type getFilterTypeBySelectedItem(String item) {
         ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
         String keyPart = "main.image.edit.filter.";
 

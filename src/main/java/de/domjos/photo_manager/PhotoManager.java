@@ -41,7 +41,9 @@ public class PhotoManager extends Application {
         if(PhotoManager.GLOBALS.isDebugMode()) {
             title += " - (Debug)";
         }
-        Dialogs.printFXML("/fxml/main.fxml", language, title, false);
+        Stage stage = Dialogs.printFXML("/fxml/main.fxml", language, title, primaryStage);
+        stage.show();
+        this.initSizes(stage);
         Platform.setImplicitExit(false);
         primaryStage.setOnCloseRequest(event -> {
             try {
@@ -61,6 +63,25 @@ public class PhotoManager extends Application {
                 Dialogs.printException(ex);
             }
         });
+    }
+
+    private void initSizes(Stage stage) {
+        stage.setX(PhotoManager.GLOBALS.getSetting(Globals.POSITION_WINDOW_X, stage.getX()));
+        stage.setY(PhotoManager.GLOBALS.getSetting(Globals.POSITION_WINDOW_Y, stage.getY()));
+        stage.setWidth(PhotoManager.GLOBALS.getSetting(Globals.POSITION_WINDOW_WIDTH, stage.getWidth()));
+        stage.setHeight(PhotoManager.GLOBALS.getSetting(Globals.POSITION_WINDOW_HEIGHT, stage.getHeight()));
+
+        stage.widthProperty().addListener(obs -> this.savePosition(stage));
+        stage.heightProperty().addListener(obs -> this.savePosition(stage));
+        stage.xProperty().addListener(obs -> this.savePosition(stage));
+        stage.yProperty().addListener(obs -> this.savePosition(stage));
+    }
+
+    private void savePosition(Stage stage) {
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_WINDOW_X, stage.getX(), false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_WINDOW_Y, stage.getY(), false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_WINDOW_WIDTH, stage.getWidth(), false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_WINDOW_HEIGHT, stage.getHeight(), false);
     }
 
     public static void main(String[] args) {

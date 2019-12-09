@@ -22,11 +22,7 @@ import java.util.*;
 
 public final class Dialogs {
 
-    public static void printFXML(String path, ResourceBundle language, String header, boolean wait) throws Exception {
-        Dialogs.printFXML(path, language, header, wait, PhotoManager.GLOBALS.getStage());
-    }
-
-    public static void printFXML(String path, ResourceBundle language, String header, boolean wait, Stage stage) throws Exception {
+    public static Stage printFXML(String path, ResourceBundle language, String header, Stage stage) throws Exception {
         Parent root = FXMLLoader.load(PhotoManager.class.getResource(path), language);
         Scene scene = new Scene(root);
         scene.getStylesheets().add(Dialogs.class.getResource("/styles/style.css").toExternalForm());
@@ -34,11 +30,7 @@ public final class Dialogs {
         stage.setTitle(header);
         stage.getIcons().add(new Image(PhotoManager.class.getResourceAsStream("/images/header.png")));
 
-        if(wait) {
-            stage.showAndWait();
-        } else {
-            stage.show();
-        }
+        return stage;
     }
 
     public static void printAlert(Alert.AlertType type, String title, String header, String content) {
