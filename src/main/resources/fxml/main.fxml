@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.gluonhq.maps.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="pane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
+<AnchorPane id="pane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
     <TabPane fx:id="tbpMain" layoutX="35.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-6.0">
         <Tab fx:id="tbMain" text="Main">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -35,7 +33,7 @@
                                             <items>
                                                 <MenuItem fx:id="ctxMainImageApply" mnemonicParsing="false" text="%main.image.menu.apply" />
                                                 <MenuItem fx:id="ctxMainImageSaveAs" mnemonicParsing="false" text="%main.image.menu.saveAs" />
-                                                <Menu fx:id="ctxMainImageMove" mnemonicParsing="false" text="%main.image.menu.move"/>
+                                                <Menu fx:id="ctxMainImageMove" mnemonicParsing="false" text="%main.image.menu.move" />
                                                 <MenuItem fx:id="ctxMainImageDelete" mnemonicParsing="false" text="%main.image.menu.delete" />
                                                 <MenuItem fx:id="ctxMainImageAssemble" mnemonicParsing="false" text="%main.image.menu.together" />
                                                 <MenuItem fx:id="ctxMainImageScale" mnemonicParsing="false" text="%main.image.menu.resize" />
@@ -79,17 +77,17 @@
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
                                         <Accordion layoutX="16.0" layoutY="93.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <panes>
-                                                <fx:include source="main_histogram.fxml" fx:id="histogram"/>
-                                                <fx:include source="main_metaData.fxml" fx:id="metaData"/>
-                                                <fx:include source="main_edit.fxml" fx:id="edit"/>
+                                                <fx:include fx:id="histogram" source="main_histogram.fxml" />
+                                                <fx:include fx:id="metaData" source="main_metaData.fxml" />
+                                                <fx:include fx:id="edit" source="main_edit.fxml" />
                                                 <TitledPane animated="false" text="%main.image.services">
                                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                         <MapView fx:id="gvMainServicesLocation" maxHeight="200.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
-                                                        <fx:include source="main_services_tinify.fxml" fx:id="tinify"/>
-                                                        <fx:include source="main_services_cloud.fxml" fx:id="cloud" />
+                                                        <fx:include fx:id="tinify" source="main_services_tinify.fxml" />
+                                                        <fx:include fx:id="cloud" source="main_services_cloud.fxml" />
                                                     </AnchorPane>
                                                 </TitledPane>
-                                                <fx:include source="main_services_unsplash.fxml" fx:id="unsplash"/>
+                                                <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
                                                 <TitledPane animated="false" expanded="false" text="%main.image.history">
                                                     <content>
                                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -165,7 +163,7 @@
                      </ImageView>
                   </graphic>
                </Button>
-                    <TextField fx:id="txtMainImageSearch" prefWidth="0.0" visible="false" />
+                    <TextField fx:id="txtMainImageSearch" minWidth="0.0" prefWidth="0.0" visible="false" />
                     <Button fx:id="cmdMainImageSearch" mnemonicParsing="false">
                         <graphic>
                             <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
@@ -189,7 +187,7 @@
             <fx:include fx:id="help" source="help.fxml" />
         </Tab>
     </TabPane>
-    <MenuBar fx:id="menMain" id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <MenuBar id="menMain" fx:id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>

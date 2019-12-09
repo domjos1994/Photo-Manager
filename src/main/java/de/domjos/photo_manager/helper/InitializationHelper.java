@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -30,18 +29,14 @@ public class InitializationHelper {
      */
     public static void initializePath() {
         if(PhotoManager.GLOBALS.isEmpty(Globals.PATH)) {
-            List<File> files = Dialogs.printFileChooser(PhotoManager.GLOBALS.getLanguage().getString("main.initialize.path"), true, true, false, null);
+            File files = Dialogs.printDirectoryChooser(PhotoManager.GLOBALS.getLanguage().getString("main.initialize.path"));
             if(files!=null) {
-                if(!files.isEmpty()) {
-                    PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.get(0).getAbsolutePath(), false);
-                    File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
-                    if(!file.exists()) {
-                        if(!file.mkdirs()) {
-                            Platform.exit();
-                        }
+                PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.getAbsolutePath(), false);
+                File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
+                if(!file.exists()) {
+                    if(!file.mkdirs()) {
+                        Platform.exit();
                     }
-                } else {
-                    Platform.exit();
                 }
             } else {
                 Platform.exit();

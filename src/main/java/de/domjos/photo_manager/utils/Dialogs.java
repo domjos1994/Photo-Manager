@@ -112,7 +112,23 @@ public final class Dialogs {
         }
     }
 
-    public static List<File> printFileChooser(String title, boolean open, boolean dir, boolean multiSelect, Map<String, String> extensions) {
+    public static File printDirectoryChooser(String title) {
+        return Dialogs.printFileChooser(title, true, true, false, new LinkedList<>()).get(0);
+    }
+
+    public static File printSingleOpenFileChooser(String title, List<String> extensions) {
+        return Dialogs.printFileChooser(title, true, false, false, extensions).get(0);
+    }
+
+    public static List<File> printMultiOpenFileChooser(String title, List<String> extensions) {
+        return Dialogs.printFileChooser(title, true, false, true, extensions);
+    }
+
+    public static File printSaveFileChooser(String title, List<String> extensions) {
+        return Dialogs.printFileChooser(title, false, false, false, extensions).get(0);
+    }
+
+    private static List<File> printFileChooser(String title, boolean open, boolean dir, boolean multiSelect, List<String> extensions) {
         List<File> files = new LinkedList<>();
         if(dir) {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -123,8 +139,8 @@ public final class Dialogs {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(title);
             if(extensions!=null) {
-                for(Map.Entry<String, String> extensionEntry : extensions.entrySet()) {
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionEntry.getKey(), extensionEntry.getValue()));
+                for(String extension : extensions) {
+                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extension.split(":")[0], extension.split(":")[1]));
                 }
             }
             if(open) {

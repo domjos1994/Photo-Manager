@@ -37,9 +37,7 @@ public class Globals {
     public final static String UNSPLASH_SECRET_KEY = "UNSPLASH_SECRET_KEY";
 
     public final static String DIRECTORIES_DELETE_KEY = "DIRECTORIES_DELETE_KEY";
-    public final static String DIRECTORIES_TITLE = "DIRECTORIES_TITLE";
-    public final static String DIRECTORIES_PATH = "DIRECTORIES_PATH";
-    public final static String DIRECTORIES_ICON = "DIRECTORIES_ICON";
+    public final static String DIRECTORIES = "DIRECTORIES_TITLE";
 
     // Keys of Split-Pane-Positions
     public final static String POSITION_DIRECTORIES = "POSITION_DIRECTORIES";
@@ -161,6 +159,10 @@ public class Globals {
         } else {
             this.preferences.put(key, String.valueOf(value));
         }
+    }
+
+    public void deleteSetting(String key) {
+        this.preferences.remove(key);
     }
 
     public List<Runnable> getCloseRunnable() {

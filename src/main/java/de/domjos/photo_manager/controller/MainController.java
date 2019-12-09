@@ -28,7 +28,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
-import javafx.stage.FileChooser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -144,11 +143,9 @@ public class MainController implements Initializable {
 
         this.cmdMainAddFolder.setOnAction(event -> this.enableFolderControls());
         this.cmdMainFolder.setOnAction(event -> {
-            List<File> paths = Dialogs.printFileChooser(resources.getString("main.dir.path"), true, true, false, null);
-            if(paths!=null) {
-                if(!paths.isEmpty()) {
-                    this.directory.setPath(paths.get(0).getAbsolutePath());
-                }
+            File path = Dialogs.printDirectoryChooser(resources.getString("main.dir.path"));
+            if(path!=null) {
+                this.directory.setPath(path.getAbsolutePath());
             }
         });
         this.cmdMainFolderSave.setOnAction(event -> {
@@ -253,19 +250,11 @@ public class MainController implements Initializable {
                     }
 
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                    File f = new File(image.getPath());
                     String extension = FilenameUtils.getExtension(image.getPath());
                     int index = this.lvMain.getSelectionModel().getSelectedIndex();
+                    String title = resources.getString("main.image.menu.saveAs.dialog");
 
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle(resources.getString("main.image.menu.saveAs.dialog"));
-                    fileChooser.setInitialFileName(f.getName());
-                    fileChooser.setInitialDirectory(new File(f.getParent()));
-                    FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Format", extension);
-                    fileChooser.getExtensionFilters().add(extensionFilter);
-                    fileChooser.setSelectedExtensionFilter(extensionFilter);
-                    File file = fileChooser.showSaveDialog(null);
-
+                    File file = Dialogs.printSingleOpenFileChooser(title, Collections.singletonList("Format:" + extension));
                     if(file != null) {
                         image.setTitle(file.getName());
                         image.setPath(file.getAbsolutePath());
@@ -568,10 +557,12 @@ public class MainController implements Initializable {
             if(!this.txtMainImageSearch.isVisible()) {
                 this.txtMainImageSearch.setVisible(true);
                 this.txtMainImageSearch.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                
             } else {
                 if(this.txtMainImageSearch.getText().trim().isEmpty()) {
                     this.txtMainImageSearch.setVisible(false);
                     this.txtMainImageSearch.setPrefWidth(0);
+                    this.txtMainImageSearch.setMinWidth(0);
                 }
                 search();
             }
