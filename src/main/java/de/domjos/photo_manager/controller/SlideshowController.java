@@ -17,7 +17,6 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Timer;
@@ -38,7 +37,7 @@ public class SlideshowController extends ParentController {
     private Timer timer;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.initBindings();
 
         this.cmdSlideshowHome.setOnAction(actionEvent -> this.mainController.back());

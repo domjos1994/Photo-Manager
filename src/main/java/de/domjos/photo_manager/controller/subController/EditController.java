@@ -11,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EditController extends ParentController {
@@ -98,7 +97,7 @@ public class EditController extends ParentController {
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.txtResizeWidth.disableProperty().bind(this.chkResize.selectedProperty().not());
         this.txtResizeHeight.disableProperty().bind(this.chkResize.selectedProperty().not());
         this.reloadFilter();

@@ -18,7 +18,6 @@ import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
@@ -41,7 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class MainController implements Initializable {
+public class MainController extends ParentController {
     private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
 
     private @FXML MenuBar menMain;
@@ -114,7 +113,8 @@ public class MainController implements Initializable {
     private final Cache cache = new Cache();
     private SaveFolderTask importTask;
 
-    public void initialize(URL location, ResourceBundle resources) {
+    @Override
+    public void initialize(ResourceBundle resources) {
         this.dirRows = new LinkedList<>();
         ControlsHelper.initController(Arrays.asList(settingsController, mapController, slideshowController, helpController,
             histogramController, metaDataController, tinifyController, unsplashController,
@@ -644,6 +644,11 @@ public class MainController implements Initializable {
         this.splPaneDirectories.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
         this.splPaneImages.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
         this.splPaneImage.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
+    }
+
+    @Override
+    protected void initContextHelp() {
+        super.addContextHelp(this.txtMainFolderName, "help.main.folderName");
     }
 
     void back() {

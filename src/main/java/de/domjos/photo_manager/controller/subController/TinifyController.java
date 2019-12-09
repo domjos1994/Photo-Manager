@@ -9,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TinifyController extends ParentController {
@@ -18,7 +17,7 @@ public class TinifyController extends ParentController {
     private @FXML Button cmdUpload;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
 
         this.cmdUpload.setOnAction(event -> {
             try {

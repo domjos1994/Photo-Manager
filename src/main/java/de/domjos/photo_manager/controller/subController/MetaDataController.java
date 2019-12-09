@@ -9,7 +9,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.ResourceBundle;
 
@@ -21,7 +20,7 @@ public class MetaDataController extends ParentController {
     private Image image;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.setImage(null);
     }
 

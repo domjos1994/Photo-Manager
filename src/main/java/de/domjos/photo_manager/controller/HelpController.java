@@ -6,7 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
-import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -15,7 +14,7 @@ public class HelpController extends ParentController {
     private @FXML WebView wvHelp;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.loadContent();
 
         this.cmdHelpHome.setOnAction(actionEvent -> this.mainController.back());

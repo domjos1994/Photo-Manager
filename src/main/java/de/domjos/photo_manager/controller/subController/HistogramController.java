@@ -11,7 +11,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
 
 import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.util.*;
 
 public class HistogramController extends ParentController {
@@ -20,7 +19,7 @@ public class HistogramController extends ParentController {
     private @FXML Image image;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.setImage(null);
 
         this.chkHistogram.selectedProperty().addListener((observable)-> this.fillBarChart());

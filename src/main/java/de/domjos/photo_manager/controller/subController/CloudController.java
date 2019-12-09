@@ -12,8 +12,6 @@ import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class CloudController extends ParentController {
@@ -69,7 +67,7 @@ public class CloudController extends ParentController {
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
 
         this.tvDirectories.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
@@ -96,7 +94,6 @@ public class CloudController extends ParentController {
 
         this.cmdUpload.setOnAction(event -> {
             try {
-                ResourceBundle resources = PhotoManager.GLOBALS.getLanguage();
                 if(!this.mainController.getLvMain().getSelectionModel().isEmpty()) {
                     DavResource davResource = this.tvDirectories.getSelectionModel().getSelectedItem().getValue().get();
                     Image image = this.mainController.getLvMain().getSelectionModel().getSelectedItem();

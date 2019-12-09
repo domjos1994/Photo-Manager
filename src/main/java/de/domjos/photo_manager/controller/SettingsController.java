@@ -22,7 +22,6 @@ import javafx.stage.DirectoryChooser;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -47,7 +46,8 @@ public class SettingsController extends ParentController {
     private @FXML TableView<DirRow> tblSettingsDirectories;
     private ResourceBundle lang;
 
-    public void initialize(URL location, ResourceBundle resources) {
+    @Override
+    public void initialize(ResourceBundle resources) {
         this.lang = PhotoManager.GLOBALS.getLanguage();
 
         this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, ""));

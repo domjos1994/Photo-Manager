@@ -9,7 +9,6 @@ import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MapController extends ParentController {
@@ -17,7 +16,7 @@ public class MapController extends ParentController {
     private @FXML Button cmdMapHome;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.cmdMapHome.setOnAction(actionEvent -> mainController.back());
     }
 

@@ -16,7 +16,6 @@ import javafx.scene.input.TransferMode;
 import org.controlsfx.control.PopOver;
 
 import java.io.ByteArrayInputStream;
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class UnsplashController extends ParentController {
@@ -32,7 +31,7 @@ public class UnsplashController extends ParentController {
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(ResourceBundle resources) {
         this.pnlUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
 
         this.lvUnsplash.getSelectionModel().selectedItemProperty().addListener((observableValue, image, t1) -> {
