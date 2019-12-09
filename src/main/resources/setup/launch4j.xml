@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>..\..\..\..\build\PhotoManager-0.1.alpha.1.jar</jar>
+  <jar>..\..\..\..\build\PhotoManager-0.1.jar</jar>
   <outfile>..\..\..\..\build\PhotoManager.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>

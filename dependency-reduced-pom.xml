@@ -45,6 +45,15 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
+        <executions>
+          <execution>
+            <configuration>
+              <includes>
+                <include>module-info.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
         <configuration>
           <release>${java.version}</release>
         </configuration>
@@ -98,6 +107,20 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.6</version>
+        <executions>
+          <execution>
+            <id>BuildSetup-Windows</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <exec />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>

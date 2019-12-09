@@ -190,10 +190,16 @@ public class SettingsController extends ParentController {
     }
 
     private void saveRowsToSettings() {
+        boolean isEmpty = true;
         for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
             if(!dirRow.getTitle().trim().isEmpty() && !dirRow.getPath().trim().isEmpty()) {
                 PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES, this.generateSetting(), false);
+                isEmpty = false;
             }
+        }
+
+        if(isEmpty) {
+            PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES, "", false);
         }
     }
 

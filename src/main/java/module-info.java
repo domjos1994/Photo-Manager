@@ -8,7 +8,6 @@ module PhotoManager {
     requires javafx.controls;
     requires javafx.swing;
     requires javafx.web;
-    requires javafx.graphics;
 
     requires com.gluonhq.maps;
     requires com.gluonhq.attach.storage;
@@ -42,5 +41,6 @@ module PhotoManager {
     exports de.domjos.photo_manager.model.gallery;
     exports de.domjos.photo_manager.model.services;
     exports de.domjos.photo_manager.helper;
+    exports de.domjos.photo_manager.services;
     exports de.domjos.photo_manager;
 }
