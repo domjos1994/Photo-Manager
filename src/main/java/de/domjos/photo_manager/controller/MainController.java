@@ -275,13 +275,14 @@ public class MainController implements Initializable {
                 MenuItem menuItem = new MenuItem(dirRow.getTitle());
                 menuItem.setOnAction(itemEvent -> {
                     try {
-                        Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                        BufferedImage bufferedImage = this.getEditedImage(false);
-                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
-                        Dialogs.printNotification(Alert.AlertType.INFORMATION,
-                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success"),
-                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success")
-                        );
+                        for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
+                            BufferedImage bufferedImage = this.getEditedImage(false);
+                            ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                            Dialogs.printNotification(Alert.AlertType.INFORMATION,
+                                    PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success"),
+                                    PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success")
+                            );
+                        }
                     } catch (Exception ex) {
                         Dialogs.printException(ex);
                     }
