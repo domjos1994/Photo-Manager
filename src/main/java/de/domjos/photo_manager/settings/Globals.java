@@ -24,6 +24,7 @@ public class Globals {
 
     // Keys of general settings
     public final static String PATH = "PATH";
+    public final static String OLD_PATHS = "OLD_PATHS";
     public final static String DEBUG = "DEBUG";
 
     public final static String TINY_KEY = "TINY";

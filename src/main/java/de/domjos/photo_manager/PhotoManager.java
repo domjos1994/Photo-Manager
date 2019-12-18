@@ -37,11 +37,7 @@ public class PhotoManager extends Application {
         PhotoManager.GLOBALS.setDatabase(InitializationHelper.initializeDatabase());
 
         // initialize application-dialog
-        String title = InitializationHelper.getHeader();
-        if(PhotoManager.GLOBALS.isDebugMode()) {
-            title += " - (Debug)";
-        }
-        Stage stage = Dialogs.printFXML("/fxml/main.fxml", language, title, primaryStage);
+        Stage stage = Dialogs.printFXML("/fxml/main.fxml", language, InitializationHelper.getHeader(), primaryStage);
         stage.show();
         this.initSizes(stage);
         Platform.setImplicitExit(false);

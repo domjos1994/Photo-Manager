@@ -189,6 +189,21 @@
     </TabPane>
     <MenuBar id="menMain" fx:id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
+            <Menu mnemonicParsing="false" text="%main.menu.program.database">
+                <items>
+                    <MenuItem fx:id="menMainDatabaseNew" mnemonicParsing="false" text="%main.menu.program.database.new">
+                        <accelerator>
+                            <KeyCodeCombination alt="ANY" code="N" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                        </accelerator>
+                    </MenuItem>
+                    <Menu fx:id="menMainDatabaseOpen" mnemonicParsing="false" text="%main.menu.program.database.open"/>
+                    <MenuItem fx:id="menMainDatabaseDelete" mnemonicParsing="false" text="%main.menu.program.database.delete">
+                        <accelerator>
+                            <KeyCodeCombination alt="ANY" code="D" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                        </accelerator>
+                    </MenuItem>
+                </items>
+            </Menu>
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>
                     <KeyCodeCombination alt="ANY" code="S" control="ANY" meta="UP" shift="UP" shortcut="UP" />

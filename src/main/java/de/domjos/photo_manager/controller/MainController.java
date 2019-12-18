@@ -5,6 +5,7 @@ import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.*;
 import de.domjos.photo_manager.helper.ControlsHelper;
 import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.Template;
@@ -49,6 +50,8 @@ public class MainController extends ParentController {
     private @FXML TabPane tbpMain;
     private @FXML Tab tbMain, tbSettings, tbMap, tbSlideshow, tbHelp;
     private @FXML MenuItem menMainSettings, menMainClose, menMainMap, menMainHelp;
+    private @FXML MenuItem menMainDatabaseNew, menMainDatabaseDelete;
+    private @FXML Menu menMainDatabaseOpen;
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow;
 
     private @FXML ContextMenu ctxMainImage;
@@ -630,6 +633,49 @@ public class MainController extends ParentController {
         });
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
+        this.menMainDatabaseNew.setOnAction(event -> {
+            try {
+                this.addPathToHistory();
+                PhotoManager.GLOBALS.saveSetting(Globals.PATH, "", false);
+                new PhotoManager().start(PhotoManager.GLOBALS.getStage());
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
+        this.menMainDatabaseOpen.setOnAction(event -> {
+            this.menMainDatabaseOpen.getItems().clear();
+            String[] history = PhotoManager.GLOBALS.getSetting(Globals.OLD_PATHS, "").split("\\|");
+            for(String item : history) {
+                if(!item.trim().isEmpty()) {
+                    MenuItem menuItem = new MenuItem(item.trim());
+                    menuItem.setOnAction(subEvent -> {
+                        try {
+                            this.addPathToHistory();
+                            PhotoManager.GLOBALS.saveSetting(Globals.PATH, item.trim(), false);
+                            new PhotoManager().start(PhotoManager.GLOBALS.getStage());
+                        } catch (Exception ex) {
+                            Dialogs.printException(ex);
+                        }
+                    });
+                    this.menMainDatabaseOpen.getItems().add(menuItem);
+                }
+            }
+        });
+        this.menMainDatabaseDelete.setOnAction(event -> {
+            try {
+                PhotoManager.GLOBALS.getDatabase().close();
+                String path = PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
+                String pathWithHidden = path + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR;
+                FileUtils.deleteDirectory(new File(pathWithHidden));
+                String history = PhotoManager.GLOBALS.getSetting(Globals.OLD_PATHS, "");
+                history = history.replace("|" + path, "");
+                PhotoManager.GLOBALS.saveSetting(Globals.OLD_PATHS, history, false);
+                PhotoManager.GLOBALS.saveSetting(Globals.PATH, "", false);
+                new PhotoManager().start(PhotoManager.GLOBALS.getStage());
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+        });
         this.menMainMap.setOnAction(event -> {
             this.tbpMain.getSelectionModel().select(this.tbMap);
             if(this.tvMain.getSelectionModel().isEmpty()) {
@@ -903,5 +949,21 @@ public class MainController extends ParentController {
         this.splPaneDirectories.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0]));
         this.splPaneImages.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0]));
         this.splPaneImage.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0]));
+    }
+
+    private void addPathToHistory() {
+        String path = PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
+        String old_paths = PhotoManager.GLOBALS.getSetting(Globals.OLD_PATHS, "");
+        String[] paths = old_paths.split("\\|");
+        boolean contains = false;
+        for(String old_path : paths) {
+            if(old_path.trim().equals(path)) {
+                contains = true;
+                break;
+            }
+        }
+        if(!contains) {
+            PhotoManager.GLOBALS.saveSetting(Globals.OLD_PATHS, old_paths + "|" + path, false);
+        }
     }
 }

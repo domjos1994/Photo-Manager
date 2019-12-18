@@ -113,10 +113,11 @@ public class InitializationHelper {
      * @return the header
      */
     public static String getHeader() {
-        /*URL[] urls = new URL[]{InitializationHelper.class.getResource("/properties/")};
-        ResourceBundle bundle = ResourceBundle.getBundle("pom", Locale.getDefault(), new URLClassLoader(urls));
-        return bundle.getString("app.name") + " - " + bundle.getString("app.version");*/
-
-        return "PhotoManager";
+        String title = "PhotoManager";
+        if(PhotoManager.GLOBALS.isDebugMode()) {
+            title += " - (Debug)";
+        }
+        title += " - " + PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
+        return title;
     }
 }

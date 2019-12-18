@@ -6,11 +6,8 @@ import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -19,7 +16,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -27,9 +23,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class SettingsController extends ParentController {
-    private @FXML Button cmdSettingsSave, cmdSettingsHome, cmdSettingsPath;
+    private @FXML Button cmdSettingsSave, cmdSettingsHome;
     private @FXML CheckBox chkSettingsDebugMode;
-    private @FXML TextField txtSettingsPath;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
 
@@ -49,54 +44,6 @@ public class SettingsController extends ParentController {
     @Override
     public void initialize(ResourceBundle resources) {
         this.lang = PhotoManager.GLOBALS.getLanguage();
-
-        this.txtSettingsPath.setText(PhotoManager.GLOBALS.getSetting(Globals.PATH, ""));
-        this.cmdSettingsPath.setOnAction(event -> {
-            this.mainController.setMessage(this.lang.getString("settings.general.move"));
-            File file = Dialogs.printDirectoryChooser(this.lang.getString("main.initialize.path"));
-            if(file!=null) {
-                Task<Void> projectTask = new Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        Platform.runLater(()->PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
-                        updateProgress(0, 1);
-                        updateProgress(0.1, 1);
-                        String oldPath = PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
-                        String path = file.getAbsolutePath();
-                        String key = Globals.PATH;
-                        String hidden = InitializationHelper.HIDDEN_PROJECT_DIR;
-                        File file = new File(path);
-                        updateProgress(0.2, 1);
-                        if(!file.exists()) {
-                            if(!file.mkdirs()) {
-                                Platform.exit();
-                            }
-                        }
-                        PhotoManager.GLOBALS.saveSetting(key, path, false);
-
-                        File oldDirectory = new File(oldPath + File.separatorChar + hidden);
-                        FileUtils.moveDirectory(oldDirectory, new File(file.getAbsolutePath() + File.separatorChar + hidden));
-
-
-                        updateProgress(1, 1);
-                        return null;
-                    }
-                };
-                this.mainController.getProgressBar().progressProperty().bind(projectTask.progressProperty());
-                projectTask.setOnSucceeded(event1 -> Platform.runLater(()->{
-                    try {
-                        this.mainController.getProgressBar().progressProperty().unbind();
-                        PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
-                        PhotoManager.GLOBALS.getStage().close();
-                        new PhotoManager().start(PhotoManager.GLOBALS.getStage());
-                    } catch (Exception ex) {
-                        Dialogs.printException(ex);
-                    }
-                }));
-                projectTask.setOnFailed(projectTask.getOnSucceeded());
-                new Thread(projectTask).start();
-            }
-        });
 
         this.chkSettingsDirectoriesDelete.selectedProperty().addListener(((observableValue, aBoolean, t1) -> this.cmdSettingsDirectoriesDelete.setDisable(!t1)));
         this.cmdSettingsDirectoriesDelete.setOnAction(event -> {
@@ -136,13 +83,9 @@ public class SettingsController extends ParentController {
     }
 
     private void updateProgram() {
-        if(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false)) {
-            PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader() + " - (Debug)");
-        } else {
-            PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader());
-        }
-        mainController.initTinify();
         PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
+        PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader());
+        mainController.initTinify();
     }
 
     private void fillData() {
