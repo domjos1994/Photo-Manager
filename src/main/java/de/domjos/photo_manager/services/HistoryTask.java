@@ -11,7 +11,7 @@ import javafx.scene.image.Image;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-public class HistoryTask extends ParentTask<BufferedImage> {
+public final class HistoryTask extends ParentTask<BufferedImage> {
     private List<TemporaryEdited> temporaryEditedList;
     private long id;
     private Image image;

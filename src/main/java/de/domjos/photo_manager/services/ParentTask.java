@@ -11,7 +11,7 @@ import javafx.scene.control.ProgressBar;
 public abstract class ParentTask<T> extends Task<T> {
     private Runnable onFinish, onFailed;
 
-    ParentTask(ProgressBar progressBar, Label messages) {
+    public ParentTask(ProgressBar progressBar, Label messages) {
         this.exceptionProperty().addListener((observable, oldValue, newValue) -> Dialogs.printException(newValue));
 
         if(progressBar!=null) {

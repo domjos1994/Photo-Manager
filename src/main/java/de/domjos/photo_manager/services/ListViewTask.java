@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ListViewTask extends ParentTask<List<Image>> {
+public final class ListViewTask extends ParentTask<List<Image>> {
     private Directory directory;
     private String search;
 

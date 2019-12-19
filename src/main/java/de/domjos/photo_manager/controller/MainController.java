@@ -31,12 +31,9 @@ import javafx.scene.layout.Region;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -586,37 +583,25 @@ public class MainController extends ParentController {
         this.tvMain.setOnDragDropped(mouseEvent -> {
             try {
                 Dragboard db = mouseEvent.getDragboard();
-                boolean success = false;
                 if (db.hasString()) {
                     String content = db.getString();
-                    for(String strIndex : content.split(";")) {
-                        if(!strIndex.trim().isEmpty()) {
-                            int index = Integer.parseInt(strIndex.trim());
-                            Image image = this.unsplashController.getUnsplashListView().getItems().get(index);
-
-                            if(!this.tvMain.getSelectionModel().isEmpty()) {
-                                Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
-                                File file = new File(directory.getPath() + File.separatorChar + image.getExtended().getOrDefault("id", "tmp") + ".jpg");
-                                InputStream inputStream = new URL(image.getExtended().get("unSplash")).openStream();
-                                BufferedImage bufferedImage = ImageIO.read(inputStream);
-                                inputStream.close();
-                                bufferedImage = ImageHelper.addWaterMark(bufferedImage, "(c) Unsplash");
-                                FileUtils.writeByteArrayToFile(file, ImageHelper.imageToByteArray(bufferedImage));
-                                image.setPath(file.getAbsolutePath());
-                                image.setDirectory(directory);
-                                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
-
-                                this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
-                                success = true;
-                            } else {
-                                success = false;
-                            }
-                        }
+                    if (!this.tvMain.getSelectionModel().isEmpty()) {
+                        DragDropTask dragDropTask = new DragDropTask(this.pbMain, this.lblMessages, content, this.tvMain.getSelectionModel().getSelectedItem().getValue(), unsplashController.getUnsplashListView());
+                        dragDropTask.onFinish(() -> {
+                            this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                            mouseEvent.setDropCompleted(true);
+                            mouseEvent.consume();
+                        });
+                        dragDropTask.onFailed(() -> {
+                            mouseEvent.setDropCompleted(false);
+                            mouseEvent.consume();
+                        });
+                        new Thread(dragDropTask).start();
+                    } else {
+                        mouseEvent.setDropCompleted(false);
+                        mouseEvent.consume();
                     }
                 }
-
-                mouseEvent.setDropCompleted(success);
-                mouseEvent.consume();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
