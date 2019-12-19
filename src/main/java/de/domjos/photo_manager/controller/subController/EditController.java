@@ -158,11 +158,12 @@ public class EditController extends ParentController {
                         PhotoManager.GLOBALS.getDatabase().insertOrUpdateEdited(temporaryEdited, id);
                     }
 
-                    this.mainController.reloadHistory(id);
+                    this.mainController.historyController.reloadHistory(id);
                 }
 
                 ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
                 Dialogs.printNotification(Alert.AlertType.INFORMATION, lang.getString("settings.saved"), lang.getString("settings.saved"));
+                this.reset();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }

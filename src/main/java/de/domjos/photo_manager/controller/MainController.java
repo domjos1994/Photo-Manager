@@ -83,8 +83,6 @@ public class MainController extends ParentController {
 
     private @FXML TitledPane pnlMainImage;
 
-    private @FXML TableView<TemporaryEdited> tblMainImageHistory;
-
     private @FXML Label lblMessages;
     private @FXML ProgressBar pbMain;
 
@@ -109,6 +107,8 @@ public class MainController extends ParentController {
     private @FXML CloudController cloudController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML EditController editController;
+    @SuppressWarnings({"UnusedDeclaration"})
+    public @FXML HistoryController historyController;
 
     private long rootID;
     private Directory directory;
@@ -121,7 +121,7 @@ public class MainController extends ParentController {
         this.dirRows = new LinkedList<>();
         ControlsHelper.initController(Arrays.asList(settingsController, mapController, slideshowController, helpController,
             histogramController, metaDataController, tinifyController, unsplashController,
-            cloudController, editController), this);
+            cloudController, editController, historyController), this);
         this.initBindings();
         this.initTinify();
         this.initTreeView();
@@ -210,13 +210,13 @@ public class MainController extends ParentController {
 
                     this.histogramController.setImage(newValue);
                     this.metaDataController.setImage(newValue);
-                    this.reloadHistory(newValue.getId());
+                    this.historyController.reloadHistory(newValue.getId());
                     this.fillCategoryAndTags();
                     this.cloudController.fillCloudWithDefault();
                     this.cloudController.getCloudPath();
                     this.editController.setCache(this.cache);
 
-                    this.tblMainImageHistory.getSelectionModel().select(this.tblMainImageHistory.getItems().size() - 1);
+                    this.historyController.selectLast();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -231,9 +231,7 @@ public class MainController extends ParentController {
         this.ctxMainImageApply.setOnAction(event -> {
             try {
                 if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    if(this.tblMainImageHistory.getSelectionModel().isEmpty()) {
-                        this.tblMainImageHistory.getSelectionModel().select(this.tblMainImageHistory.getItems().size() - 1);
-                    }
+                    this.historyController.selectLast();
 
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
                     int index = this.lvMain.getSelectionModel().getSelectedIndex();
@@ -248,9 +246,7 @@ public class MainController extends ParentController {
         this.ctxMainImageSaveAs.setOnAction(actionEvent -> {
             try {
                 if(!this.lvMain.getSelectionModel().isEmpty()) {
-                    if (this.tblMainImageHistory.getSelectionModel().isEmpty()) {
-                        this.tblMainImageHistory.getSelectionModel().select(this.tblMainImageHistory.getItems().size() - 1);
-                    }
+                    this.historyController.selectLast();
 
                     Image image = this.lvMain.getSelectionModel().getSelectedItem();
                     String extension = FilenameUtils.getExtension(image.getPath());
@@ -278,7 +274,7 @@ public class MainController extends ParentController {
                 menuItem.setOnAction(itemEvent -> {
                     try {
                         for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
-                            HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId(), this.tblMainImageHistory.getItems(), this.ivMainImage.getImage(), currentImage);
+                            HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.historyController.getSelectedId(), this.historyController.getItems(), this.ivMainImage.getImage(), currentImage);
                             historyTask.onFinish(() -> {
                                 try {
                                     BufferedImage bufferedImage = historyTask.getValue();
@@ -456,12 +452,6 @@ public class MainController extends ParentController {
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
-            }
-        });
-
-        this.tblMainImageHistory.getSelectionModel().selectedItemProperty().addListener((observableValue, temporaryEdited, t1) -> {
-            if(!this.tblMainImageHistory.getSelectionModel().isEmpty()) {
-                this.getEditedImage();
             }
         });
 
@@ -709,10 +699,6 @@ public class MainController extends ParentController {
         return this.lblMessages;
     }
 
-    void setMessage(String msg) {
-        this.lblMessages.setText(msg);
-    }
-
     public Directory getDirectory() {
         return this.directory;
     }
@@ -737,16 +723,6 @@ public class MainController extends ParentController {
         AnchorPane.setBottomAnchor(this.tbpMain, hide ? 0.0 : 30.0);
     }
 
-    public void reloadHistory(long id) throws Exception {
-        this.tblMainImageHistory.getItems().clear();
-        TemporaryEdited root = new TemporaryEdited();
-        root.setChangeType(TemporaryEdited.ChangeType.None);
-        this.tblMainImageHistory.getItems().add(root);
-        for(TemporaryEdited temporaryEdited : PhotoManager.GLOBALS.getDatabase().getTemporaryEdited(id)) {
-            this.tblMainImageHistory.getItems().add(temporaryEdited);
-        }
-    }
-
     private void initBindings() {
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.cmdMainFolder.visibleProperty());
         this.cmdMainFolderSave.visibleProperty().bindBidirectional(this.txtMainFolderName.visibleProperty());
@@ -754,11 +730,6 @@ public class MainController extends ParentController {
 
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmdMainTemplateDelete.visibleProperty());
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
-
-        ControlsHelper.addColumnsToTable(this.tblMainImageHistory, Arrays.asList(
-            new String[]{"ChangeType", "main.image.history.type", "changeType"},
-            new String[]{"Value", "main.image.history.value", "stringValue"}
-        ));
 
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
@@ -900,9 +871,9 @@ public class MainController extends ParentController {
         }
     }
 
-    private void getEditedImage() {
-        long id = this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId();
-        HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, id, this.tblMainImageHistory.getItems(), this.ivMainImage.getImage(), this.currentImage);
+    public void getEditedImage() {
+        long id = this.historyController.getSelectedId();
+        HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, id, this.historyController.getItems(), this.ivMainImage.getImage(), this.currentImage);
         historyTask.onFinish(()-> {
             BufferedImage bufferedImage = historyTask.getValue();
             if(bufferedImage!=null) {
@@ -913,14 +884,14 @@ public class MainController extends ParentController {
     }
 
     private void saveFile(File file, Image image, int index) {
-        HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.tblMainImageHistory.getSelectionModel().getSelectedItem().getId(), this.tblMainImageHistory.getItems(), this.ivMainImage.getImage(), currentImage);
+        HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.historyController.getSelectedId(), this.historyController.getItems(), this.ivMainImage.getImage(), currentImage);
         historyTask.onFinish(() -> {
             try {
                 BufferedImage bufferedImage = historyTask.getValue();
 
                 ImageHelper.save(image.getPath(), file.getAbsolutePath(), bufferedImage);
-                for (int row = 0; row <= this.tblMainImageHistory.getSelectionModel().getSelectedIndex(); row++) {
-                    TemporaryEdited temporaryEdited = this.tblMainImageHistory.getItems().get(row);
+                for (int row = 0; row <= this.historyController.getSelectedIndex(); row++) {
+                    TemporaryEdited temporaryEdited = this.historyController.getItems().get(row);
                     if (temporaryEdited != null) {
                         if (temporaryEdited.getId() != 0) {
                             PhotoManager.GLOBALS.getDatabase().removeHistory(temporaryEdited, image.getId());

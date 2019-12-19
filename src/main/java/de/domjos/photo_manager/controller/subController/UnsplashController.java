@@ -35,13 +35,15 @@ public class UnsplashController extends ParentController {
         this.pnlUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
 
         this.lvUnsplash.getSelectionModel().selectedItemProperty().addListener((observableValue, image, t1) -> {
-            this.popOver.setArrowLocation(PopOver.ArrowLocation.RIGHT_CENTER);
-            this.popOver.setHideOnEscape(true);
-            this.popOver.setAutoHide(true);
-            ImageView imageView = new ImageView();
-            imageView.setImage(new javafx.scene.image.Image(new ByteArrayInputStream(t1.getThumbnail())));
-            this.popOver.setContentNode(imageView);
-            this.popOver.show(this.lvUnsplash);
+            if(t1!=null) {
+                this.popOver.setArrowLocation(PopOver.ArrowLocation.RIGHT_CENTER);
+                this.popOver.setHideOnEscape(true);
+                this.popOver.setAutoHide(true);
+                ImageView imageView = new ImageView();
+                imageView.setImage(new javafx.scene.image.Image(new ByteArrayInputStream(t1.getThumbnail())));
+                this.popOver.setContentNode(imageView);
+                this.popOver.show(this.lvUnsplash);
+            }
         });
 
         this.cmdSearch.setOnAction(event -> {

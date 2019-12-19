@@ -88,19 +88,7 @@
                                                     </AnchorPane>
                                                 </TitledPane>
                                                 <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
-                                                <TitledPane animated="false" expanded="false" text="%main.image.history">
-                                                    <content>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                            <children>
-                                                                <TableView fx:id="tblMainImageHistory" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
-                                                                    <columnResizePolicy>
-                                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                                                    </columnResizePolicy>
-                                                                </TableView>
-                                                            </children>
-                                                        </AnchorPane>
-                                                    </content>
-                                                </TitledPane>
+                                                <fx:include fx:id="history" source="main_history.fxml" />
                                             </panes>
                                         </Accordion>
                                     </AnchorPane>
