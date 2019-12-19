@@ -6,80 +6,95 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SettingsController">
 
-    <ToolBar layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" styleClass="darkSlateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <items>
-            <Button fx:id="cmdSettingsHome" mnemonicParsing="false">
-                <graphic>
-                    <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
-                        <Image url="@../images/icons/home.png" />
-                    </ImageView>
-                </graphic>
-            </Button>
-            <HBox HBox.hgrow="ALWAYS" />
-            <Button fx:id="cmdSettingsSave" mnemonicParsing="false">
-                <graphic>
-                    <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
-                        <Image url="@../images/icons/save.png" />
-                    </ImageView>
-                </graphic>
-            </Button>
-        </items>
+    <ToolBar layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" styleClass="darkSlateGray"
+             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Button fx:id="cmdSettingsHome" mnemonicParsing="false">
+            <graphic>
+                <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../images/icons/home.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <Button fx:id="cmdSettingsSave" mnemonicParsing="false">
+            <graphic>
+                <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../images/icons/save.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
     </ToolBar>
     <TitledPane maxHeight="70.0" minHeight="70.0" prefHeight="70.0" text="%settings.general" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
         <AnchorPane>
-            <children>
-                <CheckBox fx:id="chkSettingsDebugMode" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.debug" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            </children>
+            <CheckBox fx:id="chkSettingsDebugMode" maxHeight="25.0" minHeight="25.0" prefHeight="25.0"
+                      text="%settings.general.debug" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                      AnchorPane.topAnchor="0.0"/>
         </AnchorPane>
     </TitledPane>
-   <TitledPane animated="false" text="%settings.directories" AnchorPane.bottomAnchor="320.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="110.0">
-     <content>
-       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-            <children>
-               <CheckBox fx:id="chkSettingsDirectoriesDelete" maxHeight="25.0" maxWidth="200.0" minHeight="25.0" minWidth="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="%settings.directories.delete" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               <Button fx:id="cmdSettingsDirectoriesDelete" layoutX="219.0" layoutY="92.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" text="..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               <TextField fx:id="txtSettingsDirectoriesDelete" editable="false" layoutX="125.0" layoutY="92.0" AnchorPane.leftAnchor="205.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
-               <TableView fx:id="tblSettingsDirectories" editable="true" layoutX="64.0" layoutY="41.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="30.0" />
-            </children>
-         </AnchorPane>
-          </content>
-   </TitledPane>
-   <TitledPane maxHeight="160.0" minHeight="160.0" minWidth="300.0" prefHeight="160.0" text="%settings.tiny" AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="0.0">
-     <content>
-       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-            <children>
-               <TextField fx:id="txtSettingsTinyKey" layoutX="174.0" layoutY="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-               <TextField fx:id="txtSettingsTinyFile" layoutX="93.0" layoutY="78.0" promptText="\%" text="%settings.tiny.file.default" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
-               <Label layoutX="77.0" layoutY="134.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.tiny.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               <Label layoutX="22.0" layoutY="65.0" maxWidth="25.0" minWidth="25.0" prefWidth="25.0" text="%settings.tiny.file" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0" />
-            </children>
-         </AnchorPane>
-     </content>
-   </TitledPane>
-   <TitledPane animated="false" maxHeight="160.0" minHeight="160.0" prefHeight="160.0" text="%settings.unsplash" AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0">
-     <content>
-       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-            <children>
-               <TextField fx:id="txtSettingsUnsplashKey" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-               <PasswordField fx:id="txtSettingsUnsplashSecretKey" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
-               <Label maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.unsplash.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               <Label maxWidth="25.0" minWidth="25.0" prefWidth="25.0" text="%settings.unsplash.secret.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
-            </children>
-         </AnchorPane>
-     </content>
-   </TitledPane>
-   <TitledPane maxHeight="160.0" minHeight="160.0" prefHeight="160.0" text="%settings.cloud" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-     <content>
-       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-            <children>
-               <Label layoutX="113.0" layoutY="63.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.cloud.path" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               <TextField fx:id="txtSettingsCloudPath" layoutX="159.0" layoutY="142.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-               <Label layoutX="271.0" layoutY="171.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.cloud.credentials" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
-               <TextField fx:id="txtSettingsCloudUserName" layoutX="57.0" layoutY="142.0" maxWidth="250.0" minWidth="100.0" prefWidth="250.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="90.0" />
-               <PasswordField fx:id="txtSettingsCloudPassword" layoutX="273.0" layoutY="100.0" AnchorPane.leftAnchor="255.0" AnchorPane.rightAnchor="90.0" AnchorPane.topAnchor="90.0" />
-               <Button fx:id="cmdSettingsCloudTest" layoutX="513.0" layoutY="100.0" maxWidth="85.0" minWidth="85.0" mnemonicParsing="false" prefWidth="85.0" text="%settings.cloud.test" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
-            </children>
-         </AnchorPane>
-     </content>
-   </TitledPane>
+    <TitledPane animated="false" text="%settings.directories" AnchorPane.bottomAnchor="320.0"
+                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="110.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <CheckBox fx:id="chkSettingsDirectoriesDelete" maxHeight="25.0" maxWidth="200.0" minHeight="25.0"
+                      minWidth="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0"
+                      text="%settings.directories.delete" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+            <Button fx:id="cmdSettingsDirectoriesDelete" layoutX="219.0" layoutY="92.0" maxWidth="35.0"
+                    minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" text="..." AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="0.0"/>
+            <TextField fx:id="txtSettingsDirectoriesDelete" editable="false" layoutX="125.0" layoutY="92.0"
+                       AnchorPane.leftAnchor="205.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0"/>
+            <TableView fx:id="tblSettingsDirectories" editable="true" layoutX="64.0" layoutY="41.0"
+                       prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true"
+                       AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0"
+                       AnchorPane.topAnchor="30.0"/>
+        </AnchorPane>
+    </TitledPane>
+    <TitledPane maxHeight="160.0" minHeight="160.0" minWidth="300.0" prefHeight="160.0" text="%settings.tiny"
+                AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="0.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <TextField fx:id="txtSettingsTinyKey" layoutX="174.0" layoutY="50.0" AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0"/>
+            <TextField fx:id="txtSettingsTinyFile" layoutX="93.0" layoutY="78.0" promptText="\%"
+                       text="%settings.tiny.file.default" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                       AnchorPane.topAnchor="90.0"/>
+            <Label layoutX="77.0" layoutY="134.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0"
+                   text="%settings.tiny.key" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0"/>
+            <Label layoutX="22.0" layoutY="65.0" maxWidth="25.0" minWidth="25.0" prefWidth="25.0"
+                   text="%settings.tiny.file" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="65.0"/>
+        </AnchorPane>
+    </TitledPane>
+    <TitledPane animated="false" maxHeight="160.0" minHeight="160.0" prefHeight="160.0" text="%settings.unsplash"
+                AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <TextField fx:id="txtSettingsUnsplashKey" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                       AnchorPane.topAnchor="30.0"/>
+            <PasswordField fx:id="txtSettingsUnsplashSecretKey" AnchorPane.leftAnchor="0.0"
+                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0"/>
+            <Label maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.unsplash.key"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+            <Label maxWidth="25.0" minWidth="25.0" prefWidth="25.0" text="%settings.unsplash.secret.key"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0"/>
+        </AnchorPane>
+    </TitledPane>
+    <TitledPane maxHeight="160.0" minHeight="160.0" prefHeight="160.0" text="%settings.cloud"
+                AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <Label layoutX="113.0" layoutY="63.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0"
+                   text="%settings.cloud.path" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0"/>
+            <TextField fx:id="txtSettingsCloudPath" layoutX="159.0" layoutY="142.0" AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0"/>
+            <Label layoutX="271.0" layoutY="171.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0"
+                   text="%settings.cloud.credentials" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="60.0"/>
+            <TextField fx:id="txtSettingsCloudUserName" layoutX="57.0" layoutY="142.0" maxWidth="250.0"
+                       minWidth="100.0" prefWidth="250.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="90.0"/>
+            <PasswordField fx:id="txtSettingsCloudPassword" layoutX="273.0" layoutY="100.0"
+                           AnchorPane.leftAnchor="255.0" AnchorPane.rightAnchor="90.0" AnchorPane.topAnchor="90.0"/>
+            <Button fx:id="cmdSettingsCloudTest" layoutX="513.0" layoutY="100.0" maxWidth="85.0" minWidth="85.0"
+                    mnemonicParsing="false" prefWidth="85.0" text="%settings.cloud.test"
+                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0"/>
+        </AnchorPane>
+    </TitledPane>
 </AnchorPane>

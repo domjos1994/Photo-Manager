@@ -140,6 +140,10 @@ public class Database {
         this.executeUpdate("DELETE FROM images_edited WHERE image=" + image.getId());
     }
 
+    public void deleteEdited(TemporaryEdited temporaryEdited) throws Exception {
+        this.executeUpdate("DELETE FROM images_edited WHERE ID=" + temporaryEdited.getId());
+    }
+
     public void addRoot() throws Exception {
         boolean exists = false;
         PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories WHERE isRoot=1");

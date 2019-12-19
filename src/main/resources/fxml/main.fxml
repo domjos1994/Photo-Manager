@@ -88,7 +88,7 @@
                                                     </AnchorPane>
                                                 </TitledPane>
                                                 <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
-                                                <fx:include fx:id="history" source="main_history.fxml" />
+                                                <fx:include fx:id="history" source="main_history.fxml" mnemonicParsing="false"  />
                                             </panes>
                                         </Accordion>
                                     </AnchorPane>
@@ -125,30 +125,24 @@
                     <HBox HBox.hgrow="ALWAYS" />
                <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false" visible="false">
                   <graphic>
-                     <ImageView fitHeight="16" fitWidth="16">
-                        <image>
-                           <Image url="@../images/icons/save.png" />
-                        </image>
-                     </ImageView>
+                      <ImageView fitHeight="16" fitWidth="16">
+                          <Image url="@../images/icons/save.png"/>
+                      </ImageView>
                   </graphic>
                </Button>
                <Button fx:id="cmdMainTemplateDelete" mnemonicParsing="false" visible="false">
                   <graphic>
-                     <ImageView fitHeight="16" fitWidth="16">
-                        <image>
-                           <Image url="@../images/icons/delete.png" />
-                        </image>
-                     </ImageView>
+                      <ImageView fitHeight="16" fitWidth="16">
+                          <Image url="@../images/icons/delete.png"/>
+                      </ImageView>
                   </graphic>
                </Button>
                <ComboBox fx:id="cmbMainTemplates" editable="true" prefWidth="150.0" promptText="%main.templates" visible="false" />
                <Button fx:id="cmdMainTemplate" mnemonicParsing="false">
                   <graphic>
-                     <ImageView fitHeight="16" fitWidth="16">
-                        <image>
-                           <Image url="@../images/icons/template.png" />
-                        </image>
-                     </ImageView>
+                      <ImageView fitHeight="16" fitWidth="16">
+                          <Image url="@../images/icons/template.png"/>
+                      </ImageView>
                   </graphic>
                </Button>
                     <TextField fx:id="txtMainImageSearch" minWidth="0.0" prefWidth="0.0" visible="false" />
@@ -178,19 +172,18 @@
     <MenuBar id="menMain" fx:id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
             <Menu mnemonicParsing="false" text="%main.menu.program.database">
-                <items>
-                    <MenuItem fx:id="menMainDatabaseNew" mnemonicParsing="false" text="%main.menu.program.database.new">
-                        <accelerator>
-                            <KeyCodeCombination alt="ANY" code="N" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-                        </accelerator>
-                    </MenuItem>
-                    <Menu fx:id="menMainDatabaseOpen" mnemonicParsing="false" text="%main.menu.program.database.open"/>
-                    <MenuItem fx:id="menMainDatabaseDelete" mnemonicParsing="false" text="%main.menu.program.database.delete">
-                        <accelerator>
-                            <KeyCodeCombination alt="ANY" code="D" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-                        </accelerator>
-                    </MenuItem>
-                </items>
+                <MenuItem fx:id="menMainDatabaseNew" mnemonicParsing="false" text="%main.menu.program.database.new">
+                    <accelerator>
+                        <KeyCodeCombination alt="ANY" code="N" control="ANY" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
+                <Menu fx:id="menMainDatabaseOpen" mnemonicParsing="false" text="%main.menu.program.database.open"/>
+                <MenuItem fx:id="menMainDatabaseDelete" mnemonicParsing="false"
+                          text="%main.menu.program.database.delete">
+                    <accelerator>
+                        <KeyCodeCombination alt="ANY" code="D" control="ANY" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
             </Menu>
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>

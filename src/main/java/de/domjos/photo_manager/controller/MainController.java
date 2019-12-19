@@ -39,6 +39,9 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class MainController extends ParentController {
+    public TitledPane history, unsplash, histogram, metaData, edit, tinify, cloud;
+    public AnchorPane settings, map, slideshow, help;
+
     private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
 
     private @FXML MenuBar menMain;
@@ -104,7 +107,6 @@ public class MainController extends ParentController {
     private @FXML CloudController cloudController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML EditController editController;
-    @SuppressWarnings({"UnusedDeclaration"})
     public @FXML HistoryController historyController;
 
     private long rootID;

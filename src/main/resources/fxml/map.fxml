@@ -6,19 +6,18 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MapController">
-   <children>
-      <ToolBar styleClass="darkSlateGray" layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="39.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <items>
-            <Button fx:id="cmdMapHome" mnemonicParsing="false">
-               <graphic>
-                  <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
-                     <Image url="@../images/icons/home.png" />
-                  </ImageView>
-               </graphic>
-            </Button>
-         </items>
-      </ToolBar>
-      <MapView fx:id="gvMap" layoutX="-120.0" layoutY="-63.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
-   </children>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.domjos.photo_manager.controller.MapController">
+   <ToolBar styleClass="darkSlateGray" layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="39.0"
+            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <Button fx:id="cmdMapHome" mnemonicParsing="false">
+         <graphic>
+            <ImageView fitHeight="16" fitWidth="16" pickOnBounds="true" preserveRatio="true">
+               <Image url="@../images/icons/home.png"/>
+            </ImageView>
+         </graphic>
+      </Button>
+   </ToolBar>
+   <MapView fx:id="gvMap" layoutX="-120.0" layoutY="-63.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0"/>
 </AnchorPane>
