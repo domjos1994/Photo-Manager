@@ -1,6 +1,5 @@
 package de.domjos.photo_manager.controller.subController;
 
-import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.Initializable;
@@ -13,8 +12,10 @@ import java.util.ResourceBundle;
 
 public abstract class ParentController implements Initializable {
     protected MainController mainController;
+    protected ResourceBundle lang;
 
     public void initialize(URL location, ResourceBundle resources) {
+        this.lang = resources;
         this.initContextHelp();
         this.initialize(resources);
     }
@@ -32,7 +33,7 @@ public abstract class ParentController implements Initializable {
     protected void addContextHelp(Control control, String key) {
         control.setOnKeyReleased(keyEvent -> {
             if(keyEvent.getCode() == KeyCode.F1) {
-                Dialogs.printNotification(Alert.AlertType.INFORMATION, PhotoManager.GLOBALS.getLanguage().getString(key), PhotoManager.GLOBALS.getLanguage().getString(key));
+                Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("help.title"), this.lang.getString(key));
             }
         });
     }

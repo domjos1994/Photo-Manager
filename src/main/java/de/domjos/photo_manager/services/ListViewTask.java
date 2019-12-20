@@ -74,14 +74,12 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                         if (!this.search.isEmpty()) {
                             foundItem = false;
                             if (image.getCategory() != null) {
-                                System.out.println(image.getCategory().getTitle());
                                 if (image.getCategory().getTitle().trim().toLowerCase().contains(this.search)) {
                                     foundItem = true;
                                 }
                             }
                             if (!image.getTags().isEmpty()) {
                                 for (DescriptionObject descriptionObject : image.getTags()) {
-                                    System.out.println(descriptionObject.getTitle());
                                     if (descriptionObject.getTitle().trim().toLowerCase().contains(this.search)) {
                                         foundItem = true;
                                     }

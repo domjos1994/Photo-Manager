@@ -90,7 +90,7 @@ public final class Dialogs {
 
     public static void printNotification(Alert.AlertType alertType, String title, String message) {
         Notifications notifications = Notifications.create();
-        notifications.text(title);
+        notifications.title(title);
         notifications.text(message);
         notifications.owner(PhotoManager.GLOBALS.getStage());
         notifications.position(Pos.BASELINE_CENTER);

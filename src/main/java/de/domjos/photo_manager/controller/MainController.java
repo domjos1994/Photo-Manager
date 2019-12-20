@@ -25,6 +25,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
@@ -62,11 +63,11 @@ public class MainController extends ParentController {
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
+    private @FXML ScrollPane scroller;
     private @FXML ImageView ivMainImage;
 
     private @FXML Slider slMainImageZoom;
     private @FXML Label lblMainImageZoom;
-    private @FXML Button cmdMainImageZoom;
 
     private @FXML Button cmdMainAddFolder, cmdMainReload, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
@@ -198,7 +199,7 @@ public class MainController extends ParentController {
                         if(this.pbMain.progressProperty().isBound()) {
                             this.pbMain.progressProperty().unbind();
                         }
-                        javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString(), true);
+                        javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
                         this.pbMain.progressProperty().bind(image.progressProperty());
                         this.fillImage(image);
                     } else {
@@ -278,10 +279,8 @@ public class MainController extends ParentController {
                                 try {
                                     BufferedImage bufferedImage = historyTask.getValue();
                                     ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
-                                    Dialogs.printNotification(Alert.AlertType.INFORMATION,
-                                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success"),
-                                            PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.copy.success")
-                                    );
+
+                                    Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("main.image.menu.copy.success"), this.lang.getString("main.image.menu.copy.success"));
                                 } catch (Exception ex) {
                                     Dialogs.printException(ex);
                                 }
@@ -363,8 +362,7 @@ public class MainController extends ParentController {
 
         this.slMainImageZoom.valueProperty().addListener((observable, oldValue, newValue) -> this.lblMainImageZoom.setText(newValue.intValue() + " %"));
 
-        this.cmdMainImageZoom.setOnAction(event -> {
-            // scale image
+        this.slMainImageZoom.setOnMouseReleased(event -> {
             if(!this.lvMain.getSelectionModel().isEmpty() && this.currentImage!=null) {
                 Image image = this.lvMain.getSelectionModel().getSelectedItem();
                 int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
@@ -373,6 +371,7 @@ public class MainController extends ParentController {
                 bufferedImage = ImageHelper.scale(bufferedImage, width, height);
                 this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
                 this.ivMainImage.setImage(this.currentImage);
+                this.ivMainImage.setFitWidth(width);
             }
         });
 
@@ -381,13 +380,13 @@ public class MainController extends ParentController {
                 case PRIMARY:
                     if(this.slMainImageZoom.getValue()>=11) {
                         this.slMainImageZoom.setValue(this.slMainImageZoom.getValue()-10);
-                        this.cmdMainImageZoom.fire();
+                        this.slMainImageZoom.getOnMouseReleased().handle(event);
                     }
                     break;
                 case SECONDARY:
                     if(this.slMainImageZoom.getValue()<=90) {
                         this.slMainImageZoom.setValue(this.slMainImageZoom.getValue()+10);
-                        this.cmdMainImageZoom.fire();
+                        this.slMainImageZoom.getOnMouseReleased().handle(event);
                     }
                     break;
             }
@@ -496,7 +495,7 @@ public class MainController extends ParentController {
                             this.editController.setTemplate(template);
                         }
                     }
-                    this.cmdMainImageZoom.fire();
+                    this.slMainImageZoom.getOnMouseReleased().handle(null);
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -542,6 +541,12 @@ public class MainController extends ParentController {
             if(!this.tvMain.getSelectionModel().isEmpty()) {
                 this.slideshowController.getImages(this.lvMain.getItems());
                 this.tbpMain.getSelectionModel().select(this.tbSlideshow);
+            }
+        });
+
+        this.txtMainImageSearch.setOnKeyReleased(event -> {
+            if(event.getCode()== KeyCode.ENTER) {
+                this.cmdMainImageSearch.fire();
             }
         });
 
@@ -672,6 +677,9 @@ public class MainController extends ParentController {
     @Override
     protected void initContextHelp() {
         super.addContextHelp(this.txtMainFolderName, "help.main.folderName");
+        super.addContextHelp(this.txtMainImageName, "help.main.imageSettings");
+        super.addContextHelp(this.txtMainImageCategory, "help.main.imageSettings");
+        super.addContextHelp(this.txtMainImageTags, "help.main.imageSettings");
     }
 
     void back() {
@@ -719,6 +727,17 @@ public class MainController extends ParentController {
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
 
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    private void scaleToFit() {
+        if(!this.lvMain.getSelectionModel().isEmpty()) {
+            int originalWidth = this.lvMain.getSelectionModel().getSelectedItem().getWidth();
+
+            int width = (int) this.scroller.getWidth();
+            double percentage = width / (originalWidth / 100.0);
+            this.slMainImageZoom.setValue(percentage);
+            this.slMainImageZoom.getOnMouseReleased().handle(null);
+        }
     }
 
     void initTinify() {
@@ -866,6 +885,7 @@ public class MainController extends ParentController {
             if(bufferedImage!=null) {
                 Platform.runLater(()->ivMainImage.setImage(SwingFXUtils.toFXImage(bufferedImage, null)));
             }
+            scaleToFit();
         });
         new Thread(historyTask).start();
     }
@@ -901,6 +921,7 @@ public class MainController extends ParentController {
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0], false);
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0], false);
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0], false);
+        scaleToFit();
     }
 
     private void loadSplitPanePositions() {
