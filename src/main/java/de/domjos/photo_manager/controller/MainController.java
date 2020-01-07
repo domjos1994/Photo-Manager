@@ -253,7 +253,7 @@ public class MainController extends ParentController {
                     int index = this.lvMain.getSelectionModel().getSelectedIndex();
                     String title = resources.getString("main.image.menu.saveAs.dialog");
 
-                    File file = Dialogs.printSingleOpenFileChooser(title, Collections.singletonList("Format:" + extension));
+                    File file = Dialogs.printSaveFileChooser(title, Collections.singletonList(extension + ":" + extension));
                     if(file != null) {
                         image.setTitle(file.getName());
                         image.setPath(file.getAbsolutePath());
