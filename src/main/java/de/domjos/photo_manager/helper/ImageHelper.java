@@ -1,6 +1,7 @@
 package de.domjos.photo_manager.helper;
 
 import de.domjos.photo_manager.model.gallery.MetaData;
+import de.domjos.photo_manager.utils.CryptoUtils;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
@@ -21,6 +22,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.util.Iterator;
 
@@ -82,6 +84,10 @@ public class ImageHelper {
             ImageIO.write(bufferedImage, "jpg", bos);
         }
         return bos.toByteArray();
+    }
+
+    public static byte[] imageToByteArray(String path, String password) throws Exception {
+        return CryptoUtils.decrypt(new FileInputStream(new File(path)), password);
     }
 
     public static int[] getHistogram(BufferedImage bufferedImage, int type) {
@@ -316,6 +322,22 @@ public class ImageHelper {
             bufferedImage = ImageHelper.convertColorSpace(bufferedImage);
             imageWriter.write(bufferedImage);
         }
+    }
+
+    public static void save(String path, String save, BufferedImage bufferedImage, String enc) throws Exception {
+        File tmp = File.createTempFile(path, "");
+        ImageInputStream iis = ImageIO.createImageInputStream(new File(path));
+        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(iis);
+
+        if(imageReaders.hasNext()) {
+            ImageReader reader = imageReaders.next();
+            ImageWriter imageWriter = ImageIO.getImageWriter(reader);
+            imageWriter.setOutput(new FileImageOutputStream(tmp));
+            bufferedImage = ImageHelper.convertColorSpace(bufferedImage);
+            imageWriter.write(bufferedImage);
+        }
+        CryptoUtils.encrypt(tmp.getAbsolutePath(), save, enc);
+        tmp.deleteOnExit();
     }
 
     private static ImageReader getImageReader(String path) {

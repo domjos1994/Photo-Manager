@@ -67,6 +67,7 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
             folder.setTitle(dirRow.getTitle());
             folder.setPath(dirRow.getPath());
             folder.setIcon(dirRow.getIcon());
+            folder.setDirRow(dirRow);
             this.folders.add(folder);
         }
 

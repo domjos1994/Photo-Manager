@@ -48,7 +48,15 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                                 if(Arrays.asList(ImageHelper.EXTENSIONS).contains(extension)) {
                                     Image image = new Image();
                                     image.setPath(file.getAbsolutePath());
-                                    image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
+                                    if(folder.getDirRow()!=null) {
+                                        if(folder.getDirRow().getEncryption().trim().isEmpty()) {
+                                            image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
+                                        } else {
+                                            image.setThumbnail(ImageHelper.imageToByteArray(file.getAbsolutePath(), folder.getDirRow().getEncryption()));
+                                        }
+                                    } else {
+                                        image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
+                                    }
                                     image.setTitle(file.getName());
                                     list.add(image);
                                 }

@@ -6,15 +6,13 @@ import de.domjos.photo_manager.controller.subController.*;
 import de.domjos.photo_manager.helper.ControlsHelper;
 import de.domjos.photo_manager.helper.ImageHelper;
 import de.domjos.photo_manager.helper.InitializationHelper;
-import de.domjos.photo_manager.model.gallery.Directory;
-import de.domjos.photo_manager.model.gallery.Image;
-import de.domjos.photo_manager.model.gallery.Template;
-import de.domjos.photo_manager.model.gallery.TemporaryEdited;
+import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.*;
 import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
+import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -35,6 +33,7 @@ import org.apache.commons.io.FilenameUtils;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -65,6 +64,7 @@ public class MainController extends ParentController {
     private @FXML ListView<Image> lvMain;
     private @FXML ScrollPane scroller;
     private @FXML ImageView ivMainImage;
+    private @FXML Accordion accItems;
 
     private @FXML Slider slMainImageZoom;
     private @FXML Label lblMainImageZoom;
@@ -195,28 +195,57 @@ public class MainController extends ParentController {
                     this.lblMessages.setText(String.format(resources.getString("main.image.selected"), this.lvMain.getSelectionModel().getSelectedItems().size(), this.lvMain.getItems().size()));
 
                     File img = new File(newValue.getPath());
+                    boolean encryption = false;
                     if(img.exists()) {
                         if(this.pbMain.progressProperty().isBound()) {
                             this.pbMain.progressProperty().unbind();
                         }
+
+                        if(this.tvMain.getSelectionModel().getSelectedItem().getValue() instanceof Folder) {
+                            SettingsController.DirRow dirRow = ((Folder)this.tvMain.getSelectionModel().getSelectedItem().getValue()).getDirRow();
+                            if(dirRow!=null) {
+                                if(dirRow.getEncryption().trim().isEmpty()) {
+                                    javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
+                                    this.pbMain.progressProperty().bind(image.progressProperty());
+                                    this.fillImage(image);
+                                } else {
+                                    encryption = true;
+                                    javafx.scene.image.Image image = new javafx.scene.image.Image(new ByteArrayInputStream(CryptoUtils.decrypt(new FileInputStream(newValue.getPath()), dirRow.getEncryption())));
+                                    this.pbMain.progressProperty().bind(image.progressProperty());
+                                    this.fillImage(image, true);
+                                }
+                            } else {
+                                javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
+                                this.pbMain.progressProperty().bind(image.progressProperty());
+                                this.fillImage(image);
+                            }
+                        } else {
+                            javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
+                            this.pbMain.progressProperty().bind(image.progressProperty());
+                            this.fillImage(image);
+                        }
+                    } else {
                         javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
                         this.pbMain.progressProperty().bind(image.progressProperty());
                         this.fillImage(image);
-                    } else {
-                        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(newValue.getThumbnail());
-                        this.fillImage(new javafx.scene.image.Image(byteArrayInputStream));
-                        byteArrayInputStream.close();
                     }
+                    this.accItems.setVisible(!encryption);
+                    this.pnlMainImage.setVisible(!encryption);
+                    this.splPaneImage.setDividerPositions(1);
+                    this.slMainImageZoom.setVisible(!encryption);
+                    AnchorPane.setBottomAnchor(this.scroller, encryption ? 0.0 : 205.0);
 
-                    this.histogramController.setImage(newValue);
-                    this.metaDataController.setImage(newValue);
-                    this.historyController.reloadHistory(newValue.getId());
-                    this.fillCategoryAndTags();
-                    this.cloudController.fillCloudWithDefault();
-                    this.cloudController.getCloudPath();
-                    this.editController.setCache(this.cache);
+                    if(!encryption) {
+                        this.histogramController.setImage(newValue);
+                        this.metaDataController.setImage(newValue);
+                        this.historyController.reloadHistory(newValue.getId());
+                        this.fillCategoryAndTags();
+                        this.cloudController.fillCloudWithDefault();
+                        this.cloudController.getCloudPath();
+                        this.editController.setCache(this.cache);
 
-                    this.historyController.selectLast();
+                        this.historyController.selectLast();
+                    }
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -278,7 +307,11 @@ public class MainController extends ParentController {
                             historyTask.onFinish(() -> {
                                 try {
                                     BufferedImage bufferedImage = historyTask.getValue();
-                                    ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                                    if(dirRow.getEncryption().isEmpty()) {
+                                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                                    } else {
+                                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage, dirRow.getEncryption());
+                                    }
 
                                     Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("main.image.menu.copy.success"), this.lang.getString("main.image.menu.copy.success"));
                                 } catch (Exception ex) {
@@ -363,15 +396,17 @@ public class MainController extends ParentController {
         this.slMainImageZoom.valueProperty().addListener((observable, oldValue, newValue) -> this.lblMainImageZoom.setText(newValue.intValue() + " %"));
 
         this.slMainImageZoom.setOnMouseReleased(event -> {
-            if(!this.lvMain.getSelectionModel().isEmpty() && this.currentImage!=null) {
-                Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
-                int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.cache.getOriginal(), null);
-                bufferedImage = ImageHelper.scale(bufferedImage, width, height);
-                this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
-                this.ivMainImage.setImage(this.currentImage);
-                this.ivMainImage.setFitWidth(width);
+            if(this.accItems.isVisible()) {
+                if(!this.lvMain.getSelectionModel().isEmpty() && this.currentImage!=null) {
+                    Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                    int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
+                    int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.cache.getOriginal(), null);
+                    bufferedImage = ImageHelper.scale(bufferedImage, width, height);
+                    this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
+                    this.ivMainImage.setImage(this.currentImage);
+                    this.ivMainImage.setFitWidth(width);
+                }
             }
         });
 
@@ -807,13 +842,19 @@ public class MainController extends ParentController {
     }
 
     private void fillImage(javafx.scene.image.Image image) {
+        this.fillImage(image, false);
+    }
+
+    private void fillImage(javafx.scene.image.Image image, boolean encryption) {
         this.currentImage = image;
         this.cache.setOriginal(image);
         Image img = this.lvMain.getSelectionModel().getSelectedItem();
         javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
         this.cache.setOriginalPreview(SwingFXUtils.fromFXImage(preview, null));
-        this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
-        this.editController.getPreview().setImage(preview);
+        if(!encryption) {
+            this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
+            this.editController.getPreview().setImage(preview);
+        }
         this.ivMainImage.setFitWidth(image.getWidth());
         this.ivMainImage.setFitHeight(image.getHeight());
         this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));

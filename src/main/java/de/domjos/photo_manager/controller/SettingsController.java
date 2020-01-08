@@ -5,6 +5,7 @@ import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
+import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -16,10 +17,12 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class SettingsController extends ParentController {
@@ -124,6 +127,11 @@ public class SettingsController extends ParentController {
                     if(item.length > 2) {
                         dirRow.setIcon(item[2]);
                     }
+                    if(item.length > 3) {
+                        dirRow.setEncryption(item[3].trim());
+                    } else {
+                        dirRow.setEncryption("");
+                    }
                     dirRows.add(dirRow);
                 }
             }
@@ -207,9 +215,38 @@ public class SettingsController extends ParentController {
         colSettingsDirectoriesIcon.setMinWidth(350);
         colSettingsDirectoriesIcon.setPrefWidth(500);
 
+        TableColumn<DirRow, String> colSettingsDirectoriesEncryption = new TableColumn<>(this.lang.getString("settings.directories.encryption"));
+        colSettingsDirectoriesEncryption.setCellValueFactory(new PropertyValueFactory<>("encryption"));
+        colSettingsDirectoriesEncryption.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<>() {
+            @Override
+            public String toString(String s) {
+                return CryptoUtils.encrypt(s);
+            }
+
+            @Override
+            public String fromString(String s) {
+                return CryptoUtils.decrypt(s);
+            }
+        }));
+        colSettingsDirectoriesEncryption.setEditable(true);
+        colSettingsDirectoriesEncryption.setOnEditStart(event -> {
+            Dialog<String> dialog = Dialogs.createPasswordDialog(event.getRowValue().getEncryption());
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(s -> {
+                if(!s.trim().isEmpty()) {
+                    event.getRowValue().setEncryption(s.trim());
+                    this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
+                }
+            });
+            event.consume();
+        });
+        colSettingsDirectoriesEncryption.setMinWidth(350);
+        colSettingsDirectoriesEncryption.setPrefWidth(500);
+
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesIcon);
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesEncryption);
         this.tblSettingsDirectories.getItems().add(new DirRow());
     }
 
@@ -223,19 +260,20 @@ public class SettingsController extends ParentController {
     private String generateSetting() {
         StringBuilder stringBuilder = new StringBuilder();
         for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
-            stringBuilder.append(String.format("%s,%s,%s;", dirRow.title, dirRow.path, dirRow.icon));
+            stringBuilder.append(String.format("%s,%s,%s,%s;", dirRow.title, dirRow.path, dirRow.icon, dirRow.encryption));
         }
         return stringBuilder.toString();
     }
 
     public static class DirRow {
-        private String title, path, icon;
+        private String title, path, icon, encryption;
 
         public DirRow() {
             super();
             this.title = "";
             this.path = "";
             this.icon = "";
+            this.encryption = "";
         }
 
         public String getTitle() {
@@ -260,6 +298,14 @@ public class SettingsController extends ParentController {
 
         public void setIcon(String icon) {
             this.icon = icon;
+        }
+
+        public String getEncryption() {
+            return this.encryption;
+        }
+
+        public void setEncryption(String encryption) {
+            this.encryption = encryption;
         }
     }
 }

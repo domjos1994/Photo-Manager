@@ -240,6 +240,72 @@ public final class Dialogs {
         return dialog;
     }
 
+    public static Dialog<String> createPasswordDialog(String oldPwd) {
+        Dialog<String> dialog = new Dialog<>();
+        Dialogs.setIcon(dialog);
+        dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption"));
+        ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        PasswordField newPassword = new PasswordField();
+        newPassword.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption.new"));
+
+        PasswordField repeatPassword = new PasswordField();
+        repeatPassword.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption.repeat"));
+
+        if(oldPwd.trim().isEmpty()) {
+            dialog.getDialogPane().setContent(
+                Dialogs.addControls(
+                    Collections.singletonList(
+                        Arrays.asList(newPassword, repeatPassword)
+                    )
+                )
+            );
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loginButtonType) {
+                    try {
+                        if(newPassword.getText().trim().equals(repeatPassword.getText().trim())) {
+                            return newPassword.getText().trim();
+                        } else {
+                            return "";
+                        }
+                    } catch (Exception ignored) {}
+                }
+                return "";
+            });
+
+            return dialog;
+        } else {
+            PasswordField oldPassword = new PasswordField();
+            oldPassword.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption.old"));
+
+            dialog.getDialogPane().setContent(
+                Dialogs.addControls(
+                    Arrays.asList(
+                        Collections.singletonList(oldPassword),
+                        Arrays.asList(newPassword, repeatPassword)
+                    )
+                )
+            );
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loginButtonType) {
+                    try {
+                        if(newPassword.getText().trim().equals(repeatPassword.getText().trim()) && oldPassword.getText().trim().equals(oldPwd.trim())) {
+                            return newPassword.getText().trim();
+                        } else {
+                            return "";
+                        }
+                    } catch (Exception ignored) {}
+                }
+                return "";
+            });
+
+            return dialog;
+        }
+    }
+
     private static void setIcon(Dialog dialog) {
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image(Dialogs.class.getResourceAsStream("/images/header.png")));

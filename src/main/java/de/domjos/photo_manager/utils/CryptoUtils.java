@@ -26,7 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 public final class CryptoUtils {
     private static final String STR_KEY = "b76e7392ad10fee7";
 
-    static void encrypt(String srcFile, String encryptedDstFile, String password) throws Exception {
+    public static void encrypt(String srcFile, String encryptedDstFile, String password) throws Exception {
         try (FileInputStream srcStream = new FileInputStream(srcFile); FileOutputStream encStream = new FileOutputStream(encryptedDstFile)) {
             encrypt(srcStream, encStream, password);
         }
@@ -62,6 +62,21 @@ public final class CryptoUtils {
                 decryptedOutStream.write(byteBuffer, 0, n);
             }
         }
+    }
+
+    public static byte[] decrypt(InputStream encryptedInpStream, String password) throws GeneralSecurityException, IOException {
+        SecretKey secKey = new SecretKeySpec( hashPwd( password), "AES");
+        Cipher    cipher = Cipher.getInstance("AES");
+        byte[]    byteBuffer = new byte[64 * 1024];
+        int       n;
+        cipher.init( Cipher.DECRYPT_MODE, secKey );
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (encryptedInpStream; byteArrayOutputStream; CipherInputStream cis = new CipherInputStream(encryptedInpStream, cipher)) {
+            while ((n = cis.read(byteBuffer)) > 0) {
+                byteArrayOutputStream.write(byteBuffer, 0, n);
+            }
+        }
+        return byteArrayOutputStream.toByteArray();
     }
 
     private static byte[] hashPwd(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {

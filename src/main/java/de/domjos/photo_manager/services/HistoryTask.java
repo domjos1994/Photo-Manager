@@ -57,7 +57,9 @@ public final class HistoryTask extends ParentTask<BufferedImage> {
                     }
 
                     BufferedImage image = SwingFXUtils.fromFXImage(this.image, null);
-                    ImageHelper.changeHSB(image, SwingFXUtils.fromFXImage(currentImage, null), hue, saturation, brightness);
+                    try {
+                        ImageHelper.changeHSB(image, SwingFXUtils.fromFXImage(currentImage, null), hue, saturation, brightness);
+                    } catch(Exception ignored) {}
                     if(!watermark.trim().isEmpty()) {
                         image = ImageHelper.addWaterMark(image, watermark);
                     }
