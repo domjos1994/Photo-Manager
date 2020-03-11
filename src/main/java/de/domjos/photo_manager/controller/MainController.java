@@ -189,17 +189,12 @@ public class MainController extends ParentController {
         this.lvMain.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 if(newValue !=null) {
-                    if(this.lblMessages.textProperty().isBound()) {
-                        this.lblMessages.textProperty().unbind();
-                    }
+                    ControlsHelper.unbind(this.lblMessages, this.pbMain);
                     this.lblMessages.setText(String.format(resources.getString("main.image.selected"), this.lvMain.getSelectionModel().getSelectedItems().size(), this.lvMain.getItems().size()));
 
                     File img = new File(newValue.getPath());
                     boolean encryption = false;
                     if(img.exists()) {
-                        if(this.pbMain.progressProperty().isBound()) {
-                            this.pbMain.progressProperty().unbind();
-                        }
 
                         if(this.tvMain.getSelectionModel().getSelectedItem().getValue() instanceof Folder) {
                             SettingsController.DirRow dirRow = ((Folder)this.tvMain.getSelectionModel().getSelectedItem().getValue()).getDirRow();
@@ -285,7 +280,7 @@ public class MainController extends ParentController {
                     File file = Dialogs.printSaveFileChooser(title, Collections.singletonList(extension + ":" + extension));
                     if(file != null) {
                         image.setTitle(file.getName());
-                        image.setPath(file.getAbsolutePath());
+                        //image.setPath(file.getAbsolutePath());
                         image.setId(0);
                         this.saveFile(file, image, index);
                     }
@@ -947,6 +942,7 @@ public class MainController extends ParentController {
                     }
                 }
                 image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(image.getPath()), 50, 50)));
+                image.setPath(file.getAbsolutePath());
                 PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
                 this.lvMain.getItems().set(index, image);
                 this.lvMain.getSelectionModel().clearSelection();
