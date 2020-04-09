@@ -316,6 +316,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
+                                <chmod file="${project.basedir}/src/main/resources/setup/${script_to_execute}" perm="777"/>
                                 <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/${script_to_execute}"  failonerror="false"/>
                             </target>
                         </configuration>
