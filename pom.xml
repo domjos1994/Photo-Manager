@@ -202,6 +202,31 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>Windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <script_to_execute>createSetup_win.bat</script_to_execute>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <script_to_execute>createSetup_linux.sh</script_to_execute>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <!-- Initialize Resource-Directory -->
         <directory>${application.out}</directory>
@@ -287,29 +312,17 @@
                 <version>1.6</version>
                 <executions>
                     <execution>
-                        <id>BuildSetup-Windows</id>
+                        <id>BuildSetup</id>
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/createSetup_win.bat"  failonerror="false"/>
+                                <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/${script_to_execute}"  failonerror="false"/>
                             </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <!--<execution>
-                        <id>BuildSetup-Linux</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/createSetup_linux.sh"  failonerror="false"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

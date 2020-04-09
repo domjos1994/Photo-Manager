@@ -109,7 +109,7 @@
         <version>1.6</version>
         <executions>
           <execution>
-            <id>BuildSetup-Windows</id>
+            <id>BuildSetup</id>
             <phase>package</phase>
             <goals>
               <goal>run</goal>
@@ -149,6 +149,20 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>Windows</id>
+      <properties>
+        <script_to_execute>createSetup_win.bat</script_to_execute>
+      </properties>
+    </profile>
+    <profile>
+      <id>unix</id>
+      <properties>
+        <script_to_execute>createSetup_linux.sh</script_to_execute>
+      </properties>
+    </profile>
+  </profiles>
   <repositories>
     <repository>
       <id>1</id>
