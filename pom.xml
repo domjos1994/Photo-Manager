@@ -6,7 +6,7 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>PhotoManager</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 
     <properties>
         <!-- Information of the project -->
@@ -202,31 +202,6 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>Windows</id>
-            <activation>
-                <os>
-                    <family>Windows</family>
-                </os>
-            </activation>
-            <properties>
-                <script_to_execute>createSetup_win.bat</script_to_execute>
-            </properties>
-        </profile>
-        <profile>
-            <id>unix</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <properties>
-                <script_to_execute>createSetup_linux.sh</script_to_execute>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <!-- Initialize Resource-Directory -->
         <directory>${application.out}</directory>
@@ -303,26 +278,6 @@
                                 </transformer>
                             </transformers>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <id>BuildSetup</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <chmod file="${project.basedir}/src/main/resources/setup/${script_to_execute}" perm="777"/>
-                                <exec dir="${project.basedir}/src/main/resources/setup/" executable="${project.basedir}/src/main/resources/setup/${script_to_execute}"  failonerror="false"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
