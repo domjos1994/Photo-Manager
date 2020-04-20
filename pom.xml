@@ -15,6 +15,10 @@
         <application.website>https://domjos.de</application.website>
         <application.email>developing@domjos.de</application.email>
         <application.out>build</application.out>
+        <application.result>result</application.result>
+        <application.file>${project.name}-${project.version}</application.file>
+        <application.mainClass.main>de.domjos.photo_manager.Main</application.mainClass.main>
+        <application.mainClass.application>de.domjos.photo_manager.PhotoManager</application.mainClass.application>
 
         <!-- Dependency-Versions -->
         <java.version>11</java.version>
@@ -245,7 +249,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>de.domjos.photo_manager.Main</mainClass>
+                    <mainClass>${application.mainClass.main}</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -256,7 +260,7 @@
                     <archive>
                         <manifestEntries>
                             <Multi-Release>true</Multi-Release>
-                            <Main-Class>de.domjos.photo_manager.PhotoManager</Main-Class>
+                            <Main-Class>${application.mainClass.application}</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -264,7 +268,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.2.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -274,35 +278,45 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>de.domjos.photo_manager.Main</mainClass>
+                                    <mainClass>${application.mainClass.main}</mainClass>
                                 </transformer>
                             </transformers>
+                            <outputDirectory>${application.result}</outputDirectory>
+                            <outputFile>${application.result}/${application.file}.jar</outputFile>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
+                <groupId>io.github.fvarrui</groupId>
+                <artifactId>javapackager</artifactId>
+                <version>0.9.6</version>
                 <executions>
                     <execution>
-                        <id>Zip</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>package</goal>
                         </goals>
                         <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/assembly/zip.xml</descriptor>
-                            </descriptors>
-                            <archive>
-                                <manifest>
-                                    <mainClass>de.domjos.photo_manager.PhotoManager</mainClass>
-                                </manifest>
-                            </archive>
-                            <workDirectory>${application.out}</workDirectory>
+                            <mainClass>${application.mainClass.main}</mainClass>
+                            <bundleJre>true</bundleJre>
+                            <generateInstaller>true</generateInstaller>
+                            <administratorRequired>false</administratorRequired>
+                            <copyDependencies>true</copyDependencies>
+                            <platform>auto</platform>
+                            <runnableJar>${application.result}/${application.file}.jar</runnableJar>
+                            <outputDirectory>${application.result}</outputDirectory>
+                            <winConfig>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <fileDescription>${project.description}</fileDescription>
+                                <copyright>${application.author}</copyright>
+                                <productName>${application.name}</productName>
+                                <internalName>${application.name}</internalName>
+                                <originalFilename>${application.file}.exe</originalFilename>
+                            </winConfig>
                         </configuration>
                     </execution>
                 </executions>
