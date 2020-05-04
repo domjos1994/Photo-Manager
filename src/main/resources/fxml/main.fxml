@@ -6,7 +6,7 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="pane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
+<AnchorPane id="pane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.MainController">
     <TabPane fx:id="tbpMain" layoutX="35.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-6.0">
         <Tab fx:id="tbMain" text="Main">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -45,27 +45,39 @@
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                 <SplitPane fx:id="splPaneImage" dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
-                                        <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" layoutX="14.0" layoutY="437.0" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="darkSlateGray" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
-                                                    <Button fx:id="cmdMainImageSave" mnemonicParsing="false">
-                                                        <graphic>
-                                                            <ImageView fitHeight="16" fitWidth="16">
-                                                                <Image url="@../images/icons/save.png" />
-                                                            </ImageView>
-                                                        </graphic>
-                                                    </Button>
-                                                </ToolBar>
-                                                <TextField fx:id="txtMainImageName" layoutX="110.0" layoutY="61.0" promptText="%sys.name" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                                <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
-                                            </AnchorPane>
-                                        </TitledPane>
-                                        <ScrollPane fx:id="scroller" hbarPolicy="ALWAYS" hvalue="1.0" layoutX="14.0" layoutY="63.0" pannable="true" prefHeight="200.0" prefWidth="200.0" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="235.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <ImageView fx:id="ivMainImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="darkSlateGray" />
-                                        </ScrollPane>
-                                        <Slider fx:id="slMainImageZoom" layoutX="22.0" layoutY="481.0" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" styleClass="whiteColor" value="100.0" AnchorPane.bottomAnchor="205.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" />
-                                        <Label fx:id="lblMainImageZoom" layoutX="14.0" layoutY="479.0" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" styleClass="whiteColor" text="Label" AnchorPane.bottomAnchor="205.0" AnchorPane.leftAnchor="5.0" />
+                              <SplitPane dividerPositions="0.697274031563845" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <items>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                       <children>
+                                                    <ScrollPane fx:id="scroller" hbarPolicy="ALWAYS" hvalue="1.0" pannable="true" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <ImageView fx:id="ivMainImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="darkSlateGray" />
+                                                    </ScrollPane>
+                                       </children>
+                                    </AnchorPane>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                       <children>
+                                                    <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="darkSlateGray" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
+                                                                <Button fx:id="cmdMainImageSave" mnemonicParsing="false">
+                                                                    <graphic>
+                                                                        <ImageView fitHeight="16" fitWidth="16">
+                                                                            <Image url="@../images/icons/save.png" />
+                                                                        </ImageView>
+                                                                    </graphic>
+                                                                </Button>
+                                                            </ToolBar>
+                                                            <TextField fx:id="txtMainImageName" layoutX="110.0" layoutY="61.0" promptText="%sys.name" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                            <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                            <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
+                                                        </AnchorPane>
+                                                    </TitledPane>
+                                                    <Slider fx:id="slMainImageZoom" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" showTickLabels="true" showTickMarks="true" styleClass="whiteColor" value="100.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                    <Label fx:id="lblMainImageZoom" maxHeight="25.0" maxWidth="50.0" minHeight="25.0" minWidth="50.0" prefHeight="25.0" prefWidth="50.0" styleClass="whiteColor" text="Label" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </items>
+                              </SplitPane>
                                     </AnchorPane>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
                                         <Accordion fx:id="accItems" layoutX="16.0" layoutY="93.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -81,7 +93,7 @@
                                                     </AnchorPane>
                                                 </TitledPane>
                                                 <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
-                                                <fx:include fx:id="history" source="main_history.fxml" mnemonicParsing="false"  />
+                                                <fx:include fx:id="history" mnemonicParsing="false" source="main_history.fxml" />
                                             </panes>
                                         </Accordion>
                                     </AnchorPane>
@@ -119,14 +131,14 @@
                <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false" visible="false">
                   <graphic>
                       <ImageView fitHeight="16" fitWidth="16">
-                          <Image url="@../images/icons/save.png"/>
+                          <Image url="@../images/icons/save.png" />
                       </ImageView>
                   </graphic>
                </Button>
                <Button fx:id="cmdMainTemplateDelete" mnemonicParsing="false" visible="false">
                   <graphic>
                       <ImageView fitHeight="16" fitWidth="16">
-                          <Image url="@../images/icons/delete.png"/>
+                          <Image url="@../images/icons/delete.png" />
                       </ImageView>
                   </graphic>
                </Button>
@@ -134,7 +146,7 @@
                <Button fx:id="cmdMainTemplate" mnemonicParsing="false">
                   <graphic>
                       <ImageView fitHeight="16" fitWidth="16">
-                          <Image url="@../images/icons/template.png"/>
+                          <Image url="@../images/icons/template.png" />
                       </ImageView>
                   </graphic>
                </Button>
@@ -167,14 +179,13 @@
             <Menu mnemonicParsing="false" text="%main.menu.program.database">
                 <MenuItem fx:id="menMainDatabaseNew" mnemonicParsing="false" text="%main.menu.program.database.new">
                     <accelerator>
-                        <KeyCodeCombination alt="ANY" code="N" control="ANY" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="ANY" code="N" control="ANY" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
-                <Menu fx:id="menMainDatabaseOpen" mnemonicParsing="false" text="%main.menu.program.database.open"/>
-                <MenuItem fx:id="menMainDatabaseDelete" mnemonicParsing="false"
-                          text="%main.menu.program.database.delete">
+                <Menu fx:id="menMainDatabaseOpen" mnemonicParsing="false" text="%main.menu.program.database.open" />
+                <MenuItem fx:id="menMainDatabaseDelete" mnemonicParsing="false" text="%main.menu.program.database.delete">
                     <accelerator>
-                        <KeyCodeCombination alt="ANY" code="D" control="ANY" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="ANY" code="D" control="ANY" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
             </Menu>

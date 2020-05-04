@@ -228,7 +228,7 @@ public class MainController extends ParentController {
                     this.pnlMainImage.setVisible(!encryption);
                     this.splPaneImage.setDividerPositions(1);
                     this.slMainImageZoom.setVisible(!encryption);
-                    AnchorPane.setBottomAnchor(this.scroller, encryption ? 0.0 : 205.0);
+                    //AnchorPane.setBottomAnchor(this.scroller, encryption ? 0.0 : 205.0);
 
                     if(!encryption) {
                         this.histogramController.setImage(newValue);
@@ -400,7 +400,6 @@ public class MainController extends ParentController {
                     bufferedImage = ImageHelper.scale(bufferedImage, width, height);
                     this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
                     this.ivMainImage.setImage(this.currentImage);
-                    this.ivMainImage.setFitWidth(width);
                 }
             }
         });
@@ -756,6 +755,9 @@ public class MainController extends ParentController {
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmdMainTemplateDelete.visibleProperty());
         this.cmdMainTemplateAdd.visibleProperty().bindBidirectional(this.cmbMainTemplates.visibleProperty());
 
+        this.ivMainImage.fitHeightProperty().bind(this.scroller.heightProperty());
+        this.ivMainImage.fitWidthProperty().bind(this.scroller.widthProperty());
+
         this.lvMain.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
@@ -800,7 +802,7 @@ public class MainController extends ParentController {
 
     private ListCell<Image> initListCell() {
         return new ListCell<>() {
-            private ImageView imageView = new ImageView();
+            private final ImageView imageView = new ImageView();
             @Override
             public void updateItem(Image name, boolean empty) {
                 super.updateItem(name, empty);
@@ -841,7 +843,16 @@ public class MainController extends ParentController {
     }
 
     private void fillImage(javafx.scene.image.Image image, boolean encryption) {
+        if(this.ivMainImage.fitHeightProperty().isBound()) {
+            this.ivMainImage.fitHeightProperty().unbind();
+        }
+        if(this.ivMainImage.fitWidthProperty().isBound()) {
+            this.ivMainImage.fitWidthProperty().unbind();
+        }
+
         this.currentImage = image;
+        this.ivMainImage.fitHeightProperty().bind(this.currentImage.heightProperty());
+        this.ivMainImage.fitWidthProperty().bind(this.currentImage.widthProperty());
         this.cache.setOriginal(image);
         Image img = this.lvMain.getSelectionModel().getSelectedItem();
         javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
@@ -850,8 +861,6 @@ public class MainController extends ParentController {
             this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
             this.editController.getPreview().setImage(preview);
         }
-        this.ivMainImage.setFitWidth(image.getWidth());
-        this.ivMainImage.setFitHeight(image.getHeight());
         this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));
         this.ivMainImage.setPreserveRatio(true);
         this.ivMainImage.setImage(image);
