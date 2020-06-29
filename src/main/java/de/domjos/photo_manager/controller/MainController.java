@@ -141,6 +141,7 @@ public class MainController extends ParentController {
                 PhotoManager.GLOBALS.setClose(true);
             }
         });
+        PhotoManager.GLOBALS.getCloseRunnable().add(this::saveSplitPanePositions);
 
         this.cmdMainReload.setOnAction(event -> this.initTreeView());
 
@@ -200,9 +201,7 @@ public class MainController extends ParentController {
                             SettingsController.DirRow dirRow = ((Folder)this.tvMain.getSelectionModel().getSelectedItem().getValue()).getDirRow();
                             if(dirRow!=null) {
                                 if(dirRow.getEncryption().trim().isEmpty()) {
-                                    javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
-                                    this.pbMain.progressProperty().bind(image.progressProperty());
-                                    this.fillImage(image);
+                                    this.loadImage(img);
                                 } else {
                                     encryption = true;
                                     javafx.scene.image.Image image = new javafx.scene.image.Image(new ByteArrayInputStream(CryptoUtils.decrypt(new FileInputStream(newValue.getPath()), dirRow.getEncryption())));
@@ -210,25 +209,17 @@ public class MainController extends ParentController {
                                     this.fillImage(image, true);
                                 }
                             } else {
-                                javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
-                                this.pbMain.progressProperty().bind(image.progressProperty());
-                                this.fillImage(image);
+                                this.loadImage(img);
                             }
                         } else {
-                            javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
-                            this.pbMain.progressProperty().bind(image.progressProperty());
-                            this.fillImage(image);
+                            this.loadImage(img);
                         }
                     } else {
-                        javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
-                        this.pbMain.progressProperty().bind(image.progressProperty());
-                        this.fillImage(image);
+                        this.loadImage(img);
                     }
                     this.accItems.setVisible(!encryption);
                     this.pnlMainImage.setVisible(!encryption);
-                    this.splPaneImage.setDividerPositions(1);
                     this.slMainImageZoom.setVisible(!encryption);
-                    //AnchorPane.setBottomAnchor(this.scroller, encryption ? 0.0 : 205.0);
 
                     if(!encryption) {
                         this.histogramController.setImage(newValue);
@@ -697,10 +688,6 @@ public class MainController extends ParentController {
         });
         this.menMainHelp.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbHelp));
         this.menMainClose.setOnAction(event -> Platform.exit());
-
-        this.splPaneDirectories.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
-        this.splPaneImages.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
-        this.splPaneImage.getDividers().get(0).positionProperty().addListener(obs -> this.saveSplitPanePositions());
     }
 
     @Override
@@ -866,6 +853,8 @@ public class MainController extends ParentController {
         this.ivMainImage.setImage(image);
         this.slMainImageZoom.setValue(100.0);
         this.editController.getWatermark().setText("");
+
+        this.loadSplitPanePositions();
     }
 
     public void fillImageList(Directory directory) {
@@ -967,13 +956,17 @@ public class MainController extends ParentController {
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0], false);
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0], false);
         PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0], false);
-        scaleToFit();
+        this.scaleToFit();
     }
 
     private void loadSplitPanePositions() {
-        this.splPaneDirectories.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0]));
-        this.splPaneImages.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0]));
-        this.splPaneImage.setDividerPositions(PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0]));
+        double divDir = PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0]);
+        double divIMGs = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0]);
+        double divIMG = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0]);
+
+        this.splPaneDirectories.setDividerPositions(divDir);
+        this.splPaneImages.setDividerPositions(divIMGs);
+        this.splPaneImage.setDividerPositions(divIMG);
     }
 
     private void addPathToHistory() {
@@ -990,5 +983,11 @@ public class MainController extends ParentController {
         if(!contains) {
             PhotoManager.GLOBALS.saveSetting(Globals.OLD_PATHS, old_paths + "|" + path, false);
         }
+    }
+
+    private void loadImage(File img) throws Exception {
+        javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
+        this.pbMain.progressProperty().bind(image.progressProperty());
+        this.fillImage(image);
     }
 }

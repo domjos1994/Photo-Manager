@@ -6,13 +6,13 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>PhotoManager</artifactId>
-    <version>0.3</version>
+    <version>1.0-alpha.1</version>
 
     <properties>
         <!-- Information of the project -->
         <application.name>Photo-Manager</application.name>
         <application.author>Dominic Joas</application.author>
-        <application.website>https://domjos.de</application.website>
+        <application.website>https://domjos.de/entwicklung/programme/photomanager</application.website>
         <application.email>developing@domjos.de</application.email>
         <application.out>build</application.out>
         <application.result>result</application.result>

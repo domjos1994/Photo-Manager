@@ -7,6 +7,7 @@ import de.domjos.photo_manager.model.gallery.Folder;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.utils.Dialogs;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.apache.commons.io.FilenameUtils;
@@ -19,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class ListViewTask extends ParentTask<List<Image>> {
-    private Directory directory;
-    private String search;
+    private final Directory directory;
+    private final String search;
 
     public ListViewTask(ProgressBar progressBar, Label messages, Directory directory, String search) {
         super(progressBar, messages);
@@ -64,7 +65,7 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                             index[0]++;
                             updateProgress(index[0], max);
                         } catch (Exception ex) {
-                            Dialogs.printException(ex);
+                            Platform.runLater(()->Dialogs.printException(ex));
                         }
                     });
                 } else {
@@ -104,7 +105,7 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                 }
             }
         } catch (Exception ex) {
-            Dialogs.printException(ex);
+            Platform.runLater(()->Dialogs.printException(ex));
         }
         return list;
     }
