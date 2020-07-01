@@ -26,7 +26,7 @@
         <cfx.version>11.0.0</cfx.version>
 
         <sqlite.version>3.28.0</sqlite.version>
-        <log4j.version>2.12.1</log4j.version>
+        <log4j.version>2.13.3</log4j.version>
         <commons.io.version>2.6</commons.io.version>
         <commons.imaging.version>1.0-alpha1</commons.imaging.version>
         <commons.net.version>3.6</commons.net.version>
