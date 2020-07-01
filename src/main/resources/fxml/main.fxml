@@ -164,6 +164,9 @@
         <Tab fx:id="tbSettings" text="%main.menu.program.settings">
             <fx:include fx:id="settings" source="settings.fxml" />
         </Tab>
+        <Tab fx:id="tbBatch" text="%main.menu.program.batch">
+            <fx:include fx:id="batch" source="batch.fxml" />
+        </Tab>
         <Tab fx:id="tbMap" text="%main.menu.extras.map">
             <fx:include fx:id="map" source="map.fxml" />
         </Tab>
@@ -192,6 +195,11 @@
             <MenuItem fx:id="menMainSettings" mnemonicParsing="false" text="%main.menu.program.settings">
                 <accelerator>
                     <KeyCodeCombination alt="ANY" code="S" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+                </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="menMainBatch" mnemonicParsing="false" text="%main.menu.program.batch">
+                <accelerator>
+                    <KeyCodeCombination alt="ANY" code="B" control="ANY" meta="UP" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="menMainClose" mnemonicParsing="false" text="%main.menu.program.close">

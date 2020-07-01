@@ -12,14 +12,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
+@SuppressWarnings("unused")
 public class Globals {
     private boolean debugMode;
     private Stage stage;
     private Logger logger;
-    private Preferences preferences;
+    private final Preferences preferences;
     private ResourceBundle language;
     private Database database;
-    private List<Runnable> closeRunnable;
+    private final List<Runnable> closeRunnable;
     private boolean close;
 
     // Keys of general settings

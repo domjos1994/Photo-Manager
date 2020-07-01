@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import org.controlsfx.control.PopOver;
 
@@ -77,6 +78,12 @@ public class UnsplashController extends ParentController {
             content.putString(strContent.toString());
             db.setContent(content);
             mouseEvent.consume();
+        });
+
+        this.txtSearch.setOnKeyReleased(event -> {
+            if(event.getCode() == KeyCode.ENTER) {
+                this.cmdSearch.fire();
+            }
         });
     }
 

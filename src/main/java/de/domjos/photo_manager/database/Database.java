@@ -2,11 +2,8 @@ package de.domjos.photo_manager.database;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.helper.ImageHelper;
-import de.domjos.photo_manager.model.gallery.Template;
+import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
-import de.domjos.photo_manager.model.gallery.Directory;
-import de.domjos.photo_manager.model.gallery.Image;
-import de.domjos.photo_manager.model.gallery.TemporaryEdited;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.SaveFolderTask;
 
@@ -364,6 +361,91 @@ public class Database {
         return templates;
     }
 
+    public void insertOrUpdateBatchTemplate(BatchTemplate batchTemplate) throws Exception {
+        PreparedStatement preparedStatement;
+        if(batchTemplate.getId() == 0) {
+            preparedStatement = this.prepare("INSERT INTO batchTemplates(name, width, height, compress, rename, folder, targetFolder, ftp, server, user, pwd, ftpSecure, path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        } else {
+            preparedStatement = this.prepare("UPDATE batchTemplates SET name=?, width=?, height=?, compress=?, rename=?, folder=?, targetFolder=?, ftp=?, server=?, user=?, pwd=?, ftpSecure=?, path=? WHERE id=?");
+            preparedStatement.setLong(14, batchTemplate.getId());
+        }
+        preparedStatement.setString(1, batchTemplate.getTitle());
+        preparedStatement.setInt(2, batchTemplate.getWidth());
+        preparedStatement.setInt(3, batchTemplate.getHeight());
+        preparedStatement.setInt(4, this.boolToInt(batchTemplate.isCompress()));
+        preparedStatement.setString(5, batchTemplate.getRename());
+        preparedStatement.setInt(6, this.boolToInt(batchTemplate.isFolder()));
+        if(batchTemplate.getTargetFolder() != null) {
+            preparedStatement.setLong(7, batchTemplate.getTargetFolder().getId());
+        } else {
+            preparedStatement.setLong(7, 0);
+        }
+        preparedStatement.setInt(8, this.boolToInt(batchTemplate.isFtp()));
+        preparedStatement.setString(9, batchTemplate.getServer());
+        preparedStatement.setString(10, batchTemplate.getUser());
+        preparedStatement.setString(11, batchTemplate.getPassword());
+        preparedStatement.setInt(12, this.boolToInt(batchTemplate.isFtpSecure()));
+        if(batchTemplate.getTargetFolderFtp() != null) {
+            preparedStatement.setString(13, batchTemplate.getTargetFolderFtp().getPath());
+        } else {
+            preparedStatement.setString(13, "");
+        }
+        preparedStatement.executeUpdate();
+    }
+
+    public List<BatchTemplate> getBatchTemplates(String where) throws Exception {
+        List<BatchTemplate> batchTemplates = new LinkedList<>();
+
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM batchTemplates" + (where.isEmpty() ? "" : " WHERE " + where));
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            BatchTemplate batchTemplate = new BatchTemplate();
+            batchTemplate.setId(resultSet.getLong("id"));
+            batchTemplate.setTitle(resultSet.getString("name"));
+            batchTemplate.setWidth(resultSet.getInt("width"));
+            batchTemplate.setHeight(resultSet.getInt("height"));
+            batchTemplate.setCompress(resultSet.getBoolean("compress"));
+            batchTemplate.setRename(resultSet.getString("rename"));
+            batchTemplate.setFolder(resultSet.getBoolean("folder"));
+            int targetFolder = resultSet.getInt("targetFolder");
+            if(targetFolder != 0) {
+                this.getDir(this.getRoot(), targetFolder, batchTemplate);
+            } else {
+                batchTemplate.setTargetFolder(null);
+            }
+            batchTemplate.setFtp(resultSet.getBoolean("ftp"));
+            batchTemplate.setServer(resultSet.getString("server"));
+            batchTemplate.setUser(resultSet.getString("user"));
+            batchTemplate.setPassword(resultSet.getString("pwd"));
+            batchTemplate.setFtpSecure(resultSet.getBoolean("ftpSecure"));
+            Directory directory = new Directory();
+            directory.setPath(resultSet.getString("path"));
+            batchTemplate.setTargetFolderFtp(directory);
+
+            batchTemplates.add(batchTemplate);
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        return batchTemplates;
+    }
+
+    public void deleteBatchTemplate(BatchTemplate batchTemplate) throws Exception {
+        PreparedStatement preparedStatement = this.prepare("DELETE FROM batchTemplates WHERE id=?");
+        preparedStatement.setLong(1, batchTemplate.getId());
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private void getDir(Directory root, int id, BatchTemplate batchTemplate) {
+        if(root.getId() == id) {
+            batchTemplate.setTargetFolder(root);
+        }
+        for(Directory directory : root.getChildren()) {
+            this.getDir(directory, id, batchTemplate);
+        }
+    }
+
     private long insertOrUpdateDescriptionObject(DescriptionObject descriptionObject, int type) throws Exception {
         String table;
         if(type==0) {
@@ -473,5 +555,13 @@ public class Database {
             cloud.setId(this.getGeneratedId(preparedStatement));
         }
         return cloud.getId();
+    }
+
+    private int boolToInt(boolean value) {
+        if(value) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

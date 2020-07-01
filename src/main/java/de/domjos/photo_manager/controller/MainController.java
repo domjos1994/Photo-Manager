@@ -48,8 +48,8 @@ public class MainController extends ParentController {
     private @FXML ToolBar toolbarMain;
 
     private @FXML TabPane tbpMain;
-    private @FXML Tab tbMain, tbSettings, tbMap, tbSlideshow, tbHelp;
-    private @FXML MenuItem menMainSettings, menMainClose, menMainMap, menMainHelp;
+    private @FXML Tab tbMain, tbSettings, tbBatch, tbMap, tbSlideshow, tbHelp;
+    private @FXML MenuItem menMainSettings, menMainBatch, menMainClose, menMainMap, menMainHelp;
     private @FXML MenuItem menMainDatabaseNew, menMainDatabaseDelete;
     private @FXML Menu menMainDatabaseOpen;
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow;
@@ -90,6 +90,8 @@ public class MainController extends ParentController {
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML SettingsController settingsController;
     @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML BatchController batchController;
+    @SuppressWarnings({"UnusedDeclaration"})
     private @FXML MapController mapController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML SlideshowController slideshowController;
@@ -119,7 +121,7 @@ public class MainController extends ParentController {
     @Override
     public void initialize(ResourceBundle resources) {
         this.dirRows = new LinkedList<>();
-        ControlsHelper.initController(Arrays.asList(settingsController, mapController, slideshowController, helpController,
+        ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController, helpController,
             histogramController, metaDataController, tinifyController, unsplashController,
             cloudController, editController, historyController), this);
         this.initBindings();
@@ -635,6 +637,26 @@ public class MainController extends ParentController {
         });
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
+        this.menMainBatch.setOnAction(event -> {
+            try {
+                this.batchController.getBatchTargetFolder().setRoot(null);
+                this.batchController.reloadBatchTemplates();
+                TreeViewTask treeViewTask = new TreeViewTask(this.pbMain, this.lblMessages);
+                treeViewTask.onFinish(()->{
+                    try {
+                        this.batchController.getBatchTargetFolder().setRoot(treeViewTask.get());
+                    } catch (Exception ex) {
+                        Dialogs.printException(ex);
+                    }
+                });
+                new Thread(treeViewTask).start();
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
+
+            this.batchController.addImages(this.lvMain.getSelectionModel().getSelectedItems());
+            this.tbpMain.getSelectionModel().select(this.tbBatch);
+        });
         this.menMainDatabaseNew.setOnAction(event -> {
             try {
                 this.addPathToHistory();
@@ -785,6 +807,8 @@ public class MainController extends ParentController {
         this.lvMain.setCellFactory(param ->  this.initListCell());
         this.unsplashController.getUnsplashListView().setCellFactory(param -> this.initListCell());
         this.unsplashController.getUnsplashListView().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        this.batchController.getBatchSelectedImages().setCellFactory(param -> this.initListCell());
+        this.batchController.getBatchSelectedImages().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     private ListCell<Image> initListCell() {

@@ -29,6 +29,7 @@ module PhotoManager {
     requires httpclient;
     requires httpcore;
     requires org.json;
+    requires commons.net;
 
     opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml, javafx.base;
     opens de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
@@ -37,6 +38,7 @@ module PhotoManager {
 
     exports de.domjos.photo_manager.controller to javafx.controls, javafx.fxml;
     exports de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
+    exports de.domjos.photo_manager.database;
     exports de.domjos.photo_manager.settings;
     exports de.domjos.photo_manager.model.gallery;
     exports de.domjos.photo_manager.model.services;

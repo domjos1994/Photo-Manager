@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="524.0" prefWidth="689.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.BatchController">
+   <children>
+      <ToolBar layoutX="51.0" layoutY="35.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+            <Button fx:id="cmdBatchHome" mnemonicParsing="false">
+                <graphic>
+                    <ImageView fitHeight="16" fitWidth="16">
+                        <Image url="@../images/icons/home.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="cmdBatchStart" mnemonicParsing="false">
+                <graphic>
+                    <ImageView fitHeight="16" fitWidth="16">
+                        <Image url="@../images/icons/execute.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <HBox HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="cmbBatchTemplateName" editable="true" maxWidth="150" minWidth="150" prefWidth="150" />
+            <Button fx:id="cmdBatchTemplateSave" mnemonicParsing="false">
+                <graphic>
+                    <ImageView fitHeight="16" fitWidth="16">
+                        <Image url="@../images/icons/save.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="cmdBatchTemplateDelete" mnemonicParsing="false">
+                <graphic>
+                    <ImageView fitHeight="16" fitWidth="16">
+                        <Image url="@../images/icons/delete.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+        </items>
+      </ToolBar>
+      <SplitPane dividerPositions="0.2" layoutX="93.0" layoutY="57.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <ListView fx:id="lvBatchSelectedImages" layoutX="-41.0" layoutY="-21.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Accordion layoutX="93.0" layoutY="94.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <panes>
+                      <TitledPane animated="false" text="%batch.scale">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <Label layoutX="120.0" layoutY="64.0" maxHeight="25.0" maxWidth="100.0" minHeight="25.0" minWidth="100.0" prefHeight="25.0" prefWidth="100.0" text="%batch.width" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                    <TextField fx:id="txtBatchScaleWidth" layoutX="124.0" layoutY="55.0" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="5.0" />
+                                    <Label layoutX="293.0" layoutY="108.0" maxHeight="25.0" maxWidth="100.0" minHeight="25.0" minWidth="100.0" prefHeight="25.0" prefWidth="100.0" text="%batch.height" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="5.0" />
+                                    <TextField fx:id="txtBatchScaleHeight" layoutX="220.0" layoutY="95.0" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" AnchorPane.leftAnchor="320.0" AnchorPane.topAnchor="5.0" />
+                                    <CheckBox fx:id="chkBatchScaleCompress" layoutX="83.0" layoutY="99.0" maxHeight="25.0" maxWidth="200.0" minHeight="25.0" minWidth="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="%batch.compress" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="40.0" />
+                                 </children></AnchorPane>
+                        </content>
+                      </TitledPane>
+                      <TitledPane animated="false" text="%batch.rename">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <Label layoutX="154.0" layoutY="55.0" maxHeight="25.0" maxWidth="100.0" minHeight="25.0" minWidth="100.0" prefHeight="25.0" prefWidth="100.0" text="%batch.rename" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                    <TextField fx:id="txtBatchRename" layoutX="151.0" layoutY="67.0" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                    <Label layoutX="87.0" layoutY="79.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%batch.rename.legend.count" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+                                    <Label layoutX="106.0" layoutY="133.0" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%batch.rename.legend.oldName" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="75.0" />
+                                 </children></AnchorPane>
+                        </content>
+                      </TitledPane>
+                      <TitledPane animated="false" text="%batch.target">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <SplitPane dividerPositions="0.5" layoutX="165.0" layoutY="71.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
+                                      <items>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <TitledPane animated="false" collapsible="false" text="%batch.target.folder" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                  <content>
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <CheckBox fx:id="chkBatchTargetFolder" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="%batch.target.folder" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                            <TreeView fx:id="tvBatchTargetFolder" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                  </content>
+                                                </TitledPane>
+                                             </children>
+                                          </AnchorPane>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <TitledPane animated="false" text="%batch.target.ftp" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                  <content>
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <CheckBox fx:id="chkBatchTargetFtp" maxHeight="25.0" minHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="%batch.target.ftp" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                            <Label maxHeight="25.0" maxWidth="100.0" minHeight="25.0" prefHeight="25.0" prefWidth="100.0" text="%batch.target.ftp.server" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="40.0" />
+                                                            <TextField fx:id="txtBatchTargetFtpServer" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+                                                            <Label maxHeight="25.0" maxWidth="100.0" minHeight="25.0" minWidth="100.0" text="%batch.target.ftp.user" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="70.0" />
+                                                            <TextField fx:id="txtBatchTargetFtpUser" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="70.0" />
+                                                            <Label maxHeight="25.0" minHeight="25.0" prefHeight="25.0" prefWidth="100.0" text="%batch.target.ftp.pwd" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="100.0" />
+                                                            <PasswordField fx:id="txtBatchTargetFtpPwd" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="100.0" />
+                                                            <TreeView fx:id="tvBatchTargetFtpFolder" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="160.0" />
+                                                            <CheckBox fx:id="chkBatchTargetFtpSecure" maxHeight="25.0" mnemonicParsing="false" prefHeight="25.0" text="%batch.target.ftp.secure" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="130.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                  </content>
+                                                </TitledPane>
+                                             </children></AnchorPane>
+                                      </items>
+                                    </SplitPane>
+                                 </children></AnchorPane>
+                        </content>
+                      </TitledPane>
+                    </panes>
+                  </Accordion>
+               </children></AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
