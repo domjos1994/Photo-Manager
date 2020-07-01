@@ -3,6 +3,7 @@ package de.domjos.photo_manager.helper;
 import com.gluonhq.maps.MapLayer;
 import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.gallery.MetaData;
 import javafx.collections.FXCollections;

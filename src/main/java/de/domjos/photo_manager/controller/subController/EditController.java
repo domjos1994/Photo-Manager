@@ -1,7 +1,8 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
+import de.domjos.photo_manager.images.filter.Filter;
 import de.domjos.photo_manager.model.gallery.Template;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
 import de.domjos.photo_manager.settings.Cache;
@@ -77,21 +78,11 @@ public class EditController extends ParentController {
         }
     }
 
-    public static ImageHelper.Filter.Type getFilterTypeBySelectedItem(String item) {
-        ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
-        String keyPart = "main.image.edit.filter.";
-
-        if(item.equals(lang.getString(keyPart + "color"))) {
-            return ImageHelper.Filter.Type.ColorFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "invert"))) {
-            return ImageHelper.Filter.Type.InvertFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "sharpen"))) {
-            return ImageHelper.Filter.Type.SharpenFilter;
-        }
-        if(item.equals(lang.getString(keyPart + "blur"))) {
-            return ImageHelper.Filter.Type.BlurFilter;
+    public static Filter.Type getFilterTypeBySelectedItem(String item) {
+        for(Filter.Type type : Filter.Type.values()) {
+            if(item.equals(type.name().trim().replace("Filter", "").toLowerCase())) {
+                return type;
+            }
         }
         return null;
     }
@@ -173,9 +164,9 @@ public class EditController extends ParentController {
     private void reloadFilter() {
         this.cmbFilter.getItems().clear();
 
-        for(ImageHelper.Filter.Type type : ImageHelper.Filter.Type.values()) {
+        for(Filter.Type type : Filter.Type.values()) {
             String name = type.name().trim().toLowerCase().replace("filter", "");
-            this.cmbFilter.getItems().add(PhotoManager.GLOBALS.getLanguage().getString("main.image.edit.filter." + name));
+            this.cmbFilter.getItems().add(name);
         }
     }
 
@@ -201,7 +192,7 @@ public class EditController extends ParentController {
             }
             if(!this.cmbFilter.getSelectionModel().isEmpty()) {
                 String selectedFilter = this.cmbFilter.getSelectionModel().getSelectedItem();
-                ImageHelper.Filter.Type type = EditController.getFilterTypeBySelectedItem(selectedFilter);
+                Filter.Type type = EditController.getFilterTypeBySelectedItem(selectedFilter);
                 if(type!=null) {
                     this.cache.setPreviewImage(ImageHelper.addFilter(this.cache.getPreviewImage(), type));
                 }

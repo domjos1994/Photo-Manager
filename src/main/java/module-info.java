@@ -45,4 +45,5 @@ module PhotoManager {
     exports de.domjos.photo_manager.helper;
     exports de.domjos.photo_manager.services;
     exports de.domjos.photo_manager;
+    exports de.domjos.photo_manager.images.filter;
 }

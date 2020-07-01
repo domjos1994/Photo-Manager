@@ -4,7 +4,7 @@ import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.*;
 import de.domjos.photo_manager.helper.ControlsHelper;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
@@ -327,22 +327,23 @@ public class MainController extends ParentController {
                     }
                 }
 
-                Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                if(image!=null) {
-                    this.currentImage = null;
-                    PhotoManager.GLOBALS.getDatabase().deleteImage(image);
-                    this.editController.getPreview().setImage(null);
-                    this.ivMainImage.setImage(null);
-                    this.histogramController.setImage(null);
-                    this.metaDataController.setImage(null);
+                for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
+                    if(image!=null) {
+                        this.currentImage = null;
+                        PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+                        this.editController.getPreview().setImage(null);
+                        this.ivMainImage.setImage(null);
+                        this.histogramController.setImage(null);
+                        this.metaDataController.setImage(null);
 
-                    if(moveToPath.isEmpty()) {
-                        Files.delete(Paths.get(image.getPath()));
-                    } else {
-                        Files.move(Paths.get(image.getPath()), Paths.get(moveToPath + File.separatorChar + new File(image.getPath()).getName()));
+                        if(moveToPath.isEmpty()) {
+                            Files.delete(Paths.get(image.getPath()));
+                        } else {
+                            Files.move(Paths.get(image.getPath()), Paths.get(moveToPath + File.separatorChar + new File(image.getPath()).getName()));
+                        }
                     }
-                    this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
                 }
+                this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }

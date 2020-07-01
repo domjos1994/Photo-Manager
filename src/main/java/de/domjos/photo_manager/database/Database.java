@@ -1,7 +1,7 @@
 package de.domjos.photo_manager.database;
 
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;

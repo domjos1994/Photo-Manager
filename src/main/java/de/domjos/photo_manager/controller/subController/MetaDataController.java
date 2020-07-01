@@ -1,7 +1,7 @@
 package de.domjos.photo_manager.controller.subController;
 
 import com.gluonhq.maps.MapPoint;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.helper.MapHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.utils.Dialogs;

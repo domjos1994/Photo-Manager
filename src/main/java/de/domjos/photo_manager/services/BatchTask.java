@@ -3,7 +3,7 @@ package de.domjos.photo_manager.services;
 import com.tinify.Source;
 import com.tinify.Tinify;
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.BatchTemplate;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;

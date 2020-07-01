@@ -4,7 +4,7 @@ import com.tinify.Options;
 import com.tinify.Source;
 import com.tinify.Tinify;
 import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.settings.Globals;

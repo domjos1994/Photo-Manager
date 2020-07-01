@@ -1,5 +1,6 @@
-package de.domjos.photo_manager.helper;
+package de.domjos.photo_manager.images;
 
+import de.domjos.photo_manager.images.filter.*;
 import de.domjos.photo_manager.model.gallery.MetaData;
 import de.domjos.photo_manager.utils.CryptoUtils;
 import org.apache.commons.imaging.Imaging;
@@ -290,25 +291,10 @@ public class ImageHelper {
     }
 
     public static BufferedImage addFilter(BufferedImage bufferedImage, Filter.Type type) {
-        Filter filter;
-        switch (type) {
-            case ColorFilter:
-                filter = new ColorFilter();
-                break;
-            case InvertFilter:
-                filter = new InvertFilter();
-                break;
-            case SharpenFilter:
-                filter = new SharpenFilter();
-                break;
-            case BlurFilter:
-                filter = new BlurFilter();
-                break;
-            default:
-                filter = null;
-                break;
+        if(Filter.filters.containsKey(type)) {
+            return Filter.filters.get(type).processImage(bufferedImage);
         }
-        return filter.processImage(bufferedImage);
+        return bufferedImage;
     }
 
     public static void save(String path, String save, BufferedImage bufferedImage) throws Exception {
@@ -401,67 +387,5 @@ public class ImageHelper {
 
     private static boolean checkImageHasAlpha(BufferedImage bufferedImage) {
         return bufferedImage.getColorModel().hasAlpha();
-    }
-
-    public interface Filter {
-        BufferedImage processImage(BufferedImage image);
-
-        enum Type {
-            ColorFilter,
-            InvertFilter,
-            SharpenFilter,
-            BlurFilter
-        }
-    }
-
-    private static class ColorFilter implements Filter {
-        public BufferedImage processImage(BufferedImage image) {
-            float[][] colorMatrix = { { 1f, 0f, 0f, 1f }, { 0.5f, 1.0f, 0.5f, 1f }, { 0.2f, 0.4f, 0.6f, 1f }, {1f, 1f, 1f, 1f}};
-            BandCombineOp changeColors = new BandCombineOp(colorMatrix, null);
-            Raster sourceRaster = image.getRaster();
-            WritableRaster displayRaster = sourceRaster.createCompatibleWritableRaster();
-            changeColors.filter(sourceRaster, displayRaster);
-            return new BufferedImage(image.getColorModel(), displayRaster, true, null);
-        }
-    }
-
-    private static class InvertFilter implements Filter {
-        public BufferedImage processImage(BufferedImage image) {
-            if(image!=null) {
-                byte[] invertArray = new byte[256];
-
-                for (int counter = 0; counter < 256; counter++)
-                    invertArray[counter] = (byte) (255 - counter);
-
-                BufferedImageOp invertFilter = new LookupOp(new ByteLookupTable(0, invertArray), null);
-                return invertFilter.filter(image, null);
-            }
-            return null;
-        }
-    }
-
-    private static class SharpenFilter implements Filter {
-        public BufferedImage processImage(BufferedImage image) {
-            if(image!=null) {
-                float[] sharpenMatrix = { 0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f };
-                BufferedImageOp sharpenFilter = new ConvolveOp(new Kernel(3, 3, sharpenMatrix),
-                        ConvolveOp.EDGE_NO_OP, null);
-                return sharpenFilter.filter(image, null);
-            }
-            return null;
-        }
-    }
-
-    private static class BlurFilter implements Filter {
-        public BufferedImage processImage(BufferedImage image) {
-            if(image!=null) {
-                float[] blurMatrix = { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f,
-                        1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
-                BufferedImageOp blurFilter = new ConvolveOp(new Kernel(3, 3, blurMatrix),
-                        ConvolveOp.EDGE_NO_OP, null);
-                return blurFilter.filter(image, null);
-            }
-            return null;
-        }
     }
 }

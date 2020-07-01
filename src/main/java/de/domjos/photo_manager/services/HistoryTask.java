@@ -1,7 +1,8 @@
 package de.domjos.photo_manager.services;
 
 import de.domjos.photo_manager.controller.subController.EditController;
-import de.domjos.photo_manager.helper.ImageHelper;
+import de.domjos.photo_manager.images.ImageHelper;
+import de.domjos.photo_manager.images.filter.Filter;
 import de.domjos.photo_manager.model.gallery.TemporaryEdited;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Label;
@@ -66,7 +67,7 @@ public final class HistoryTask extends ParentTask<BufferedImage> {
                     image = ImageHelper.resize(image, currentImage, width, height);
                     bufferedImage = ImageHelper.rotate(image, rotation);
 
-                    ImageHelper.Filter.Type type = EditController.getFilterTypeBySelectedItem(filter);
+                    Filter.Type type = EditController.getFilterTypeBySelectedItem(filter);
                     if(type!=null) {
                         bufferedImage  = ImageHelper.addFilter(bufferedImage, type);
                     }
