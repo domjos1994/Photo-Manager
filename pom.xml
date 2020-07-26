@@ -227,8 +227,8 @@
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>
-            <artifactId>javax.activation-api</artifactId>
-            <version>1.2.0</version>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 
@@ -251,6 +251,7 @@
                 <version>3.8.1</version>
                 <configuration>
                     <release>${java.version}</release>
+                    <debug>true</debug>
                 </configuration>
                 <executions>
                     <execution>
