@@ -7,6 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -16,7 +17,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * This is the class for the En- and Decryption of Files and Strings
@@ -79,7 +79,7 @@ public final class CryptoUtils {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static byte[] hashPwd(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static byte[] hashPwd(String password) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance( "MD5" );
         md.update( password.getBytes(StandardCharsets.ISO_8859_1) );
         return md.digest();
@@ -100,7 +100,7 @@ public final class CryptoUtils {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
                 byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
                 byte[] enc = cipher.doFinal(utf8);
-                return DatatypeConverter.printBase64Binary(enc);
+                return Base64.getEncoder().encodeToString(enc);
             }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
             Dialogs.printException(ex);
@@ -121,7 +121,7 @@ public final class CryptoUtils {
                 SecretKey key = new SecretKeySpec(STR_KEY.getBytes(Charset.defaultCharset()), "AES");
                 Cipher cipher = Cipher.getInstance("AES");
                 cipher.init(Cipher.DECRYPT_MODE, key);
-                byte[] dec = DatatypeConverter.parseBase64Binary(str);
+                byte[] dec = Base64.getDecoder().decode(str);
                 byte[] utf8 = cipher.doFinal(dec);
                 return new String(utf8, StandardCharsets.UTF_8);
             }

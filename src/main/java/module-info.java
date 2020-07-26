@@ -3,7 +3,6 @@ module PhotoManager {
     requires java.sql;
     requires java.prefs;
     requires java.base;
-    requires java.activation;
 
     requires javafx.fxml;
     requires javafx.controls;
@@ -17,8 +16,6 @@ module PhotoManager {
     requires sqlite.jdbc;
 
     requires sardine;
-    requires java.xml.bind;
-    requires com.sun.xml.bind;
     requires tinify;
     requires instagram4j;
 
