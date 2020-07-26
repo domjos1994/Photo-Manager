@@ -93,6 +93,7 @@
                                                     </AnchorPane>
                                                 </TitledPane>
                                                 <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
+                                                <fx:include fx:id="instagram" source="main_services_instagram.fxml" />
                                                 <fx:include fx:id="history" mnemonicParsing="false" source="main_history.fxml" />
                                             </panes>
                                         </Accordion>

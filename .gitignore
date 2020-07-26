@@ -4,3 +4,5 @@
 .idea
 /out/
 result
+/nb-configuration.xml
+/nbactions.xml

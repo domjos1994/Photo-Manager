@@ -107,6 +107,8 @@ public class MainController extends ParentController {
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML UnsplashController unsplashController;
     @SuppressWarnings({"UnusedDeclaration"})
+    private @FXML InstagramController instagramController;
+    @SuppressWarnings({"UnusedDeclaration"})
     private @FXML CloudController cloudController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML EditController editController;
@@ -122,7 +124,7 @@ public class MainController extends ParentController {
     public void initialize(ResourceBundle resources) {
         this.dirRows = new LinkedList<>();
         ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController, helpController,
-            histogramController, metaDataController, tinifyController, unsplashController,
+            histogramController, metaDataController, tinifyController, unsplashController, instagramController,
             cloudController, editController, historyController), this);
         this.initBindings();
         this.initTinify();
@@ -237,6 +239,17 @@ public class MainController extends ParentController {
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
+            }
+        });
+
+        this.ivMainImage.setOnDragDetected(event -> {
+            if(this.lvMain.getSelectionModel().getSelectedItem() != null) {
+                Dragboard db = this.lvMain.startDragAndDrop(TransferMode.COPY);
+                ClipboardContent content = new ClipboardContent();
+                this.instagramController.setImage(this.lvMain.getSelectionModel().getSelectedItem());
+                content.putString("image");
+                db.setContent(content);
+                event.consume();
             }
         });
 
@@ -723,6 +736,7 @@ public class MainController extends ParentController {
 
     void back() {
         this.tbpMain.getSelectionModel().select(this.tbMain);
+        this.instagramController.hide();
     }
 
     public ProgressBar getProgressBar() {
@@ -810,6 +824,8 @@ public class MainController extends ParentController {
         this.unsplashController.getUnsplashListView().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         this.batchController.getBatchSelectedImages().setCellFactory(param -> this.initListCell());
         this.batchController.getBatchSelectedImages().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        this.instagramController.getInstagramListView().setCellFactory(param -> this.initListCell());
+        this.instagramController.getInstagramListView().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     private ListCell<Image> initListCell() {

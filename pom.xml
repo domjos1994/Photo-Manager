@@ -184,6 +184,21 @@
             <artifactId>tinify</artifactId>
             <version>1.6.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.brunocvcunha.instagram4j</groupId>
+            <artifactId>instagram4j</artifactId>
+            <version>1.14</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacv</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacv-platform</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- WebDav Client -->
         <dependency>

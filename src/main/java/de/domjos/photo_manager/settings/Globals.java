@@ -35,6 +35,9 @@ public class Globals {
     public final static String CLOUD_USER = "CLOUD_USER";
     public final static String CLOUD_PWD = "CLOUD_PWD";
 
+    public final static String INSTAGRAM_USER = "INSTAGRAM_USER";
+    public final static String INSTAGRAM_PWD = "INSTAGRAM_PWD";
+
     public final static String UNSPLASH_KEY = "UNSPLASH_KEY";
     public final static String UNSPLASH_SECRET_KEY = "UNSPLASH_SECRET_KEY";
 

@@ -3,6 +3,7 @@ module PhotoManager {
     requires java.sql;
     requires java.prefs;
     requires java.base;
+    requires java.activation;
 
     requires javafx.fxml;
     requires javafx.controls;
@@ -19,6 +20,7 @@ module PhotoManager {
     requires java.xml.bind;
     requires com.sun.xml.bind;
     requires tinify;
+    requires instagram4j;
 
     requires org.apache.logging.log4j.core;
 
@@ -26,8 +28,8 @@ module PhotoManager {
     requires org.apache.commons.imaging;
 
     requires org.apache.logging.log4j;
-    requires httpclient;
-    requires httpcore;
+    requires org.apache.httpcomponents.httpclient;
+    requires org.apache.httpcomponents.httpcore;
     requires org.json;
     requires commons.net;
 

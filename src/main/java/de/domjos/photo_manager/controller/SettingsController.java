@@ -38,6 +38,9 @@ public class SettingsController extends ParentController {
     private @FXML PasswordField txtSettingsCloudPassword;
     private @FXML Button cmdSettingsCloudTest;
 
+    private @FXML TextField txtSettingsInstagramUser;
+    private @FXML PasswordField txtSettingsInstagramPwd;
+
     private @FXML CheckBox chkSettingsDirectoriesDelete;
     private @FXML TextField txtSettingsDirectoriesDelete;
     private @FXML Button cmdSettingsDirectoriesDelete;
@@ -69,6 +72,8 @@ public class SettingsController extends ParentController {
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText(), true);
+            PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_USER, this.txtSettingsInstagramUser.getText(), true);
+            PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_PWD, this.txtSettingsInstagramPwd.getText(), true);
             this.saveDeleteFolder();
             this.saveRowsToSettings();
 
@@ -101,6 +106,8 @@ public class SettingsController extends ParentController {
         this.txtSettingsCloudPath.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PATH, ""));
         this.txtSettingsCloudUserName.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_USER, ""));
         this.txtSettingsCloudPassword.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.CLOUD_PWD, ""));
+        this.txtSettingsInstagramUser.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_USER, ""));
+        this.txtSettingsInstagramPwd.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_PWD, ""));
         SettingsController.getRowsFromSettings().forEach(this.tblSettingsDirectories.getItems()::add);
         this.tblSettingsDirectories.getItems().add(new DirRow());
 
