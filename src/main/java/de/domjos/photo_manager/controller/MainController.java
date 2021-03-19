@@ -29,11 +29,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -52,7 +51,7 @@ public class MainController extends ParentController {
     private @FXML MenuItem menMainSettings, menMainBatch, menMainClose, menMainMap, menMainHelp;
     private @FXML MenuItem menMainDatabaseNew, menMainDatabaseDelete;
     private @FXML Menu menMainDatabaseOpen;
-    private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow;
+    private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow, ctxMainBatch;
 
     private @FXML ContextMenu ctxMainImage;
     private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs, ctxMainImageAssemble, ctxMainImageScale;
@@ -580,6 +579,12 @@ public class MainController extends ParentController {
             }
         });
 
+        this.ctxMainBatch.setOnAction(event -> {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                this.openBatchWindow();
+            }
+        });
+
         this.txtMainImageSearch.setOnKeyReleased(event -> {
             if(event.getCode()== KeyCode.ENTER) {
                 this.cmdMainImageSearch.fire();
@@ -651,26 +656,7 @@ public class MainController extends ParentController {
         });
 
         this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
-        this.menMainBatch.setOnAction(event -> {
-            try {
-                this.batchController.getBatchTargetFolder().setRoot(null);
-                this.batchController.reloadBatchTemplates();
-                TreeViewTask treeViewTask = new TreeViewTask(this.pbMain, this.lblMessages);
-                treeViewTask.onFinish(()->{
-                    try {
-                        this.batchController.getBatchTargetFolder().setRoot(treeViewTask.get());
-                    } catch (Exception ex) {
-                        Dialogs.printException(ex);
-                    }
-                });
-                new Thread(treeViewTask).start();
-            } catch (Exception ex) {
-                Dialogs.printException(ex);
-            }
-
-            this.batchController.addImages(this.lvMain.getSelectionModel().getSelectedItems());
-            this.tbpMain.getSelectionModel().select(this.tbBatch);
-        });
+        this.menMainBatch.setOnAction(event -> this.openBatchWindow());
         this.menMainDatabaseNew.setOnAction(event -> {
             try {
                 this.addPathToHistory();
@@ -810,6 +796,8 @@ public class MainController extends ParentController {
                     this.tvMain.setRoot(root);
                 } catch (Exception ex) {
                     Dialogs.printException(ex);
+                } finally {
+                    this.readArguments();
                 }
             });
             new Thread(treeViewTask).start();
@@ -1030,5 +1018,148 @@ public class MainController extends ParentController {
         javafx.scene.image.Image image = new javafx.scene.image.Image(img.toURI().toURL().toString());
         this.pbMain.progressProperty().bind(image.progressProperty());
         this.fillImage(image);
+    }
+
+    private void openBatchWindow() {
+        List<Image> images;
+        if(this.lvMain.getSelectionModel().isEmpty()) {
+            images = this.lvMain.getItems();
+        } else {
+            images = this.lvMain.getSelectionModel().getSelectedItems();
+        }
+        this.openBatchWindow(images);
+    }
+
+    private void openBatchWindow(List<Image> images) {
+        try {
+            this.batchController.getBatchTargetFolder().setRoot(null);
+            this.batchController.reloadBatchTemplates();
+            TreeViewTask treeViewTask = new TreeViewTask(this.pbMain, this.lblMessages);
+            treeViewTask.onFinish(()->{
+                try {
+                    this.batchController.getBatchTargetFolder().setRoot(treeViewTask.get());
+                } catch (Exception ex) {
+                    Dialogs.printException(ex);
+                }
+            });
+            new Thread(treeViewTask).start();
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
+        }
+
+        this.batchController.addImages(images);
+        this.tbpMain.getSelectionModel().select(this.tbBatch);
+    }
+
+    private Directory findDirectory(TreeItem<Directory> directory, String search) {
+        if(directory != null) {
+            if(directory.getValue().getTitle().trim().toLowerCase().contains(search)) {
+                return directory.getValue();
+            }
+            if(directory.getChildren() != null) {
+                for(TreeItem<Directory> tmp : directory.getChildren()) {
+                    return this.findDirectory(tmp, search);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void readArguments() {
+        String[] arguments = PhotoManager.GLOBALS.getArguments();
+
+        if(arguments != null) {
+            if(arguments.length > 1 ) {
+                switch (arguments[0].toLowerCase().trim()) {
+                    case "batch":
+                        File folder = new File(arguments[1].trim());
+                        if(folder.exists() && folder.isDirectory()) {
+                            String[] files = folder.list(ImageHelper.getFilter());
+                            if(files != null) {
+                                List<Image> images = new LinkedList<>();
+                                for(String file : files)    {
+                                    file = folder.getAbsolutePath() + File.separatorChar + file;
+                                    try {
+                                        BufferedImage bufferedImage = ImageHelper.getImage(file);
+                                        if(bufferedImage != null) {
+                                            Image image = new Image();
+                                            image.setHeight(bufferedImage.getHeight());
+                                            image.setWidth(bufferedImage.getWidth());
+                                            image.setPath(file);
+                                            image.setTitle(new File(file).getName().split("\\.")[0].trim());
+                                            image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 128, 128)));
+                                            images.add(image);
+                                        }
+                                    } catch (Exception ignored) {}
+                                }
+
+                                this.openBatchWindow(images);
+                            }
+                        }
+                        break;
+                    case "save":
+                        File imageFile = new File(arguments[1].trim());
+                        if(imageFile.exists()) {
+                            List<File> files = new LinkedList<>();
+                            if(imageFile.isFile()) {
+                                files.add(imageFile);
+                            } else if(imageFile.isDirectory()) {
+                                files.addAll(Arrays.asList(Objects.requireNonNull(imageFile.listFiles(ImageHelper.getFilter()))));
+                            }
+
+                            for(File current : files) {
+                                if(arguments.length == 3) {
+                                    String folderName = arguments[2].trim();
+                                    Directory directory = this.findDirectory(this.tvMain.getRoot(), folderName);
+                                    if(directory != null) {
+                                        if(!(directory instanceof Folder)) {
+                                            this.saveImage(current, directory);
+                                        } else {
+                                            try {
+                                                Folder tmp = (Folder) directory;
+                                                String path = tmp.getDirRow().getPath();
+
+                                                File newFile = new File(path + File.separatorChar + current.getName());
+                                                FileInputStream fis = new FileInputStream(current);
+                                                if(newFile.exists() || newFile.createNewFile()) {
+                                                    FileOutputStream fos = new FileOutputStream(newFile);
+                                                    IOUtils.copy(fis, fos);
+                                                    fis.close();
+                                                    fos.close();
+                                                    this.saveImage(newFile, directory);
+                                                }
+
+                                            } catch (Exception ex) {
+                                                Dialogs.printException(ex);
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        PhotoManager.GLOBALS.setArguments(null);
+    }
+
+    private void saveImage(File imageFile, Directory directory) {
+        try {
+            BufferedImage bufferedImage = ImageHelper.getImage(imageFile.getAbsolutePath());
+            if (bufferedImage != null) {
+                Image image = new Image();
+                image.setHeight(bufferedImage.getHeight());
+                image.setWidth(bufferedImage.getWidth());
+                image.setPath(imageFile.getAbsolutePath());
+                image.setTitle(imageFile.getName().split("\\.")[0].trim());
+                image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 128, 128)));
+                image.setDirectory(directory);
+                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+            }
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
+        }
     }
 }

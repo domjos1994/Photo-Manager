@@ -39,13 +39,14 @@ public class BatchTask extends ParentTask<Void> {
     Void runBody() throws Exception {
         int current = 1, max = this.images.size();
         for(Image image : this.images) {
+            String path = image.getPath();
             this.updateMessage(image.getTitle());
 
             BufferedImage bufferedImage = ImageHelper.getImage(image.getPath());
             bufferedImage = this.resizeImage(bufferedImage);
             bufferedImage = this.compress(bufferedImage);
             image.setTitle(this.getName(image, current));
-            this.createImage(image, bufferedImage);
+            this.createImage(path, image, bufferedImage);
             this.uploadToFTP(image, bufferedImage);
 
             this.updateProgress(current, max);
@@ -100,31 +101,39 @@ public class BatchTask extends ParentTask<Void> {
         return image.getTitle();
     }
 
-    private void createImage(Image image, BufferedImage bufferedImage) {
+    private void createImage(String original_path, Image image, BufferedImage bufferedImage) {
         try {
-            String ext = FilenameUtils.getExtension(image.getPath());
-            String path;
-            Image tmp;
-            if(this.batchTemplate.isFolder()) {
-                path = this.batchTemplate.getTargetFolder().getPath() + File.separatorChar + image.getTitle() + "." + ext;
-                ImageHelper.save(image.getPath(), path, bufferedImage);
+            if(image.getDirectory() != null) {
+                String ext = FilenameUtils.getExtension(image.getPath());
+                String path;
+                Image tmp;
+                if(this.batchTemplate.isFolder()) {
+                    path = this.batchTemplate.getTargetFolder().getPath() + File.separatorChar + image.getTitle() + "." + ext;
+                    ImageHelper.save(image.getPath(), path, bufferedImage);
 
-                Image newImage = new Image();
-                newImage.setPath(path);
-                newImage.setDirectory(this.batchTemplate.getTargetFolder());
-                newImage.setTitle(image.getTitle());
-                newImage.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 50, 50)));
-                newImage.setHeight(bufferedImage.getHeight());
-                newImage.setWidth(bufferedImage.getWidth());
-                tmp = newImage;
+                    Image newImage = new Image();
+                    newImage.setPath(path);
+                    newImage.setDirectory(this.batchTemplate.getTargetFolder());
+                    newImage.setTitle(image.getTitle());
+                    newImage.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 50, 50)));
+                    newImage.setHeight(bufferedImage.getHeight());
+                    newImage.setWidth(bufferedImage.getWidth());
+                    tmp = newImage;
+                } else {
+                    path = FilenameUtils.getPath(image.getPath()) + File.separatorChar + image.getTitle() + "." + ext;
+                    ImageHelper.save(image.getPath(), path, bufferedImage);
+                    image.setPath(path);
+                    image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 50, 50)));
+                    tmp = image;
+                }
+                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(tmp);
             } else {
-                path = FilenameUtils.getPath(image.getPath()) + File.separatorChar + image.getTitle() + "." + ext;
-                ImageHelper.save(image.getPath(), path, bufferedImage);
-                image.setPath(path);
-                image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 50, 50)));
-                tmp = image;
+                File file = new File(image.getPath());
+                File folder = file.getParentFile();
+                String ext = FilenameUtils.getExtension(image.getPath());
+
+                ImageHelper.save(original_path, folder.getAbsolutePath() + File.separatorChar + image.getTitle() + "." + ext, bufferedImage);
             }
-            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(tmp);
         } catch (Exception ex) {
             this.updateMessage(ex.getMessage());
         }

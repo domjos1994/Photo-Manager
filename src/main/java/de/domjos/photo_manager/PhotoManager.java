@@ -81,6 +81,7 @@ public class PhotoManager extends Application {
     }
 
     public static void main(String[] args) {
+        PhotoManager.GLOBALS.setArguments(args);
         Application.launch(args);
     }
 }

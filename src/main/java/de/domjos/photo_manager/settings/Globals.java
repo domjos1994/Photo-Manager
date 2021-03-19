@@ -22,6 +22,7 @@ public class Globals {
     private Database database;
     private final List<Runnable> closeRunnable;
     private boolean close;
+    private String[] args;
 
     // Keys of general settings
     public final static String PATH = "PATH";
@@ -60,6 +61,15 @@ public class Globals {
         this.preferences = Preferences.userRoot().node(PhotoManager.class.getName());
         this.closeRunnable = new LinkedList<>();
         this.close = false;
+        this.args = null;
+    }
+
+    public String[] getArguments() {
+       return this.args;
+    }
+
+    public void setArguments(String[] args) {
+        this.args = args;
     }
 
     public boolean isDebugMode() {

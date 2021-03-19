@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.apache.commons.io.FilenameUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,6 +59,9 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                                     } else {
                                         image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
                                     }
+                                    Dimension dimension = ImageHelper.getSize(file.getAbsolutePath());
+                                    image.setWidth(dimension.width);
+                                    image.setHeight(dimension.height);
                                     image.setTitle(file.getName());
                                     list.add(image);
                                 }
@@ -95,7 +99,9 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                                 }
                             }
                         }
-
+                        Dimension dimension = ImageHelper.getSize(image.getPath());
+                        image.setWidth(dimension.width);
+                        image.setHeight(dimension.height);
                         if (foundItem) {
                             list.add(image);
                         }

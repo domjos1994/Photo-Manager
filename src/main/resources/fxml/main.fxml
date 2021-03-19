@@ -19,6 +19,7 @@
                                         <MenuItem fx:id="ctxMainDelete" mnemonicParsing="false" text="%sys.delete" />
                                         <MenuItem fx:id="ctxMainRecreate" mnemonicParsing="false" text="%main.ctx.thumbnails" />
                                         <MenuItem fx:id="ctxMainSlideshow" mnemonicParsing="false" text="%main.ctx.slideshow" />
+                                        <MenuItem fx:id="ctxMainBatch" mnemonicParsing="false" text="%main.menu.program.batch" />
                                     </items>
                                 </ContextMenu>
                             </contextMenu>

@@ -3,6 +3,9 @@ module PhotoManager {
     requires java.sql;
     requires java.prefs;
     requires java.base;
+    requires java.xml.bind;
+    requires com.sun.xml.bind;
+    requires java.activation;
 
     requires javafx.fxml;
     requires javafx.controls;

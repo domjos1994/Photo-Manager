@@ -23,6 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
  * @author Dominic Joas
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public final class CryptoUtils {
     private static final String STR_KEY = "b76e7392ad10fee7";
 

@@ -13,13 +13,14 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
-    private List<Folder> folders;
+    private final List<Folder> folders;
 
     public TreeViewTask(ProgressBar progressBar, Label messages) {
         super(progressBar, messages);
@@ -68,7 +69,9 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
             folder.setPath(dirRow.getPath());
             folder.setIcon(dirRow.getIcon());
             folder.setDirRow(dirRow);
-            this.folders.add(folder);
+            if(new File(dirRow.getPath()).exists()) {
+                this.folders.add(folder);
+            }
         }
 
         String deleteFolder = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
@@ -77,7 +80,9 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
             folder.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.bin"));
             folder.setPath(deleteFolder);
             folder.setIcon("/images/icons/delete.png");
-            this.folders.add(folder);
+            if(new File(deleteFolder).exists()) {
+                this.folders.add(folder);
+            }
         }
     }
 

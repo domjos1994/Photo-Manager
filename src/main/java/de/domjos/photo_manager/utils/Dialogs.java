@@ -20,7 +20,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public final class Dialogs {
+    private final static ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
 
     public static Stage printFXML(String path, ResourceBundle language, String header, Stage stage) throws Exception {
         Parent root = FXMLLoader.load(PhotoManager.class.getResource(path), language);
@@ -160,8 +162,8 @@ public final class Dialogs {
         Dialog<AssembleResult> dialog = new Dialog<>();
         Dialogs.setIcon(dialog);
         dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("main.image.menu.together.size"));
-        ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        dialog.getDialogPane().getButtonTypes().addAll(Dialogs.loginButtonType, ButtonType.CANCEL);
 
 
         TextField width = new TextField();
@@ -244,8 +246,7 @@ public final class Dialogs {
         Dialog<String> dialog = new Dialog<>();
         Dialogs.setIcon(dialog);
         dialog.setTitle(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption"));
-        ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(Dialogs.loginButtonType, ButtonType.CANCEL);
 
         PasswordField newPassword = new PasswordField();
         newPassword.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption.new"));
@@ -275,7 +276,6 @@ public final class Dialogs {
                 return "";
             });
 
-            return dialog;
         } else {
             PasswordField oldPassword = new PasswordField();
             oldPassword.setPromptText(PhotoManager.GLOBALS.getLanguage().getString("settings.directories.encryption.old"));
@@ -302,11 +302,11 @@ public final class Dialogs {
                 return "";
             });
 
-            return dialog;
         }
+        return dialog;
     }
 
-    private static void setIcon(Dialog dialog) {
+    private static void setIcon(Dialog<?> dialog) {
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image(Dialogs.class.getResourceAsStream("/images/header.png")));
     }

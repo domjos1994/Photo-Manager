@@ -67,8 +67,8 @@ public class ImageHelper {
     }
 
     public static BufferedImage scale(BufferedImage imageToScale, int dWidth, int dHeight) {
-        BufferedImage scaledImage = null;
-        if (imageToScale != null) {
+        BufferedImage scaledImage = imageToScale;
+        if (imageToScale != null && (dWidth != 0 && dHeight != 0)) {
             scaledImage = new BufferedImage(dWidth, dHeight, imageToScale.getType());
             Graphics2D graphics2D = scaledImage.createGraphics();
             graphics2D.drawImage(imageToScale, 0, 0, dWidth, dHeight, null);
@@ -88,7 +88,7 @@ public class ImageHelper {
     }
 
     public static byte[] imageToByteArray(String path, String password) throws Exception {
-        return CryptoUtils.decrypt(new FileInputStream(new File(path)), password);
+        return CryptoUtils.decrypt(new FileInputStream(path), password);
     }
 
     public static int[] getHistogram(BufferedImage bufferedImage, int type) {
@@ -324,6 +324,10 @@ public class ImageHelper {
         }
         CryptoUtils.encrypt(tmp.getAbsolutePath(), save, enc);
         tmp.deleteOnExit();
+    }
+
+    public static Dimension getSize(String path) throws Exception {
+        return Imaging.getImageSize(new File(path));
     }
 
     private static ImageReader getImageReader(String path) {

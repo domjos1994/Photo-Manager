@@ -19,7 +19,7 @@ import java.util.List;
 
 public final class TinifyTask extends ParentTask<Void> {
     private int width, height;
-    private List<Image> images;
+    private final List<Image> images;
 
     public TinifyTask(ProgressBar progressBar, Label messages, String width, String height, Object img) {
         super(progressBar, messages);
@@ -45,7 +45,7 @@ public final class TinifyTask extends ParentTask<Void> {
         } else if(img instanceof Directory) {
             loadImagesFromDirectory((Directory) img);
         } else if(img instanceof List) {
-            for(Object obj : (List) img) {
+            for(Object obj : (List<?>) img) {
                 this.images.add((Image) obj);
             }
         }

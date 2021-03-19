@@ -4,7 +4,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SettingsController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.domjos.photo_manager.controller.SettingsController">
 
     <ToolBar layoutY="25.0" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" styleClass="darkSlateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Button fx:id="cmdSettingsHome" mnemonicParsing="false">
@@ -23,21 +23,21 @@
             </graphic>
         </Button>
     </ToolBar>
-    <TitledPane maxHeight="70.0" minHeight="70.0" prefHeight="70.0" text="%settings.general" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
-        <AnchorPane>
-            <CheckBox fx:id="chkSettingsDebugMode" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.debug" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-        </AnchorPane>
-    </TitledPane>
-    <TitledPane animated="false" text="%settings.directories" AnchorPane.bottomAnchor="320.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="110.0">
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-            <CheckBox fx:id="chkSettingsDirectoriesDelete" maxHeight="25.0" maxWidth="200.0" minHeight="25.0" minWidth="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="%settings.directories.delete" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <Button fx:id="cmdSettingsDirectoriesDelete" layoutX="219.0" layoutY="92.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" text="..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <TextField fx:id="txtSettingsDirectoriesDelete" editable="false" layoutX="125.0" layoutY="92.0" AnchorPane.leftAnchor="205.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
-            <TableView fx:id="tblSettingsDirectories" editable="true" layoutX="64.0" layoutY="41.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="30.0" />
-        </AnchorPane>
-    </TitledPane>
-    <Accordion layoutX="109.0" layoutY="94.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="280.0">
+    <Accordion layoutX="109.0" layoutY="94.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
         <panes>
+            <TitledPane text="%settings.general">
+                <AnchorPane>
+                    <CheckBox fx:id="chkSettingsDebugMode" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.debug" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                </AnchorPane>
+            </TitledPane>
+            <TitledPane text="%settings.directories">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <CheckBox fx:id="chkSettingsDirectoriesDelete" maxHeight="25.0" maxWidth="200.0" minHeight="25.0" minWidth="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="%settings.directories.delete" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    <Button fx:id="cmdSettingsDirectoriesDelete" layoutX="219.0" layoutY="92.0" maxWidth="35.0" minWidth="35.0" mnemonicParsing="false" prefWidth="35.0" text="..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    <TextField fx:id="txtSettingsDirectoriesDelete" editable="false" layoutX="125.0" layoutY="92.0" AnchorPane.leftAnchor="205.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
+                    <TableView fx:id="tblSettingsDirectories" editable="true" layoutX="64.0" layoutY="41.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="30.0" />
+                </AnchorPane>
+            </TitledPane>
             <TitledPane text="%settings.tiny">
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                     <TextField fx:id="txtSettingsTinyKey" layoutX="174.0" layoutY="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />

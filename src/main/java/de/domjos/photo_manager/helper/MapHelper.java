@@ -17,7 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public class MapHelper {
-    private MapView mapView;
+    private final MapView mapView;
 
     public MapHelper(MapView mapView, MapPoint center) {
         if(center!=null) {
