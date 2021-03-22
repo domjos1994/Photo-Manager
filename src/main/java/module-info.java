@@ -26,12 +26,12 @@ module PhotoManager {
 
     requires org.apache.commons.io;
     requires org.apache.commons.imaging;
+    requires org.apache.commons.net;
 
     requires org.apache.logging.log4j;
     requires org.apache.httpcomponents.httpclient;
     requires org.apache.httpcomponents.httpcore;
     requires org.json;
-    requires commons.net;
 
     opens de.domjos.photo_manager.controller to javafx.controls, javafx.fxml, javafx.base;
     opens de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;

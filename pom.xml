@@ -6,7 +6,7 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>PhotoManager</artifactId>
-    <version>1.0-alpha.1</version>
+    <version>1.0-beta.1</version>
 
     <properties>
         <!-- Information of the project -->
@@ -25,11 +25,11 @@
         <jfx.version>11</jfx.version>
         <cfx.version>11.0.0</cfx.version>
 
-        <sqlite.version>3.28.0</sqlite.version>
+        <sqlite.version>3.34.0</sqlite.version>
         <log4j.version>2.13.3</log4j.version>
-        <commons.io.version>2.6</commons.io.version>
-        <commons.imaging.version>1.0-alpha1</commons.imaging.version>
-        <commons.net.version>3.6</commons.net.version>
+        <commons.io.version>2.8.0</commons.io.version>
+        <commons.imaging.version>1.0-alpha2</commons.imaging.version>
+        <commons.net.version>3.8.0</commons.net.version>
 
         <!-- Language-Level -->
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -301,10 +301,13 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
+                            <Multi-Release>True</Multi-Release>
                             <Main-Class>${application.mainClass.application}</Main-Class>
                         </manifestEntries>
                     </archive>
+                    <excludes>
+                        <exclude>*.jar</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
