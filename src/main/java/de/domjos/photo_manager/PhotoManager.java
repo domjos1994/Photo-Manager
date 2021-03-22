@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 
 public class PhotoManager extends Application {
     public static final Globals GLOBALS = new Globals();
+    private static String path = "";
 
     static {
         System.setProperty("javafx.platform" , "Desktop");
@@ -28,7 +29,7 @@ public class PhotoManager extends Application {
         PhotoManager.GLOBALS.setLanguage(language);
 
         // initialize path
-        InitializationHelper.initializePath();
+        InitializationHelper.initializePath(PhotoManager.path);
 
         // initialize logger
         PhotoManager.GLOBALS.setLogger(InitializationHelper.initializeLogger());
@@ -82,6 +83,11 @@ public class PhotoManager extends Application {
 
     public static void main(String[] args) {
         PhotoManager.GLOBALS.setArguments(args);
+        if(args != null) {
+            if(args.length == 1) {
+                PhotoManager.path = args[0].trim();
+            }
+        }
         Application.launch(args);
     }
 }

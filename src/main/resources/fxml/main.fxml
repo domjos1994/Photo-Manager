@@ -136,6 +136,7 @@
                             </ImageView>
                         </graphic>
                     </Button>
+                    <TextField fx:id="tmpPath" prefWidth="0" visible="false" />
                     <HBox HBox.hgrow="ALWAYS" />
                <Button fx:id="cmdMainTemplateAdd" mnemonicParsing="false" visible="false">
                   <graphic>

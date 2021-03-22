@@ -30,7 +30,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -71,7 +70,7 @@ public class MainController extends ParentController {
 
     private @FXML Button cmdMainAddFolder, cmdMainReload, cmdMainBatchStart, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
-    private @FXML TextField txtMainFolderName;
+    private @FXML TextField txtMainFolderName, tmpPath;
     private @FXML TextField txtMainImageCategory, txtMainImageTags, txtMainImageName;
 
     private @FXML Button cmdMainImageSearch;
@@ -153,11 +152,12 @@ public class MainController extends ParentController {
         this.cmdMainFolder.setOnAction(event -> {
             File path = Dialogs.printDirectoryChooser(resources.getString("main.dir.path"));
             if(path!=null) {
-                this.directory.setPath(path.getAbsolutePath());
+                this.tmpPath.setText(path.getAbsolutePath());
             }
         });
         this.cmdMainFolderSave.setOnAction(event -> {
             try {
+                directory.setPath(this.tmpPath.getText());
                 directory.setTitle(txtMainFolderName.getText());
                 final long[] parentId = {rootID};
                 if(!tvMain.getSelectionModel().isEmpty()) {
@@ -1036,20 +1036,24 @@ public class MainController extends ParentController {
     }
 
     private void saveSplitPanePositions() {
-        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0], false);
-        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0], false);
-        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0], false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividers().get(0).getPosition(), false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividers().get(0).getPosition(), false);
+        PhotoManager.GLOBALS.saveSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividers().get(0).getPosition(), false);
         this.scaleToFit();
     }
 
     private void loadSplitPanePositions() {
-        double divDir = PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividerPositions()[0]);
-        double divIMGs = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividerPositions()[0]);
-        double divIMG = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividerPositions()[0]);
+        double divDir = PhotoManager.GLOBALS.getSetting(Globals.POSITION_DIRECTORIES, this.splPaneDirectories.getDividers().get(0).getPosition());
+        double divIMGs = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGES, this.splPaneImages.getDividers().get(0).getPosition());
+        double divIMG = PhotoManager.GLOBALS.getSetting(Globals.POSITION_IMAGE, this.splPaneImage.getDividers().get(0).getPosition());
 
-        this.splPaneDirectories.setDividerPositions(divDir);
-        this.splPaneImages.setDividerPositions(divIMGs);
-        this.splPaneImage.setDividerPositions(divIMG);
+        this.changeSize(this.splPaneDirectories, divDir);
+        this.changeSize(this.splPaneImages, divIMGs);
+        this.changeSize(this.splPaneImage, divIMG);
+    }
+
+    private void changeSize(SplitPane spl, double size) {
+        Platform.runLater(() -> spl.setDividerPositions(size));
     }
 
     private void addPathToHistory() {
@@ -1121,8 +1125,10 @@ public class MainController extends ParentController {
 
     private void readArguments() {
         String[] arguments = PhotoManager.GLOBALS.getArguments();
-        if(arguments.length != 0) {
-            new ArgsHelper(arguments, this);
+        if(arguments != null) {
+            if(arguments.length != 0) {
+                new ArgsHelper(arguments, this);
+            }
         }
         PhotoManager.GLOBALS.setArguments(null);
     }

@@ -27,25 +27,36 @@ public class InitializationHelper {
      * Opens a Dialog if saved path doesn't exists
      * and creates the path.
      */
-    public static void initializePath() {
-        if(PhotoManager.GLOBALS.isEmpty(Globals.PATH)) {
-            File files = Dialogs.printDirectoryChooser(PhotoManager.GLOBALS.getLanguage().getString("main.initialize.path"));
-            if(files!=null) {
-                PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.getAbsolutePath(), false);
-                File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
-                if(!file.exists()) {
-                    if(!file.mkdirs()) {
-                        Platform.exit();
+    public static void initializePath(String path) {
+        if(path.isEmpty()) {
+            if(PhotoManager.GLOBALS.isEmpty(Globals.PATH)) {
+                File files = Dialogs.printDirectoryChooser(PhotoManager.GLOBALS.getLanguage().getString("main.initialize.path"));
+                if(files!=null) {
+                    PhotoManager.GLOBALS.saveSetting(Globals.PATH, files.getAbsolutePath(), false);
+                    File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
+                    if(!file.exists()) {
+                        if(!file.mkdirs()) {
+                            Platform.exit();
+                        }
                     }
+                } else {
+                    Platform.exit();
                 }
             } else {
-                Platform.exit();
+                File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
+                if(!file.exists()) {
+                    PhotoManager.GLOBALS.saveSetting(Globals.PATH, "", false);
+                    InitializationHelper.initializePath(path);
+                }
             }
         } else {
             File file = new File(PhotoManager.GLOBALS.getSetting(Globals.PATH, "") + File.separatorChar + InitializationHelper.HIDDEN_PROJECT_DIR);
             if(!file.exists()) {
                 PhotoManager.GLOBALS.saveSetting(Globals.PATH, "", false);
-                InitializationHelper.initializePath();
+                InitializationHelper.initializePath(path);
+            } else {
+                PhotoManager.GLOBALS.saveSetting(Globals.PATH, path, false);
+                InitializationHelper.initializePath(path);
             }
         }
     }
