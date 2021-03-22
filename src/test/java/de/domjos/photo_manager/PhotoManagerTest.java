@@ -1,6 +1,7 @@
 package de.domjos.photo_manager;
 
 import de.domjos.photo_manager.helper.InitializationHelper;
+import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.settings.Globals;
 import javafx.application.Platform;
 import javafx.scene.control.*;
@@ -93,6 +94,7 @@ class PhotoManagerTest {
         assertEquals(splitPane.getDividerPositions()[0], position, 0.001);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void importTest(FxRobot robot) {
         Button button = robot.lookup("#cmdMainAddFolder").queryButton();
@@ -110,6 +112,26 @@ class PhotoManagerTest {
         button = robot.lookup("#cmdMainFolderSave").queryButton();
         Button finalButton = button;
         Platform.runLater(finalButton::fire);
+        try {
+            Thread.sleep(1000);
+        } catch (Exception ignored) {}
+        this.wait(robot);
+
+        TreeView<Directory> treeView = (TreeView<Directory>) robot.lookup("#tvMain").queryAs(TreeView.class);
+        for(TreeItem<Directory> treeItem : treeView.getRoot().getChildren()) {
+            if(treeItem.getValue().getTitle().equals("Gallery")) {
+                treeView.getSelectionModel().select(treeItem);
+                break;
+            }
+        }
+        this.wait(robot);
+
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    private void wait(FxRobot robot) {
+        ProgressBar progressBar = robot.lookup("#pbMain").queryAs(ProgressBar.class);
+        while (progressBar.progressProperty().isBound()) {}
     }
 
     private static Preferences getSettings() {
