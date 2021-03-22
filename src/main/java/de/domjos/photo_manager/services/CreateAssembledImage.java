@@ -17,15 +17,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class CreateAssembledImage extends ParentTask<Void> {
-    private Dialogs.AssembleResult assembleResult;
-    private Directory directory;
-    private List<Image> images;
-    private List<Integer> imageIndices;
+    private final Dialogs.AssembleResult assembleResult;
+    private final Directory directory;
+    private final List<Image> images;
+    private final List<Integer> imageIndices;
+    private final String path;
 
     public CreateAssembledImage(ProgressBar progressBar, Label messages, Dialogs.AssembleResult assembleResult, Directory directory, List<Image> images) {
         super(progressBar, messages);
         this.assembleResult = assembleResult;
         this.directory = directory;
+        this.path = "";
+        this.imageIndices = new LinkedList<>();
+        for(int i = 0; i<=images.size()-1; i++) {
+            this.imageIndices.add(i);
+        }
+        Collections.shuffle(this.imageIndices);
+        this.images = images;
+    }
+
+    public CreateAssembledImage(ProgressBar progressBar, Label messages, Dialogs.AssembleResult assembleResult, String path, List<Image> images) {
+        super(progressBar, messages);
+        this.assembleResult = assembleResult;
+        this.directory = null;
+        this.path = path;
         this.imageIndices = new LinkedList<>();
         for(int i = 0; i<=images.size()-1; i++) {
             this.imageIndices.add(i);
@@ -112,15 +127,20 @@ public final class CreateAssembledImage extends ParentTask<Void> {
     }
 
     private void saveFile(BufferedImage bufferedImage, String name) throws Exception {
-        File file = new File(this.directory.getPath() + File.separatorChar + name + ".jpg");
-        ImageIO.write(bufferedImage, "jpeg", file);
-        Image image = new Image();
-        image.setPath(file.getAbsolutePath());
-        image.setDirectory(this.directory);
-        image.setHeight(bufferedImage.getWidth());
-        image.setWidth(bufferedImage.getHeight());
-        image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(image.getPath()), 50, 50)));
-        image.setTitle(name);
-        PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+        if(this.directory != null) {
+            File file = new File(this.directory.getPath() + File.separatorChar + name + ".jpg");
+            ImageIO.write(bufferedImage, "jpeg", file);
+            Image image = new Image();
+            image.setPath(file.getAbsolutePath());
+            image.setDirectory(this.directory);
+            image.setHeight(bufferedImage.getWidth());
+            image.setWidth(bufferedImage.getHeight());
+            image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(image.getPath()), 50, 50)));
+            image.setTitle(name);
+            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+        } else {
+            File file = new File(this.path);
+            ImageIO.write(bufferedImage, "jpeg", file);
+        }
     }
 }

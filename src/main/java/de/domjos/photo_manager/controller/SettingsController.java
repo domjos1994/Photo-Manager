@@ -3,13 +3,16 @@ package de.domjos.photo_manager.controller;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.helper.InitializationHelper;
+import de.domjos.photo_manager.model.gallery.BatchTemplate;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Background;
@@ -20,10 +23,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class SettingsController extends ParentController {
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
@@ -45,11 +45,15 @@ public class SettingsController extends ParentController {
     private @FXML TextField txtSettingsDirectoriesDelete;
     private @FXML Button cmdSettingsDirectoriesDelete;
     private @FXML TableView<DirRow> tblSettingsDirectories;
+
+    private @FXML Accordion accSettings;
+
     private ResourceBundle lang;
 
     @Override
     public void initialize(ResourceBundle resources) {
         this.lang = PhotoManager.GLOBALS.getLanguage();
+        this.accSettings.setExpandedPane(this.accSettings.getPanes().get(0));
 
         this.chkSettingsDirectoriesDelete.selectedProperty().addListener(((observableValue, aBoolean, t1) -> this.cmdSettingsDirectoriesDelete.setDisable(!t1)));
         this.cmdSettingsDirectoriesDelete.setOnAction(event -> {
@@ -135,7 +139,13 @@ public class SettingsController extends ParentController {
                         dirRow.setIcon(item[2]);
                     }
                     if(item.length > 3) {
-                        dirRow.setEncryption(item[3].trim());
+                        try {
+                            int id = Integer.parseInt(item[3].trim());
+                            dirRow.batch = PhotoManager.GLOBALS.getDatabase().getBatchTemplates("id=" + id).get(0);
+                        } catch (Exception ignored) {}
+                    }
+                    if(item.length > 4) {
+                        dirRow.setEncryption(item[4].trim());
                     } else {
                         dirRow.setEncryption("");
                     }
@@ -189,8 +199,6 @@ public class SettingsController extends ParentController {
             this.tblSettingsDirectories.getItems().add(new DirRow());
         });
         colSettingsDirectoriesTitle.setEditable(true);
-        colSettingsDirectoriesTitle.setMinWidth(150);
-        colSettingsDirectoriesTitle.setPrefWidth(150);
 
         TableColumn<DirRow, String> colSettingsDirectoriesPath = new TableColumn<>(this.lang.getString("settings.directories.path"));
         colSettingsDirectoriesPath.setCellValueFactory(new PropertyValueFactory<>("path"));
@@ -204,8 +212,6 @@ public class SettingsController extends ParentController {
                 this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
             }
         });
-        colSettingsDirectoriesPath.setMinWidth(350);
-        colSettingsDirectoriesPath.setPrefWidth(500);
 
         TableColumn<DirRow, String> colSettingsDirectoriesIcon = new TableColumn<>(this.lang.getString("settings.directories.icon"));
         colSettingsDirectoriesIcon.setCellValueFactory(new PropertyValueFactory<>("icon"));
@@ -219,8 +225,42 @@ public class SettingsController extends ParentController {
                 this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
             }
         });
-        colSettingsDirectoriesIcon.setMinWidth(350);
-        colSettingsDirectoriesIcon.setPrefWidth(500);
+
+        List<BatchTemplate> batchTemplates = new LinkedList<>();
+        try {
+            batchTemplates.addAll(PhotoManager.GLOBALS.getDatabase().getBatchTemplates(""));
+        } catch (Exception ignored) {}
+        TableColumn<DirRow, BatchTemplate> colSettingsDirectoriesBatch = new TableColumn<>(this.lang.getString("main.menu.program.batch"));
+        colSettingsDirectoriesBatch.setCellValueFactory(new PropertyValueFactory<>("batch"));
+        colSettingsDirectoriesBatch.setCellFactory(ComboBoxTableCell.forTableColumn(new StringConverter<>() {
+            @Override
+            public String toString(BatchTemplate object) {
+                if (object != null) {
+                    return object.getTitle();
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public BatchTemplate fromString(String string) {
+                if (string != null) {
+                    for (BatchTemplate batchTemplate : batchTemplates) {
+                        if (batchTemplate != null) {
+                            if (batchTemplate.getTitle().equals(string)) {
+                                return batchTemplate;
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+        }, FXCollections.observableList(batchTemplates)));
+        colSettingsDirectoriesBatch.setOnEditCommit(event -> {
+            BatchTemplate batchTemplate = event.getNewValue();
+            event.getRowValue().setBatch(batchTemplate);
+        });
+        colSettingsDirectoriesBatch.setEditable(true);
 
         TableColumn<DirRow, String> colSettingsDirectoriesEncryption = new TableColumn<>(this.lang.getString("settings.directories.encryption"));
         colSettingsDirectoriesEncryption.setCellValueFactory(new PropertyValueFactory<>("encryption"));
@@ -247,14 +287,25 @@ public class SettingsController extends ParentController {
             });
             event.consume();
         });
-        colSettingsDirectoriesEncryption.setMinWidth(350);
-        colSettingsDirectoriesEncryption.setPrefWidth(500);
 
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesIcon);
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesBatch);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesEncryption);
         this.tblSettingsDirectories.getItems().add(new DirRow());
+        this.fixColumns(Arrays.asList(1, 2, 2, 1, 1));
+    }
+
+    public void fixColumns(List<Integer> sizes) {
+        int max = sizes.stream().mapToInt(cur -> cur).sum();
+        double width = this.tblSettingsDirectories.getWidth() - 20;
+        double factor = width / max;
+
+        for(int i = 0; i<=this.tblSettingsDirectories.getColumns().size() - 1; i++) {
+            this.tblSettingsDirectories.getColumns().get(i).setPrefWidth(sizes.get(i) * factor);
+            this.tblSettingsDirectories.getColumns().get(i).setMinWidth(sizes.get(i) * factor);
+        }
     }
 
     @Override
@@ -267,19 +318,25 @@ public class SettingsController extends ParentController {
     private String generateSetting() {
         StringBuilder stringBuilder = new StringBuilder();
         for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
-            stringBuilder.append(String.format("%s,%s,%s,%s;", dirRow.title, dirRow.path, dirRow.icon, dirRow.encryption));
+            if(dirRow.batch != null) {
+                stringBuilder.append(String.format("%s,%s,%s,%d,%s;", dirRow.title, dirRow.path, dirRow.icon, dirRow.batch.getId(), dirRow.encryption));
+            } else {
+                stringBuilder.append(String.format("%s,%s,%s,%s,%s;", dirRow.title, dirRow.path, dirRow.icon, "", dirRow.encryption));
+            }
         }
         return stringBuilder.toString();
     }
 
     public static class DirRow {
         private String title, path, icon, encryption;
+        private BatchTemplate batch;
 
         public DirRow() {
             super();
             this.title = "";
             this.path = "";
             this.icon = "";
+            this.batch = null;
             this.encryption = "";
         }
 
@@ -305,6 +362,14 @@ public class SettingsController extends ParentController {
 
         public void setIcon(String icon) {
             this.icon = icon;
+        }
+
+        public BatchTemplate getBatch() {
+            return this.batch;
+        }
+
+        public void setBatch(BatchTemplate batch) {
+            this.batch = batch;
         }
 
         public String getEncryption() {

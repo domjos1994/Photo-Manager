@@ -3,6 +3,7 @@ package de.domjos.photo_manager.controller;
 import com.gluonhq.maps.MapView;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.*;
+import de.domjos.photo_manager.helper.ArgsHelper;
 import de.domjos.photo_manager.helper.ControlsHelper;
 import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.helper.InitializationHelper;
@@ -68,7 +69,7 @@ public class MainController extends ParentController {
     private @FXML Slider slMainImageZoom;
     private @FXML Label lblMainImageZoom;
 
-    private @FXML Button cmdMainAddFolder, cmdMainReload, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
+    private @FXML Button cmdMainAddFolder, cmdMainReload, cmdMainBatchStart, cmdMainFolder, cmdMainFolderSave, cmdMainImageSave;
     private @FXML CheckBox chkMainRecursive;
     private @FXML TextField txtMainFolderName;
     private @FXML TextField txtMainImageCategory, txtMainImageTags, txtMainImageName;
@@ -181,6 +182,14 @@ public class MainController extends ParentController {
         this.tvMain.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 if(newValue!=null) {
+                    this.cmdMainBatchStart.setDisable(true);
+                    if(newValue.getValue() instanceof Folder) {
+                        Folder folder = (Folder) newValue.getValue();
+                        if(folder.getDirRow() != null) {
+                            this.cmdMainBatchStart.setDisable(folder.getDirRow().getBatch() == null);
+                        }
+                    }
+
                     this.fillImageList(newValue.getValue());
                     this.cloudController.fillCloudWithDefault();
                     this.cloudController.getCloudPath();
@@ -655,7 +664,52 @@ public class MainController extends ParentController {
             }
         });
 
-        this.menMainSettings.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbSettings));
+        this.cmdMainBatchStart.setOnAction(event -> {
+            if(!this.tvMain.getSelectionModel().isEmpty()) {
+                TreeItem<Directory> treeItem = this.tvMain.getSelectionModel().getSelectedItem();
+                if(treeItem != null) {
+                    Directory directory = treeItem.getValue();
+                    if(directory != null) {
+                        if(directory instanceof Folder) {
+                            Folder folder = (Folder) directory;
+                            if(folder.getDirRow() != null) {
+                                if(folder.getDirRow().getBatch() != null) {
+                                    BatchTemplate batchTemplate = folder.getDirRow().getBatch();
+                                    List<Image> images;
+                                    if(this.lvMain.getSelectionModel().isEmpty()) {
+                                        images = this.lvMain.getItems();
+                                    } else {
+                                        images = this.lvMain.getSelectionModel().getSelectedItems();
+                                    }
+                                    boolean state = Dialogs.printConfirmDialog(
+                                                Alert.AlertType.WARNING,
+                                                this.lang.getString("main.menu.program.batch"),
+                                                this.lang.getString("main.menu.program.batch"),
+                                                String.format(this.lang.getString("batch.msg.sure"), images.size()));
+
+                                    if(state) {
+                                        BatchTask batchTask = new BatchTask(this.pbMain, this.lblMessages, batchTemplate, images);
+                                        batchTask.onFinish(()-> {
+                                            String title = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish");
+                                            String content = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish.content");
+
+                                            Dialogs.printNotification(Alert.AlertType.CONFIRMATION, title, content);
+                                            this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                                        });
+                                        new Thread(batchTask).start();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        this.menMainSettings.setOnAction(event -> {
+            this.settingsController.fixColumns(Arrays.asList(1, 2, 2, 1, 1));
+            this.tbpMain.getSelectionModel().select(this.tbSettings);
+        });
         this.menMainBatch.setOnAction(event -> this.openBatchWindow());
         this.menMainDatabaseNew.setOnAction(event -> {
             try {
@@ -1030,7 +1084,7 @@ public class MainController extends ParentController {
         this.openBatchWindow(images);
     }
 
-    private void openBatchWindow(List<Image> images) {
+    public void openBatchWindow(List<Image> images) {
         try {
             this.batchController.getBatchTargetFolder().setRoot(null);
             this.batchController.reloadBatchTemplates();
@@ -1051,7 +1105,7 @@ public class MainController extends ParentController {
         this.tbpMain.getSelectionModel().select(this.tbBatch);
     }
 
-    private Directory findDirectory(TreeItem<Directory> directory, String search) {
+    public Directory findDirectory(TreeItem<Directory> directory, String search) {
         if(directory != null) {
             if(directory.getValue().getTitle().trim().toLowerCase().contains(search)) {
                 return directory.getValue();
@@ -1067,85 +1121,13 @@ public class MainController extends ParentController {
 
     private void readArguments() {
         String[] arguments = PhotoManager.GLOBALS.getArguments();
-
-        if(arguments != null) {
-            if(arguments.length > 1 ) {
-                switch (arguments[0].toLowerCase().trim()) {
-                    case "batch":
-                        File folder = new File(arguments[1].trim());
-                        if(folder.exists() && folder.isDirectory()) {
-                            String[] files = folder.list(ImageHelper.getFilter());
-                            if(files != null) {
-                                List<Image> images = new LinkedList<>();
-                                for(String file : files)    {
-                                    file = folder.getAbsolutePath() + File.separatorChar + file;
-                                    try {
-                                        BufferedImage bufferedImage = ImageHelper.getImage(file);
-                                        if(bufferedImage != null) {
-                                            Image image = new Image();
-                                            image.setHeight(bufferedImage.getHeight());
-                                            image.setWidth(bufferedImage.getWidth());
-                                            image.setPath(file);
-                                            image.setTitle(new File(file).getName().split("\\.")[0].trim());
-                                            image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(bufferedImage, 128, 128)));
-                                            images.add(image);
-                                        }
-                                    } catch (Exception ignored) {}
-                                }
-
-                                this.openBatchWindow(images);
-                            }
-                        }
-                        break;
-                    case "save":
-                        File imageFile = new File(arguments[1].trim());
-                        if(imageFile.exists()) {
-                            List<File> files = new LinkedList<>();
-                            if(imageFile.isFile()) {
-                                files.add(imageFile);
-                            } else if(imageFile.isDirectory()) {
-                                files.addAll(Arrays.asList(Objects.requireNonNull(imageFile.listFiles(ImageHelper.getFilter()))));
-                            }
-
-                            for(File current : files) {
-                                if(arguments.length == 3) {
-                                    String folderName = arguments[2].trim();
-                                    Directory directory = this.findDirectory(this.tvMain.getRoot(), folderName);
-                                    if(directory != null) {
-                                        if(!(directory instanceof Folder)) {
-                                            this.saveImage(current, directory);
-                                        } else {
-                                            try {
-                                                Folder tmp = (Folder) directory;
-                                                String path = tmp.getDirRow().getPath();
-
-                                                File newFile = new File(path + File.separatorChar + current.getName());
-                                                FileInputStream fis = new FileInputStream(current);
-                                                if(newFile.exists() || newFile.createNewFile()) {
-                                                    FileOutputStream fos = new FileOutputStream(newFile);
-                                                    IOUtils.copy(fis, fos);
-                                                    fis.close();
-                                                    fos.close();
-                                                    this.saveImage(newFile, directory);
-                                                }
-
-                                            } catch (Exception ex) {
-                                                Dialogs.printException(ex);
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                }
-            }
+        if(arguments.length != 0) {
+            new ArgsHelper(arguments, this);
         }
         PhotoManager.GLOBALS.setArguments(null);
     }
 
-    private void saveImage(File imageFile, Directory directory) {
+    public void saveImage(File imageFile, Directory directory) {
         try {
             BufferedImage bufferedImage = ImageHelper.getImage(imageFile.getAbsolutePath());
             if (bufferedImage != null) {
