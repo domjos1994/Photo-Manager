@@ -344,7 +344,7 @@
                         </goals>
                         <configuration>
                             <mainClass>${application.mainClass.main}</mainClass>
-                            <bundleJre>true</bundleJre>
+                            <bundleJre>false</bundleJre>
                             <generateInstaller>true</generateInstaller>
                             <administratorRequired>false</administratorRequired>
                             <copyDependencies>true</copyDependencies>
