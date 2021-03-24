@@ -28,6 +28,10 @@ public class HelpController extends ParentController {
         }
 
         WebEngine webEngine = this.wvHelp.getEngine();
-        webEngine.load(HelpController.class.getResource("/help/" + urlParam + "/Einfuhrung.html").toExternalForm());
+        if(urlParam.equals("en")) {
+            webEngine.load(HelpController.class.getResource("/help/" + urlParam + "/Introduction.html").toExternalForm());
+        } else {
+            webEngine.load(HelpController.class.getResource("/help/" + urlParam + "/Einfuhrung.html").toExternalForm());
+        }
     }
 }

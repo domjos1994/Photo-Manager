@@ -70,7 +70,9 @@ public class MetaDataController extends ParentController {
                 });
             } else {
                 Platform.runLater(()-> {
-                    this.mainController.getMapView().setVisible(false);
+                    if(this.mainController != null) {
+                        this.mainController.getMapView().setVisible(false);
+                    }
                     this.txtDate.setText("");
                     this.txtLat.setText("");
                     this.txtLong.setText("");
