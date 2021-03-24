@@ -16,6 +16,7 @@
         <application.email>developing@domjos.de</application.email>
         <application.out>build</application.out>
         <application.result>result</application.result>
+        <applications.assets>assets</applications.assets>
         <application.file>${project.name}-${project.version}</application.file>
         <application.mainClass.main>de.domjos.photo_manager.Main</application.mainClass.main>
         <application.mainClass.application>de.domjos.photo_manager.PhotoManager</application.mainClass.application>
@@ -351,6 +352,7 @@
                             <platform>auto</platform>
                             <runnableJar>${application.result}/${application.file}.jar</runnableJar>
                             <outputDirectory>${application.result}</outputDirectory>
+                            <licenseFile>${applications.assets}/windows/LICENSE</licenseFile>
                             <winConfig>
                                 <fileVersion>1.0.0.0</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
