@@ -57,8 +57,10 @@ public class EditController extends ParentController {
         this.slSaturation.setValue(100.0);
         this.slRotate.setValue(0.0);
         this.txtWatermark.setText("");
-        this.txtResizeWidth.setText(String.valueOf(this.cache.getOriginal().getWidth()));
-        this.txtResizeHeight.setText(String.valueOf(this.cache.getOriginal().getHeight()));
+        if(this.cache != null) {
+            this.txtResizeWidth.setText(String.valueOf(this.cache.getOriginal().getWidth()));
+            this.txtResizeHeight.setText(String.valueOf(this.cache.getOriginal().getHeight()));
+        }
         this.cmbFilter.getSelectionModel().clearSelection();
     }
 
