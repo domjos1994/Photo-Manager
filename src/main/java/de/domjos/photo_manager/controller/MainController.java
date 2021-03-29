@@ -153,6 +153,7 @@ public class MainController extends ParentController {
             File path = Dialogs.printDirectoryChooser(resources.getString("main.dir.path"));
             if(path!=null) {
                 this.tmpPath.setText(path.getAbsolutePath());
+                this.cmdMainFolder.setTooltip(new Tooltip(path.getAbsolutePath()));
             }
         });
         this.cmdMainFolderSave.setOnAction(event -> {
