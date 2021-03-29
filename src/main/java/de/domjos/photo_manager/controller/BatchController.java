@@ -224,8 +224,14 @@ public class BatchController extends ParentController {
     }
 
     private void selectDirectory(TreeItem<Directory> current, Directory directory) {
-        if(current.getValue().getId() == directory.getId()) {
-            this.tvBatchTargetFolder.getSelectionModel().select(current);
+        if(directory.getId() != 0) {
+            if(current.getValue().getId() == directory.getId()) {
+                this.tvBatchTargetFolder.getSelectionModel().select(current);
+            }
+        } else {
+            if(current.getValue().getTitle().trim().equals(directory.getTitle())) {
+                this.tvBatchTargetFolder.getSelectionModel().select(current);
+            }
         }
         for(TreeItem<Directory> dir : current.getChildren()) {
             this.selectDirectory(dir, directory);

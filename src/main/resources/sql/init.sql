@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS batchTemplates(
     rename VARCHAR(255) DEFAULT '',
     folder TINYINT DEFAULT 0,
     targetFolder INTEGER DEFAULT 0,
+    dirRow VARCHAR(255) DEFAULT '',
     ftp TINYINT DEFAULT 0,
     server VARCHAR(255) DEFAULT '',
     user VARCHAR(255) DEFAULT '',

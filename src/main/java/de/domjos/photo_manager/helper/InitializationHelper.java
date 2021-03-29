@@ -100,8 +100,20 @@ public class InitializationHelper {
             database.executeUpdate(query.trim());
         }
 
+        try {
+            InitializationHelper.updateDatabaseTo10(database);
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
+        }
+
         database.addRoot();
         return database;
+    }
+
+    private static void updateDatabaseTo10(Database database) throws Exception {
+        if(!database.columnExists("batchTemplates", "dirRow")) {
+            database.executeUpdate("ALTER TABLE batchTemplates ADD COLUMN dirRow VARCHAR(255) DEFAULT ''");
+        }
     }
 
     /**

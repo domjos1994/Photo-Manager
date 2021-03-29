@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-public class BatchTask extends ParentTask<Void> {
+public final class BatchTask extends ParentTask<Void> {
     private final List<Image> images;
     private final BatchTemplate batchTemplate;
 
@@ -131,8 +131,12 @@ public class BatchTask extends ParentTask<Void> {
                 File file = new File(image.getPath());
                 File folder = file.getParentFile();
                 String ext = FilenameUtils.getExtension(image.getPath());
-
-                ImageHelper.save(original_path, folder.getAbsolutePath() + File.separatorChar + image.getTitle() + "." + ext, bufferedImage);
+                if(this.batchTemplate.isFolder()) {
+                    String path = this.batchTemplate.getTargetFolder().getPath() + File.separatorChar + image.getTitle() + "." + ext;
+                    ImageHelper.save(original_path, path, bufferedImage);
+                } else {
+                    ImageHelper.save(original_path, folder.getAbsolutePath() + File.separatorChar + image.getTitle() + "." + ext, bufferedImage);
+                }
             }
         } catch (Exception ex) {
             this.updateMessage(ex.getMessage());

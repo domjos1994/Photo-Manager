@@ -1,11 +1,13 @@
 package de.domjos.photo_manager.database;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.controller.SettingsController;
 import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.SaveFolderTask;
+import de.domjos.photo_manager.settings.Globals;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Database {
-    private Connection connection;
+    private final Connection connection;
 
     public Database(String path) throws Exception {
         Class.forName("org.sqlite.JDBC");
@@ -364,10 +366,10 @@ public class Database {
     public void insertOrUpdateBatchTemplate(BatchTemplate batchTemplate) throws Exception {
         PreparedStatement preparedStatement;
         if(batchTemplate.getId() == 0) {
-            preparedStatement = this.prepare("INSERT INTO batchTemplates(name, width, height, compress, rename, folder, targetFolder, ftp, server, user, pwd, ftpSecure, path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            preparedStatement = this.prepare("INSERT INTO batchTemplates(name, width, height, compress, rename, folder, targetFolder, dirRow, ftp, server, user, pwd, ftpSecure, path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
         } else {
-            preparedStatement = this.prepare("UPDATE batchTemplates SET name=?, width=?, height=?, compress=?, rename=?, folder=?, targetFolder=?, ftp=?, server=?, user=?, pwd=?, ftpSecure=?, path=? WHERE id=?");
-            preparedStatement.setLong(14, batchTemplate.getId());
+            preparedStatement = this.prepare("UPDATE batchTemplates SET name=?, width=?, height=?, compress=?, rename=?, folder=?, targetFolder=?, dirRow=?, ftp=?, server=?, user=?, pwd=?, ftpSecure=?, path=? WHERE id=?");
+            preparedStatement.setLong(15, batchTemplate.getId());
         }
         preparedStatement.setString(1, batchTemplate.getTitle());
         preparedStatement.setInt(2, batchTemplate.getWidth());
@@ -380,15 +382,29 @@ public class Database {
         } else {
             preparedStatement.setLong(7, 0);
         }
-        preparedStatement.setInt(8, this.boolToInt(batchTemplate.isFtp()));
-        preparedStatement.setString(9, batchTemplate.getServer());
-        preparedStatement.setString(10, batchTemplate.getUser());
-        preparedStatement.setString(11, batchTemplate.getPassword());
-        preparedStatement.setInt(12, this.boolToInt(batchTemplate.isFtpSecure()));
-        if(batchTemplate.getTargetFolderFtp() != null) {
-            preparedStatement.setString(13, batchTemplate.getTargetFolderFtp().getPath());
+        if(batchTemplate.getTargetFolder() != null) {
+            if(batchTemplate.getTargetFolder() instanceof Folder) {
+                Folder folder = (Folder) batchTemplate.getTargetFolder();
+                if(folder.getDirRow() != null) {
+                    preparedStatement.setString(8, folder.getDirRow().getTitle());
+                } else {
+                    preparedStatement.setString(8, "");
+                }
+            } else {
+                preparedStatement.setString(8, "");
+            }
         } else {
-            preparedStatement.setString(13, "");
+            preparedStatement.setString(8, "");
+        }
+        preparedStatement.setInt(9, this.boolToInt(batchTemplate.isFtp()));
+        preparedStatement.setString(10, batchTemplate.getServer());
+        preparedStatement.setString(11, batchTemplate.getUser());
+        preparedStatement.setString(12, batchTemplate.getPassword());
+        preparedStatement.setInt(13, this.boolToInt(batchTemplate.isFtpSecure()));
+        if(batchTemplate.getTargetFolderFtp() != null) {
+            preparedStatement.setString(14, batchTemplate.getTargetFolderFtp().getPath());
+        } else {
+            preparedStatement.setString(14, "");
         }
         preparedStatement.executeUpdate();
     }
@@ -413,6 +429,27 @@ public class Database {
             } else {
                 batchTemplate.setTargetFolder(null);
             }
+            String strFolder = resultSet.getString("dirRow");
+            if(strFolder != null) {
+                if(!strFolder.trim().isEmpty()) {
+                    Folder folder = new Folder();
+                    List<SettingsController.DirRow> rows = this.getRowsFromSettings();
+                    SettingsController.DirRow selectedRow = null;
+                    for(SettingsController.DirRow dirRow : rows) {
+                        if(dirRow.getTitle().trim().equals(strFolder.trim())) {
+                            selectedRow = dirRow;
+                            break;
+                        }
+                    }
+
+                    if(selectedRow != null) {
+                        folder.setTitle(selectedRow.getTitle());
+                        folder.setPath(selectedRow.getPath());
+                        folder.setDirRow(selectedRow);
+                        batchTemplate.setTargetFolder(folder);
+                    }
+                }
+            }
             batchTemplate.setFtp(resultSet.getBoolean("ftp"));
             batchTemplate.setServer(resultSet.getString("server"));
             batchTemplate.setUser(resultSet.getString("user"));
@@ -430,11 +467,50 @@ public class Database {
         return batchTemplates;
     }
 
+    private List<SettingsController.DirRow> getRowsFromSettings() {
+        List<SettingsController.DirRow> dirRows = new LinkedList<>();
+
+        String setting = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES, "");
+        for(String row : setting.split(";")) {
+            if(row.contains(",")) {
+                String[] item = row.trim().split(",");
+                if(item.length >= 2) {
+                    SettingsController.DirRow dirRow = new SettingsController.DirRow();
+                    dirRow.setTitle(item[0]);
+                    dirRow.setPath(item[1]);
+                    if(item.length > 2) {
+                        dirRow.setIcon(item[2]);
+                    }
+                    if(item.length > 4) {
+                        dirRow.setEncryption(item[4].trim());
+                    } else {
+                        dirRow.setEncryption("");
+                    }
+                    dirRows.add(dirRow);
+                }
+            }
+        }
+
+        return dirRows;
+    }
+
     public void deleteBatchTemplate(BatchTemplate batchTemplate) throws Exception {
         PreparedStatement preparedStatement = this.prepare("DELETE FROM batchTemplates WHERE id=?");
         preparedStatement.setLong(1, batchTemplate.getId());
         preparedStatement.executeUpdate();
         preparedStatement.close();
+    }
+
+    public boolean columnExists(String table, String column) {
+        try {
+            PreparedStatement preparedStatement = this.prepare(String.format("SELECT %s FROM %s", column, table));
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.close();
+            preparedStatement.close();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     private void getDir(Directory root, int id, BatchTemplate batchTemplate) {
