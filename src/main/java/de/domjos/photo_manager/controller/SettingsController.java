@@ -20,6 +20,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
 import java.io.File;
@@ -217,9 +218,11 @@ public class SettingsController extends ParentController {
         colSettingsDirectoriesIcon.setCellValueFactory(new PropertyValueFactory<>("icon"));
         colSettingsDirectoriesIcon.setEditable(true);
         colSettingsDirectoriesIcon.setOnEditStart(event -> {
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            directoryChooser.setTitle(this.lang.getString("settings.directories.icon"));
-            File file = directoryChooser.showDialog(null);
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle(this.lang.getString("settings.directories.icon"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Icon", "*.ico"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
+            File file = fileChooser.showOpenDialog(null);
             if(file!=null) {
                 event.getRowValue().setIcon(file.getAbsolutePath());
                 this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());

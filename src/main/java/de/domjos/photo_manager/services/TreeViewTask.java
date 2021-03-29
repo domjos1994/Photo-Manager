@@ -2,17 +2,27 @@ package de.domjos.photo_manager.services;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.SettingsController;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Folder;
 import de.domjos.photo_manager.settings.Globals;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import org.apache.commons.imaging.Imaging;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.LinkedList;
@@ -114,11 +124,23 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
 
     private Node getIcon(String path) {
         try {
-            return new ImageView(
-                new javafx.scene.image.Image(new FileInputStream(path), 16, 16, true, true)
-            );
+            File iconFile = new File(path);
+            if(iconFile.exists()) {
+                if(iconFile.getAbsolutePath().trim().endsWith(".ico")) {
+                    BufferedImage bufferedImage = Imaging.getBufferedImage(iconFile);
+                    bufferedImage = ImageHelper.scale(bufferedImage, 16, 16);
+                    return new ImageView(SwingFXUtils.toFXImage(bufferedImage, null));
+                } else {
+                    FileInputStream fileInputStream = new FileInputStream(iconFile);
+                    ImageView imageView =  new ImageView(new Image(fileInputStream, 16, 16, true, true));
+                    fileInputStream.close();
+                    return imageView;
+                }
+            } else {
+                return this.getIconFromResource("/images/icons/directory.png");
+            }
         } catch (Exception ex) {
-            return this.getIconFromResource("/images/icons/system_folder.png");
+            return this.getIconFromResource("/images/icons/directory.png");
         }
     }
 }
