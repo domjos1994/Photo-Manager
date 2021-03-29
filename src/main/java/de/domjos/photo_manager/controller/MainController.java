@@ -22,6 +22,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -38,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class MainController extends ParentController {
+    private BufferedImage imgToZoom;
     public TitledPane history, unsplash, histogram, metaData, edit, tinify, cloud;
     public AnchorPane settings, map, slideshow, help;
 
@@ -409,11 +411,19 @@ public class MainController extends ParentController {
         this.slMainImageZoom.setOnMouseReleased(event -> {
             if(this.accItems.isVisible()) {
                 if(!this.lvMain.getSelectionModel().isEmpty() && this.currentImage!=null) {
-                    Image image = this.lvMain.getSelectionModel().getSelectedItem();
-                    int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
-                    int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
-                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(this.cache.getOriginal(), null);
-                    bufferedImage = ImageHelper.scale(bufferedImage, width, height);
+                    BufferedImage bufferedImage;
+                    if(this.imgToZoom != null) {
+                        int width = (int) (this.imgToZoom.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
+                        int height = (int) (this.imgToZoom.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
+                        bufferedImage = ImageHelper.scale(this.imgToZoom, width, height);
+                    } else {
+                        Image image = this.lvMain.getSelectionModel().getSelectedItem();
+                        int width = (int) (image.getWidth() * (this.slMainImageZoom.getValue() / 100.0));
+                        int height = (int) (image.getHeight() * (this.slMainImageZoom.getValue() / 100.0));
+                        bufferedImage = SwingFXUtils.fromFXImage(this.cache.getOriginal(), null);
+                        bufferedImage = ImageHelper.scale(bufferedImage, width, height);
+                    }
+
                     this.currentImage = SwingFXUtils.toFXImage(bufferedImage, null);
                     this.ivMainImage.setImage(this.currentImage);
                 }
@@ -1002,6 +1012,7 @@ public class MainController extends ParentController {
         historyTask.onFinish(()-> {
             BufferedImage bufferedImage = historyTask.getValue();
             if(bufferedImage!=null) {
+                this.imgToZoom = bufferedImage;
                 Platform.runLater(()->ivMainImage.setImage(SwingFXUtils.toFXImage(bufferedImage, null)));
             }
             scaleToFit();
