@@ -15,13 +15,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import org.apache.commons.imaging.Imaging;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -137,10 +132,10 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
                     return imageView;
                 }
             } else {
-                return this.getIconFromResource("/images/icons/directory.png");
+                return this.getIconFromResource("/images/icons/empty_folder.png");
             }
         } catch (Exception ex) {
-            return this.getIconFromResource("/images/icons/directory.png");
+            return this.getIconFromResource("/images/icons/empty_folder.png");
         }
     }
 }
