@@ -44,15 +44,15 @@ public class MetaDataController extends ParentController {
                     this.txtLat.setText(String.valueOf(metaData.getLatitude()));
                     try {
                         if(metaData.getLatitude()!=0 && metaData.getLongitude()!=0) {
-                            this.mainController.getMapView().setVisible(true);
+                            this.mainController.getMapView().setDisable(false);
 
                             MapHelper mapHelper = new MapHelper(this.mainController.getMapView(), new MapPoint(metaData.getLatitude(), metaData.getLongitude()));
                             mapHelper.init(Collections.singletonList(image));
                         } else {
-                            this.mainController.getMapView().setVisible(false);
+                            this.mainController.getMapView().setDisable(true);
                         }
                     } catch (Exception ex) {
-                        this.mainController.getMapView().setVisible(false);
+                        this.mainController.getMapView().setDisable(true);
                     }
 
                     // resolution-data
@@ -71,7 +71,7 @@ public class MetaDataController extends ParentController {
             } else {
                 Platform.runLater(()-> {
                     if(this.mainController != null) {
-                        this.mainController.getMapView().setVisible(false);
+                        this.mainController.getMapView().setDisable(true);
                     }
                     this.txtDate.setText("");
                     this.txtLat.setText("");

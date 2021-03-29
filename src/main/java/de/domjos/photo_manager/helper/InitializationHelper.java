@@ -140,7 +140,9 @@ public class InitializationHelper {
         if(PhotoManager.GLOBALS.isDebugMode()) {
             title += " - (Debug)";
         }
-        title += " - " + PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
+        if(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false)) {
+            title += " - " + PhotoManager.GLOBALS.getSetting(Globals.PATH, "");
+        }
         return title;
     }
 }

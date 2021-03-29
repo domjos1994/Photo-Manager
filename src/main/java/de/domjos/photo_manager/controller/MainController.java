@@ -22,7 +22,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -210,8 +209,8 @@ public class MainController extends ParentController {
 
                     File img = new File(newValue.getPath());
                     boolean encryption = false;
+                    boolean isFolder = false;
                     if(img.exists()) {
-
                         if(this.tvMain.getSelectionModel().getSelectedItem().getValue() instanceof Folder) {
                             SettingsController.DirRow dirRow = ((Folder)this.tvMain.getSelectionModel().getSelectedItem().getValue()).getDirRow();
                             if(dirRow!=null) {
@@ -226,12 +225,18 @@ public class MainController extends ParentController {
                             } else {
                                 this.loadImage(img);
                             }
+                            isFolder = true;
                         } else {
                             this.loadImage(img);
                         }
                     } else {
                         this.loadImage(img);
                     }
+
+                    this.history.setDisable(isFolder);
+                    this.edit.setDisable(isFolder);
+                    this.cloud.setDisable(isFolder);
+
                     this.accItems.setVisible(!encryption);
                     this.pnlMainImage.setVisible(!encryption);
                     this.slMainImageZoom.setVisible(!encryption);

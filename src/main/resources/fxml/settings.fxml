@@ -28,6 +28,7 @@
             <TitledPane text="%settings.general">
                 <AnchorPane>
                     <CheckBox fx:id="chkSettingsDebugMode" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.debug" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    <CheckBox fx:id="chkSettingsPath" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.path" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
                 </AnchorPane>
             </TitledPane>
             <TitledPane text="%settings.directories">

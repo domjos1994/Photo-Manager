@@ -28,7 +28,7 @@ import java.util.*;
 
 public class SettingsController extends ParentController {
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
-    private @FXML CheckBox chkSettingsDebugMode;
+    private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
 
@@ -70,6 +70,7 @@ public class SettingsController extends ParentController {
 
         this.cmdSettingsSave.setOnAction(event -> {
             PhotoManager.GLOBALS.saveSetting(Globals.DEBUG, this.chkSettingsDebugMode.isSelected(), false);
+            PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
@@ -104,6 +105,7 @@ public class SettingsController extends ParentController {
     private void fillData() {
         this.cmdSettingsDirectoriesDelete.setDisable(true);
         this.chkSettingsDebugMode.setSelected(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
+        this.chkSettingsPath.setSelected(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false));
         this.txtSettingsTinyKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
         this.txtSettingsTinyFile.setText(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, ""));
         this.txtSettingsUnsplashKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.UNSPLASH_KEY, ""));
