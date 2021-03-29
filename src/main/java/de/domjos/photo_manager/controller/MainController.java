@@ -894,6 +894,7 @@ public class MainController extends ParentController {
 
     private void enableFolderControls() {
         if(this.cmdMainFolder.isVisible()) {
+            this.chkMainRecursive.setSelected(false);
             this.txtMainFolderName.setText("");
             this.cmdMainFolder.setVisible(false);
         } else {
