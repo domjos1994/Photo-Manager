@@ -623,7 +623,11 @@ public class MainController extends ParentController {
 
         this.tvMain.setOnDragOver(mouseEvent -> {
             if(mouseEvent.getGestureSource() != this.tvMain && mouseEvent.getDragboard().hasString()) {
-                mouseEvent.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                if(!this.tvMain.getSelectionModel().isEmpty()) {
+                    mouseEvent.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                } else {
+                    mouseEvent.acceptTransferModes(TransferMode.NONE);
+                }
             }
             mouseEvent.consume();
         });

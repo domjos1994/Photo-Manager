@@ -81,7 +81,7 @@ public class InstagramController extends ParentController {
     public void hide() {
         this.user = PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_USER, "");
         this.pwd = PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_PWD, "");
-        this.pnlInstagram.setVisible(!(this.user.trim().isEmpty() && this.pwd.trim().isEmpty()));
+        this.pnlInstagram.setDisable((this.user.trim().isEmpty() && this.pwd.trim().isEmpty()));
     }
 
     private void executeInstagramTask(int page) {

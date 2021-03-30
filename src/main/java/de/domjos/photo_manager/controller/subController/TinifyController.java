@@ -41,6 +41,6 @@ public class TinifyController extends ParentController {
     }
 
     public void initTinify() {
-        this.pnlTinify.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "").equals(""));
+        this.pnlTinify.setDisable(PhotoManager.GLOBALS.getSetting(Globals.TINY_KEY, "").equals(""));
     }
 }

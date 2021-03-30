@@ -36,7 +36,7 @@ public class UnsplashController extends ParentController {
 
     @Override
     public void initialize(ResourceBundle resources) {
-        this.pnlUnsplash.setVisible(!PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
+        this.pnlUnsplash.setDisable(PhotoManager.GLOBALS.getSetting(Globals.UNSPLASH_KEY, "").equals(""));
         this.lblPage.setText(String.format(this.lang.getString("main.image.unsplash.page"), this.page, this.page));
         this.lblPage.setTextAlignment(TextAlignment.CENTER);
         this.lblPage.setAlignment(Pos.CENTER);
