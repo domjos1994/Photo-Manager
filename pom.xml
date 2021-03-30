@@ -394,6 +394,7 @@
                             <files>
                                 <file>${basedir}/../keystore/credentials.properties</file>
                             </files>
+                            <quiet>true</quiet>
                         </configuration>
                     </execution>
                 </executions>
