@@ -2,7 +2,6 @@ package de.domjos.photo_manager.images;
 
 import de.domjos.photo_manager.images.filter.*;
 import de.domjos.photo_manager.model.gallery.MetaData;
-import de.domjos.photo_manager.utils.CryptoUtils;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
@@ -87,8 +86,8 @@ public class ImageHelper {
         return bos.toByteArray();
     }
 
-    public static byte[] imageToByteArray(String path, String password) throws Exception {
-        return CryptoUtils.decrypt(new FileInputStream(path), password);
+    public static byte[] imageToByteArray(String path) throws Exception {
+        return new FileInputStream(path).readAllBytes();
     }
 
     public static int[] getHistogram(BufferedImage bufferedImage, int type) {
@@ -308,22 +307,6 @@ public class ImageHelper {
             bufferedImage = ImageHelper.convertColorSpace(bufferedImage);
             imageWriter.write(bufferedImage);
         }
-    }
-
-    public static void save(String path, String save, BufferedImage bufferedImage, String enc) throws Exception {
-        File tmp = File.createTempFile(path, "");
-        ImageInputStream iis = ImageIO.createImageInputStream(new File(path));
-        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(iis);
-
-        if(imageReaders.hasNext()) {
-            ImageReader reader = imageReaders.next();
-            ImageWriter imageWriter = ImageIO.getImageWriter(reader);
-            imageWriter.setOutput(new FileImageOutputStream(tmp));
-            bufferedImage = ImageHelper.convertColorSpace(bufferedImage);
-            imageWriter.write(bufferedImage);
-        }
-        CryptoUtils.encrypt(tmp.getAbsolutePath(), save, enc);
-        tmp.deleteOnExit();
     }
 
     public static Dimension getSize(String path) throws Exception {

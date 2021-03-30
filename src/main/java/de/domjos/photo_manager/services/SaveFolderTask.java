@@ -41,13 +41,13 @@ public final class SaveFolderTask extends ParentTask<Void> {
         if(!directories.isEmpty()) {
             Directory parent = directories.get(0);
             updateProgress(1, 4);
-            Directory tree = this.generateTree(this.directory.getPath(), this.recursive);
+            Directory tree = SaveFolderTask.generateTree(this.directory.getPath(), this.recursive);
             if(tree != null) {
                 tree.setTitle(this.directory.getTitle());
                 tree.setLibrary(true);
                 updateProgress(2, 4);
                 parent.getChildren().add(tree);
-                this.save(tree, parent.getId());
+                save(tree, parent.getId());
                 updateProgress(3, 4);
             }
         }
@@ -58,18 +58,18 @@ public final class SaveFolderTask extends ParentTask<Void> {
         return null;
     }
 
-    private Directory generateTree(String path, boolean recursive) throws Exception {
+    public static Directory generateTree(String path, boolean recursive) throws Exception {
         File root = new File(path);
         if(root.exists() && root.isDirectory()) {
             Directory directory = new Directory();
-            directory.setId(this.getDir(path));
+            directory.setId(getDir(path));
             directory.setPath(path);
             directory.setTitle(root.getName());
 
             File[] files = root.listFiles(ImageHelper.getFilter());
             if(files != null) {
                 for(File child : files) {
-                    Image image = SaveFolderTask.fileToImage(this.getImage(path), child, directory);
+                    Image image = SaveFolderTask.fileToImage(getImage(child.getAbsolutePath()), child, directory);
                     directory.getImages().add(image);
                 }
             }
@@ -79,7 +79,7 @@ public final class SaveFolderTask extends ParentTask<Void> {
                 if(folders != null) {
                     for(File folder : folders) {
                         if(folder.isDirectory()) {
-                            directory.getChildren().add(this.generateTree(folder.getAbsolutePath(), true));
+                            directory.getChildren().add(generateTree(folder.getAbsolutePath(), true));
                         }
                     }
                 }
@@ -90,7 +90,7 @@ public final class SaveFolderTask extends ParentTask<Void> {
         return null;
     }
 
-    private Directory save(Directory current, long parent) throws Exception {
+    public static Directory save(Directory current, long parent) throws Exception {
         current.setId(PhotoManager.GLOBALS.getDatabase().insertOrUpdateDirectory(current, parent, false));
 
         for(int i = 0; i<=current.getImages().size() - 1; i++) {
@@ -100,12 +100,12 @@ public final class SaveFolderTask extends ParentTask<Void> {
         }
 
         for(int i = 0; i<=current.getChildren().size() - 1; i++) {
-            current.getChildren().set(i, this.save(current.getChildren().get(i), current.getId()));
+            current.getChildren().set(i, save(current.getChildren().get(i), current.getId()));
         }
         return current;
     }
 
-    private long getDir(String path) {
+    private static long getDir(String path) {
         long id = 0;
         try {
             List<Directory> directories = PhotoManager.GLOBALS.getDatabase().getDirectories("path='" + path + "'", false);
@@ -118,7 +118,7 @@ public final class SaveFolderTask extends ParentTask<Void> {
         return id;
     }
 
-    private long getImage(String path) {
+    private static long getImage(String path) {
         long id = 0;
         try {
             List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages("path='" + path + "'");

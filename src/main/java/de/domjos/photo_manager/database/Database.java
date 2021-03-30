@@ -80,15 +80,17 @@ public class Database {
             }
         } else {
             if(parent != -1) {
-                preparedStatement = this.prepare("DELETE FROM children WHERE parent=" + parent + " AND child=" + id);
-                preparedStatement.executeUpdate();
-                preparedStatement.close();
+                if(parent != id) {
+                    preparedStatement = this.prepare("DELETE FROM children WHERE parent=" + parent + " AND child=" + id);
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
 
-                preparedStatement = this.prepare("INSERT INTO children(parent, child) VALUES(?, ?)");
-                preparedStatement.setLong(1, parent);
-                preparedStatement.setLong(2, id);
-                preparedStatement.executeUpdate();
-                preparedStatement.close();
+                    preparedStatement = this.prepare("INSERT INTO children(parent, child) VALUES(?, ?)");
+                    preparedStatement.setLong(1, parent);
+                    preparedStatement.setLong(2, id);
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
+                }
             }
         }
 
@@ -451,7 +453,6 @@ public class Database {
         while (resultSet.next()) {
             folder = new Folder();
             folder.setIcon(resultSet.getString("icon"));
-            folder.setPassword(resultSet.getString("password"));
 
             long batch_id = resultSet.getLong("batch");
             if(batch_id != 0) {
@@ -489,7 +490,7 @@ public class Database {
             preparedStatement.setLong(4, folder.getId());
         }
         preparedStatement.setString(1, folder.getIcon());
-        preparedStatement.setString(2, folder.getPassword());
+        preparedStatement.setString(2, "");
         if(folder.getBatchTemplate() != null) {
             preparedStatement.setLong(3, folder.getBatchTemplate().getId());
         } else {

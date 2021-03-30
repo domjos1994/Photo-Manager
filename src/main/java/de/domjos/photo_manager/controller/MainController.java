@@ -13,7 +13,6 @@ import de.domjos.photo_manager.model.services.Cloud;
 import de.domjos.photo_manager.services.*;
 import de.domjos.photo_manager.settings.Cache;
 import de.domjos.photo_manager.settings.Globals;
-import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -130,6 +129,8 @@ public class MainController extends ParentController {
         this.initListView();
         this.fillTemplates();
         this.loadSplitPanePositions();
+        this.reloadOnStart();
+
 
         PhotoManager.GLOBALS.getCloseRunnable().add(() -> {
             if(importTask!=null) {
@@ -199,30 +200,17 @@ public class MainController extends ParentController {
                     this.lblMessages.setText(String.format(resources.getString("main.image.selected"), this.lvMain.getSelectionModel().getSelectedItems().size(), this.lvMain.getItems().size()));
 
                     File img = new File(newValue.getPath());
-                    boolean encryption = false;
-                    if(img.exists()) {
-                        Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
-                        if(directory.getFolder() != null) {
-                            encryption = !directory.getFolder().getPassword().trim().isEmpty();
-                        }
-                    }
                     this.loadImage(img);
 
-                    this.accItems.setVisible(!encryption);
-                    this.pnlMainImage.setVisible(!encryption);
-                    this.slMainImageZoom.setVisible(!encryption);
+                    this.histogramController.setImage(newValue);
+                    this.metaDataController.setImage(newValue);
+                    this.historyController.reloadHistory(newValue.getId());
+                    this.fillCategoryAndTags();
+                    this.cloudController.fillCloudWithDefault();
+                    this.cloudController.getCloudPath();
+                    this.editController.setCache(this.cache);
 
-                    if(!encryption) {
-                        this.histogramController.setImage(newValue);
-                        this.metaDataController.setImage(newValue);
-                        this.historyController.reloadHistory(newValue.getId());
-                        this.fillCategoryAndTags();
-                        this.cloudController.fillCloudWithDefault();
-                        this.cloudController.getCloudPath();
-                        this.editController.setCache(this.cache);
-
-                        this.historyController.selectLast();
-                    }
+                    this.historyController.selectLast();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -298,11 +286,7 @@ public class MainController extends ParentController {
                                 historyTask.onFinish(() -> {
                                     try {
                                         BufferedImage bufferedImage = historyTask.getValue();
-                                        if(directory.getFolder().getPassword().isEmpty()) {
-                                            ImageHelper.save(image.getPath(), directory.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
-                                        } else {
-                                            ImageHelper.save(image.getPath(), directory.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage, directory.getFolder().getPassword());
-                                        }
+                                        ImageHelper.save(image.getPath(), directory.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
 
                                         Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("main.image.menu.copy.success"), this.lang.getString("main.image.menu.copy.success"));
                                     } catch (Exception ex) {
@@ -391,16 +375,11 @@ public class MainController extends ParentController {
         this.ctxMainUpdateDatabase.setOnAction(event -> {
             try {
                 if(!this.tvMain.getSelectionModel().isEmpty()) {
-                    final long[] parentId = {rootID};
                     String msg = resources.getString("main.image.import");
                     this.directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
 
-                    importTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], true);
-                    importTask.onFinish(()->{
-                        this.enableFolderControls();
-                        this.initTreeView();
-                    });
-                    new Thread(importTask).start();
+                    ReloadTask reloadTask = new ReloadTask(this.pbMain, this.lblMessages, msg, this.directory.getId());
+                    new Thread(reloadTask).start();
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);
@@ -717,7 +696,7 @@ public class MainController extends ParentController {
         });
 
         this.menMainSettings.setOnAction(event -> {
-            this.settingsController.fixColumns(Arrays.asList(1, 2, 2, 2, 1, 1));
+            this.settingsController.fixColumns(Arrays.asList(1, 2, 2, 2, 1));
             this.tbpMain.getSelectionModel().select(this.tbSettings);
         });
         this.menMainBatch.setOnAction(event -> this.openBatchWindow());
@@ -920,10 +899,6 @@ public class MainController extends ParentController {
     }
 
     private void fillImage(javafx.scene.image.Image image) {
-        this.fillImage(image, false);
-    }
-
-    private void fillImage(javafx.scene.image.Image image, boolean encryption) {
         if(this.ivMainImage.fitHeightProperty().isBound()) {
             this.ivMainImage.fitHeightProperty().unbind();
         }
@@ -938,10 +913,8 @@ public class MainController extends ParentController {
         Image img = this.lvMain.getSelectionModel().getSelectedItem();
         javafx.scene.image.Image preview = new javafx.scene.image.Image(new ByteArrayInputStream(img.getThumbnail()));
         this.cache.setOriginalPreview(SwingFXUtils.fromFXImage(preview, null));
-        if(!encryption) {
-            this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
-            this.editController.getPreview().setImage(preview);
-        }
+        this.cache.setPreviewImage(ImageHelper.deepCopy(this.cache.getOriginalPreview()));
+        this.editController.getPreview().setImage(preview);
         this.ivMainImage.setViewport(new Rectangle2D(0, 0, image.getWidth(), image.getHeight()));
         this.ivMainImage.setPreserveRatio(true);
         this.ivMainImage.setImage(image);
@@ -1160,6 +1133,13 @@ public class MainController extends ParentController {
             }
         } catch (Exception ex) {
             Dialogs.printException(ex);
+        }
+    }
+
+    private void reloadOnStart() {
+        if(PhotoManager.GLOBALS.getSetting(Globals.RELOAD_ON_START, false)) {
+            ReloadTask reloadTask = new ReloadTask(this.pbMain, this.lblMessages, PhotoManager.GLOBALS.getLanguage().getString("main.image.import"), 1);
+            new Thread(reloadTask).start();
         }
     }
 }

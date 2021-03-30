@@ -29,6 +29,7 @@ public class Globals {
     public final static String OLD_PATHS = "OLD_PATHS";
     public final static String DEBUG = "DEBUG";
     public final static String TITLE_PATH = "TITLE_PATH";
+    public final static String RELOAD_ON_START = "RELOAD_ON_START";
 
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";

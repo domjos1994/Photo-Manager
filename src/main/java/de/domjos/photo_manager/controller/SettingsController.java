@@ -8,7 +8,6 @@ import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Folder;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
-import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.*;
@@ -31,7 +30,7 @@ import java.util.*;
 
 public class SettingsController extends ParentController {
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
-    private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath;
+    private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath, chkSettingsReload;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
 
@@ -74,6 +73,7 @@ public class SettingsController extends ParentController {
         this.cmdSettingsSave.setOnAction(event -> {
             PhotoManager.GLOBALS.saveSetting(Globals.DEBUG, this.chkSettingsDebugMode.isSelected(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
+            PhotoManager.GLOBALS.saveSetting(Globals.RELOAD_ON_START, this.chkSettingsReload.isSelected(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
@@ -109,6 +109,7 @@ public class SettingsController extends ParentController {
         this.cmdSettingsDirectoriesDelete.setDisable(true);
         this.chkSettingsDebugMode.setSelected(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         this.chkSettingsPath.setSelected(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false));
+        this.chkSettingsReload.setSelected(PhotoManager.GLOBALS.getSetting(Globals.RELOAD_ON_START, false));
         this.txtSettingsTinyKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
         this.txtSettingsTinyFile.setText(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, ""));
         this.txtSettingsUnsplashKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.UNSPLASH_KEY, ""));
@@ -309,42 +310,15 @@ public class SettingsController extends ParentController {
         });
         colSettingsDirectoriesBatch.setEditable(true);
 
-        TableColumn<Directory, String> colSettingsDirectoriesEncryption = new TableColumn<>(this.lang.getString("settings.directories.encryption"));
-        colSettingsDirectoriesEncryption.setCellValueFactory(param -> returnStringValue(param.getValue().getFolder().getPassword()));
-        colSettingsDirectoriesEncryption.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<>() {
-            @Override
-            public String toString(String s) {
-                return CryptoUtils.encrypt(s);
-            }
-
-            @Override
-            public String fromString(String s) {
-                return CryptoUtils.decrypt(s);
-            }
-        }));
-        colSettingsDirectoriesEncryption.setEditable(true);
-        colSettingsDirectoriesEncryption.setOnEditStart(event -> {
-            Dialog<String> dialog = Dialogs.createPasswordDialog(event.getRowValue().getFolder().getPassword());
-            Optional<String> result = dialog.showAndWait();
-            result.ifPresent(s -> {
-                if(!s.trim().isEmpty()) {
-                    event.getRowValue().getFolder().setPassword(s.trim());
-                    this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
-                }
-            });
-            event.consume();
-        });
-
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesParent);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesIcon);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesBatch);
-        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesEncryption);
         Directory directory = new Directory();
         directory.setFolder(new Folder());
         this.tblSettingsDirectories.getItems().add(directory);
-        this.fixColumns(Arrays.asList(1, 2, 2, 2, 1, 1));
+        this.fixColumns(Arrays.asList(1, 2, 2, 2, 1));
     }
 
     private ObservableValue<String> returnStringValue(String item) {

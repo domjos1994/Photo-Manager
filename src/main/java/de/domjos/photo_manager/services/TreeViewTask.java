@@ -62,7 +62,7 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
 
     private Node getIcon(String path, Directory directory) {
         try {
-            Node node = null;
+            Node node;
             if(directory.isRoot()) {
                 return this.getIconFromResource("/images/icons/root.png");
             }
@@ -71,11 +71,7 @@ public final class TreeViewTask extends ParentTask<TreeItem<Directory>> {
             }
 
             if(directory.getFolder() != null) {
-                if(!directory.getFolder().getPassword().trim().isEmpty()) {
-                    node = this.getIconFromResource("/images/icons/system_folder.png");
-                } else {
-                    node = this.getIconFromResource("/images/icons/empty_folder.png");
-                }
+                node = this.getIconFromResource("/images/icons/empty_folder.png");
             } else {
                 node = this.getIconFromResource("/images/icons/directory.png");
             }
