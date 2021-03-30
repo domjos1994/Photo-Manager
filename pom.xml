@@ -6,10 +6,11 @@
 
     <groupId>de.domjos</groupId>
     <artifactId>PhotoManager</artifactId>
-    <version>1.0-beta.1</version>
+    <version>1.0-beta.2</version>
 
     <properties>
         <!-- Information of the project -->
+        <application.version>1.0.0.0</application.version>
         <application.name>Photo-Manager</application.name>
         <application.author>Dominic Joas</application.author>
         <application.website>https://domjos.de/entwicklung/programme/photomanager</application.website>
@@ -353,16 +354,21 @@
                             <runnableJar>${application.result}/${application.file}.jar</runnableJar>
                             <outputDirectory>${application.result}</outputDirectory>
                             <licenseFile>${applications.assets}/windows/LICENSE</licenseFile>
+                            <assetsDir>${applications.assets}</assetsDir>
                             <winConfig>
-                                <fileVersion>${project.version}</fileVersion>
+                                <fileVersion>${application.version}</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
-                                <productVersion>${project.version}</productVersion>
+                                <productVersion>${application.version}</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
                                 <fileDescription>${project.description}</fileDescription>
                                 <copyright>${application.author}</copyright>
                                 <productName>${application.name}</productName>
                                 <internalName>${application.name}</internalName>
                                 <originalFilename>${application.file}.exe</originalFilename>
+                                <setupLanguages>
+                                    <german>..\..\assets\windows\german.isl</german>
+                                    <english>..\..\assets\windows\english.isl</english>
+                                </setupLanguages>
                             </winConfig>
                         </configuration>
                     </execution>
