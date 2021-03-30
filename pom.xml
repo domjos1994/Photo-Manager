@@ -354,9 +354,9 @@
                             <outputDirectory>${application.result}</outputDirectory>
                             <licenseFile>${applications.assets}/windows/LICENSE</licenseFile>
                             <winConfig>
-                                <fileVersion>1.0.0.0</fileVersion>
+                                <fileVersion>${project.version}</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
-                                <productVersion>1.0.0.0</productVersion>
+                                <productVersion>${project.version}</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
                                 <fileDescription>${project.description}</fileDescription>
                                 <copyright>${application.author}</copyright>
