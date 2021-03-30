@@ -369,7 +369,31 @@
                                     <german>..\..\assets\windows\german.isl</german>
                                     <english>..\..\assets\windows\english.isl</english>
                                 </setupLanguages>
+                                <signing>
+                                    <keystore>..\Keystore\domjos.jks</keystore>
+                                    <storepass>${domjos.storePass}</storepass>
+                                    <alias>${domjos.alias}</alias>
+                                    <keypass>${domjos.keyPass}</keypass>
+                                </signing>
                             </winConfig>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-1</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../keystore/credentials.properties</file>
+                            </files>
                         </configuration>
                     </execution>
                 </executions>
