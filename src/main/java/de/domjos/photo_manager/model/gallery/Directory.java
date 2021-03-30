@@ -14,6 +14,7 @@ public class Directory extends BaseObject {
     private List<Directory> children;
     private List<Image> images;
     private Cloud cloud;
+    private Folder folder;
 
     public Directory() {
         super();
@@ -25,6 +26,7 @@ public class Directory extends BaseObject {
         this.children = new LinkedList<>();
         this.images = new LinkedList<>();
         this.cloud = null;
+        this.folder = null;
     }
 
     public String getPath() {
@@ -81,6 +83,14 @@ public class Directory extends BaseObject {
 
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
+    }
+
+    public Folder getFolder() {
+        return this.folder;
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
     }
 
     public String toString() {

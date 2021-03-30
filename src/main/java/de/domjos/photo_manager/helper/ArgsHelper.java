@@ -52,27 +52,21 @@ public class ArgsHelper {
                         String folderName = arguments[2].trim();
                         Directory directory = this.mainController.findDirectory(this.mainController.getTvMain().getRoot(), folderName);
                         if (directory != null) {
-                            if (!(directory instanceof Folder)) {
-                                this.mainController.saveImage(current, directory);
-                            } else {
-                                try {
-                                    Folder tmp = (Folder) directory;
-                                    String path = tmp.getDirRow().getPath();
+                            try {
+                                String path = directory.getPath();
 
-                                    File newFile = new File(path + File.separatorChar + current.getName());
-                                    FileInputStream fis = new FileInputStream(current);
-                                    if (newFile.exists() || newFile.createNewFile()) {
-                                        FileOutputStream fos = new FileOutputStream(newFile);
-                                        IOUtils.copy(fis, fos);
-                                        fis.close();
-                                        fos.close();
-                                        this.mainController.saveImage(newFile, directory);
-                                    }
-
-                                } catch (Exception ex) {
-                                    Dialogs.printException(ex);
+                                File newFile = new File(path + File.separatorChar + current.getName());
+                                FileInputStream fis = new FileInputStream(current);
+                                if (newFile.exists() || newFile.createNewFile()) {
+                                    FileOutputStream fos = new FileOutputStream(newFile);
+                                    IOUtils.copy(fis, fos);
+                                    fis.close();
+                                    fos.close();
+                                    this.mainController.saveImage(newFile, directory);
                                 }
 
+                            } catch (Exception ex) {
+                                Dialogs.printException(ex);
                             }
                         }
                     }

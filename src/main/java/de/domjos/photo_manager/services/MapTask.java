@@ -40,14 +40,14 @@ public final class MapTask extends ParentTask<List<Image>> {
 
     private List<Image> getAllImages(Directory directory, List<Image> images) throws Exception {
         if(directory==null) {
-            directory = PhotoManager.GLOBALS.getDatabase().getRoot();
+            directory = PhotoManager.GLOBALS.getDatabase().getDirectories("isRoot=1", true).get(0);
         }
 
         for(Directory child : directory.getChildren()) {
             images = this.getAllImages(child, images);
         }
 
-        images.addAll(PhotoManager.GLOBALS.getDatabase().getImages(directory, false));
+        images.addAll(PhotoManager.GLOBALS.getDatabase().getImages("parent=" + directory.getId()));
         return images;
     }
 }

@@ -1,19 +1,14 @@
 package de.domjos.photo_manager.database;
 
-import de.domjos.photo_manager.PhotoManager;
-import de.domjos.photo_manager.controller.SettingsController;
-import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.*;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.model.services.Cloud;
-import de.domjos.photo_manager.services.SaveFolderTask;
-import de.domjos.photo_manager.settings.Globals;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.sql.*;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Database {
     private final Connection connection;
@@ -37,78 +32,112 @@ public class Database {
         this.connection.close();
     }
 
-    public void updateDirectory(Directory directory) throws Exception {
-        if(directory.getCloud()!=null) {
-            directory.getCloud().setId(this.insertCloud(directory.getCloud()));
-        }
-
-        PreparedStatement preparedStatement = this.prepare("UPDATE directories SET cloud_id=? WHERE ID=?");
-        preparedStatement.setLong(2, directory.getId());
-        if(directory.getCloud()!=null) {
-            preparedStatement.setLong(1, directory.getCloud().getId());
+    public long insertOrUpdateDirectory(Directory directory, long parent, boolean recursive) throws Exception {
+        PreparedStatement preparedStatement;
+        if(directory.getId() == 0) {
+            preparedStatement = this.prepare("INSERT INTO directories(name, path, isRoot, isLibrary, isRecursive, cloud_id, folder) VALUES(?,?,?,?,?,?,?)");
         } else {
-            preparedStatement.setNull(1, Types.INTEGER);
+            preparedStatement = this.prepare("UPDATE directories SET name=?, path=?, isRoot=?, isLibrary=?, isRecursive=?, cloud_id=?, folder=? WHERE id=?");
+            preparedStatement.setLong(8, directory.getId());
         }
-        preparedStatement.executeUpdate();
-        preparedStatement.close();
-    }
-
-    public long insertOrUpdateDirectory(Directory directory, long id, boolean recursive, SaveFolderTask task) throws Exception {
-        if(directory.getCloud()!=null) {
-            directory.getCloud().setId(this.insertCloud(directory.getCloud()));
-        }
-
-        PreparedStatement preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT, isLibrary, isRecursive, cloud_id) VALUES(?, ?, ?, ?, ?, ?)");
         preparedStatement.setString(1, directory.getTitle());
         preparedStatement.setString(2, directory.getPath());
-        preparedStatement.setInt(3, 0);
-        preparedStatement.setInt(4, directory.isLibrary() ? 1 : 0);
-        preparedStatement.setInt(5, directory.isRecursive() ? 1 : 0);
-        if(directory.getCloud()!=null) {
-            preparedStatement.setLong(6, directory.getCloud().getId());
+        preparedStatement.setBoolean(3, directory.isRoot());
+        preparedStatement.setBoolean(4, directory.isLibrary());
+        preparedStatement.setBoolean(5, directory.isRecursive());
+
+        if(directory.getCloud() != null) {
+            preparedStatement.setLong(6, this.insertCloud(directory.getCloud()));
         } else {
             preparedStatement.setNull(6, Types.INTEGER);
         }
-        preparedStatement.executeUpdate();
-        long genId = this.getGeneratedId(preparedStatement);
-        preparedStatement.close();
-
-        preparedStatement = this.prepare("INSERT INTO children(parent, child) VALUES(?, ?)");
-        preparedStatement.setLong(1, id);
-        preparedStatement.setLong(2, genId);
+        if(directory.getFolder() != null) {
+            preparedStatement.setLong(7, this.insertOrUpdateFolder(directory.getFolder()));
+        } else {
+            preparedStatement.setNull(7, Types.INTEGER);
+        }
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
-        directory.setId(genId);
-        this.getImages(directory, true);
+        long id;
+        if(directory.getId() == 0) {
+            id = getGeneratedId(preparedStatement);
+        } else {
+            id = directory.getId();
+        }
 
         if(recursive) {
-            File file = new File(directory.getPath());
-            File[] paths = file.listFiles(File::isDirectory);
-            if(paths!=null) {
-                int i = 0;
-                for(File sub  : paths) {
-                    if(task!=null) {
-                        task.max = paths.length;
-                        task.counter.set(i);
-                    }
-                    if(sub.isDirectory() && !sub.getName().startsWith(".")) {
-                        Directory subDir = new Directory();
-                        subDir.setTitle(sub.getName());
-                        subDir.setPath(sub.getAbsolutePath());
-                        subDir.setRoot(false);
-                        subDir.setId(this.insertOrUpdateDirectory(subDir, genId, true));
-                        this.getImages(subDir, true);
-                    }
-                    i++;
-                }
+            preparedStatement = this.prepare("DELETE FROM children WHERE parent=" + id);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            for(Directory child : directory.getChildren()) {
+                preparedStatement = this.prepare("INSERT INTO children(parent, child) VALUES(?, ?)");
+                preparedStatement.setLong(1, id);
+                preparedStatement.setLong(2, this.insertOrUpdateDirectory(child, id, true));
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+        } else {
+            if(parent != -1) {
+                preparedStatement = this.prepare("DELETE FROM children WHERE parent=" + parent + " AND child=" + id);
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+
+                preparedStatement = this.prepare("INSERT INTO children(parent, child) VALUES(?, ?)");
+                preparedStatement.setLong(1, parent);
+                preparedStatement.setLong(2, id);
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
             }
         }
-        return genId;
+
+        return id;
     }
 
-    private long insertOrUpdateDirectory(Directory directory, long id, boolean recursive) throws Exception {
-        return this.insertOrUpdateDirectory(directory, id, recursive, null);
+    public List<Directory> getDirectories(String where, boolean recursive) throws Exception {
+        Map<Directory, String> dirsAndChildren = new LinkedHashMap<>();
+
+        where = where.trim();
+        if(!where.isEmpty()) {
+            where = " WHERE " + where;
+        }
+
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories" + where);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            Directory directory = new Directory();
+            directory.setId(resultSet.getLong("id"));
+            directory.setTitle(resultSet.getString("name"));
+            directory.setPath(resultSet.getString("path"));
+            directory.setRoot(resultSet.getBoolean("isRoot"));
+            directory.setLibrary(resultSet.getBoolean("isLibrary"));
+            directory.setRecursive(resultSet.getBoolean("isRecursive"));
+
+            long cloud_id = resultSet.getLong("cloud_id");
+            if(cloud_id != 0) {
+                directory.setCloud(this.getCloud(cloud_id));
+            }
+
+            long folder = resultSet.getLong("folder");
+            if(folder != 0) {
+                directory.setFolder(this.getFolder(folder, directory.getId()));
+            }
+
+            dirsAndChildren.put(directory, this.getChildren(directory.getId()));
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        List<Directory> directories = new LinkedList<>();
+        for(Map.Entry<Directory, String> entry : dirsAndChildren.entrySet()) {
+            Directory directory = entry.getKey();
+            if(recursive) {
+                directory.setChildren(this.getDirectories("id IN " + entry.getValue(), true));
+            }
+            directories.add(directory);
+        }
+        return directories;
     }
 
     public void deleteDirectory(Directory directory) throws Exception {
@@ -124,6 +153,7 @@ public class Database {
         for(long child : children) {
             this.executeUpdate("DELETE FROM images WHERE parent=" + child);
             this.executeUpdate("DELETE FROM directories WHERE id=" + child);
+
             Directory sub = new Directory();
             sub.setId(child);
             deleteDirectory(sub);
@@ -131,6 +161,63 @@ public class Database {
 
         this.executeUpdate("DELETE FROM children WHERE parent=" + directory.getId());
         this.executeUpdate("DELETE FROM directories WHERE id=" + directory.getId());
+        if(directory.getCloud() != null) {
+            this.executeUpdate("DELETE FROM cloud WHERE id=" + directory.getCloud().getId());
+        }
+    }
+
+    public List<Image> getImages(String where) throws Exception {
+        List<Image> images = new LinkedList<>();
+
+        where = where.trim();
+        if(!where.isEmpty()) {
+            where = " WHERE " + where;
+        }
+
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM images" + where);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            Image image = new Image();
+            image.setId(resultSet.getLong("id"));
+
+            try {
+                long parent = resultSet.getLong("parent");
+                if(parent != 0) {
+                    image.setDirectory(this.getDirectories("id=" + parent, false).get(0));
+                }
+            } catch (Exception ignored) {}
+
+            image.setTitle(resultSet.getString("name"));
+            image.setPath(resultSet.getString("path"));
+            image.setThumbnail(resultSet.getBytes("thumbnail"));
+
+            try {
+                long category = resultSet.getLong("category");
+                if(category != 0) {
+                    image.setCategory(this.getDescriptionObjects(category, 0).get(0));
+                }
+            } catch (Exception ignored) {}
+
+            image.setWidth(resultSet.getInt("width"));
+            image.setHeight(resultSet.getInt("height"));
+
+            try {
+                long cloudId = resultSet.getLong("cloud_id");
+                if(cloudId != 0) {
+                    image.setCloud(this.getCloud(cloudId));
+                }
+            } catch (Exception ignored) {}
+
+            try {
+                image.setTags(this.getDescriptionObjects(image.getId(), 1));
+            } catch (Exception ignored) {}
+
+            images.add(image);
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        return images;
     }
 
     public void deleteImage(Image image) throws Exception {
@@ -141,36 +228,6 @@ public class Database {
 
     public void deleteEdited(TemporaryEdited temporaryEdited) throws Exception {
         this.executeUpdate("DELETE FROM images_edited WHERE ID=" + temporaryEdited.getId());
-    }
-
-    public void addRoot() throws Exception {
-        boolean exists = false;
-        PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories WHERE isRoot=1");
-        ResultSet rs = preparedStatement.executeQuery();
-        while (rs.next()) {
-            exists = true;
-        }
-        rs.close();
-        preparedStatement.close();
-
-        if(!exists) {
-            preparedStatement = this.prepare("INSERT INTO directories(name, path, isROOT) VALUES('ROOT', '', 1)");
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-        }
-    }
-
-    public Directory getRoot() throws Exception {
-        Directory directory = new Directory();
-        PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories WHERE isRoot=1");
-        ResultSet rs = preparedStatement.executeQuery();
-        rs.next();
-        directory.setId(rs.getInt("id"));
-        directory.setTitle(rs.getString("name"));
-        rs.close();
-        preparedStatement.close();
-        this.getChildren(directory);
-        return directory;
     }
 
     public void insertOrUpdateImage(Image image) throws Exception {
@@ -219,70 +276,6 @@ public class Database {
                 this.executeUpdate(String.format("INSERT INTO images_tags(image, tag) VALUES('%s', '%s')", id, tag_id));
             }
         }
-    }
-
-    public List<Image> getImages(Directory directory, boolean fromFolder) throws Exception {
-        List<Image> images = new LinkedList<>();
-
-        if(fromFolder) {
-            String path = directory.getPath();
-            File[] files = new File(path).listFiles(ImageHelper.getFilter());
-            if(files!=null) {
-                for(File file : files) {
-                    try {
-                        Image image = new Image();
-                        image.setDirectory(directory);
-                        image.setTitle(file.getName());
-                        image.setPath(file.getAbsolutePath());
-                        BufferedImage originalImage = ImageHelper.getImage(image.getPath());
-                        if(originalImage!=null) {
-                            image.setWidth(originalImage.getWidth());
-                            image.setHeight(originalImage.getHeight());
-                            BufferedImage bufferedImage;
-                            if(originalImage.getWidth()>originalImage.getHeight()) {
-                                double factor = originalImage.getWidth() / 200.0;
-                                bufferedImage = ImageHelper.scale(originalImage, 200, (int) (originalImage.getHeight()/factor));
-                            } else if(originalImage.getWidth()<originalImage.getHeight()) {
-                                double factor = originalImage.getHeight() / 200.0;
-                                bufferedImage = ImageHelper.scale(originalImage, (int) (originalImage.getWidth()/factor), 200);
-                            } else {
-                                bufferedImage = ImageHelper.scale(originalImage, 200, 200);
-                            }
-                            image.setThumbnail(ImageHelper.imageToByteArray(bufferedImage));
-                        }
-                        this.insertOrUpdateImage(image);
-                    } catch (Exception ex) {
-                        PhotoManager.GLOBALS.getLogger().error("Read Image", ex);
-                    }
-                }
-            }
-            images = this.getImages(directory, false);
-        } else {
-            PreparedStatement preparedStatement = this.prepare("SELECT * FROM images WHERE parent=" + directory.getId());
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                Image image = new Image();
-                image.setId(rs.getInt("id"));
-                image.setTitle(rs.getString("name"));
-                image.setPath(rs.getString("path"));
-                image.setDirectory(directory);
-                image.setHeight(rs.getInt("height"));
-                image.setWidth(rs.getInt("width"));
-                image.setThumbnail(rs.getBytes("thumbnail"));
-                image.setCloud(this.getCloud(rs.getLong("cloud_id")));
-                image.setTemporaryEditedList(this.getTemporaryEdited(image.getId()));
-
-                List<DescriptionObject> descriptionObjects = this.getDescriptionObjects(rs.getLong("category"), 0);
-                if(!descriptionObjects.isEmpty()) {
-                    image.setCategory(descriptionObjects.get(0));
-                }
-                image.setTags(this.getDescriptionObjects(image.getId(), 1));
-                images.add(image);
-            }
-            rs.close();
-            preparedStatement.close();
-        }
-        return images;
     }
 
     public void insertOrUpdateEdited(TemporaryEdited temporaryEdited, long image) throws Exception {
@@ -382,20 +375,6 @@ public class Database {
         } else {
             preparedStatement.setLong(7, 0);
         }
-        if(batchTemplate.getTargetFolder() != null) {
-            if(batchTemplate.getTargetFolder() instanceof Folder) {
-                Folder folder = (Folder) batchTemplate.getTargetFolder();
-                if(folder.getDirRow() != null) {
-                    preparedStatement.setString(8, folder.getDirRow().getTitle());
-                } else {
-                    preparedStatement.setString(8, "");
-                }
-            } else {
-                preparedStatement.setString(8, "");
-            }
-        } else {
-            preparedStatement.setString(8, "");
-        }
         preparedStatement.setInt(9, this.boolToInt(batchTemplate.isFtp()));
         preparedStatement.setString(10, batchTemplate.getServer());
         preparedStatement.setString(11, batchTemplate.getUser());
@@ -425,30 +404,9 @@ public class Database {
             batchTemplate.setFolder(resultSet.getBoolean("folder"));
             int targetFolder = resultSet.getInt("targetFolder");
             if(targetFolder != 0) {
-                this.getDir(this.getRoot(), targetFolder, batchTemplate);
+                this.getDir(this.getDirectories("isRoot=1", true).get(0), targetFolder, batchTemplate);
             } else {
                 batchTemplate.setTargetFolder(null);
-            }
-            String strFolder = resultSet.getString("dirRow");
-            if(strFolder != null) {
-                if(!strFolder.trim().isEmpty()) {
-                    Folder folder = new Folder();
-                    List<SettingsController.DirRow> rows = this.getRowsFromSettings();
-                    SettingsController.DirRow selectedRow = null;
-                    for(SettingsController.DirRow dirRow : rows) {
-                        if(dirRow.getTitle().trim().equals(strFolder.trim())) {
-                            selectedRow = dirRow;
-                            break;
-                        }
-                    }
-
-                    if(selectedRow != null) {
-                        folder.setTitle(selectedRow.getTitle());
-                        folder.setPath(selectedRow.getPath());
-                        folder.setDirRow(selectedRow);
-                        batchTemplate.setTargetFolder(folder);
-                    }
-                }
             }
             batchTemplate.setFtp(resultSet.getBoolean("ftp"));
             batchTemplate.setServer(resultSet.getString("server"));
@@ -467,33 +425,6 @@ public class Database {
         return batchTemplates;
     }
 
-    private List<SettingsController.DirRow> getRowsFromSettings() {
-        List<SettingsController.DirRow> dirRows = new LinkedList<>();
-
-        String setting = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES, "");
-        for(String row : setting.split(";")) {
-            if(row.contains(",")) {
-                String[] item = row.trim().split(",");
-                if(item.length >= 2) {
-                    SettingsController.DirRow dirRow = new SettingsController.DirRow();
-                    dirRow.setTitle(item[0]);
-                    dirRow.setPath(item[1]);
-                    if(item.length > 2) {
-                        dirRow.setIcon(item[2]);
-                    }
-                    if(item.length > 4) {
-                        dirRow.setEncryption(item[4].trim());
-                    } else {
-                        dirRow.setEncryption("");
-                    }
-                    dirRows.add(dirRow);
-                }
-            }
-        }
-
-        return dirRows;
-    }
-
     public void deleteBatchTemplate(BatchTemplate batchTemplate) throws Exception {
         PreparedStatement preparedStatement = this.prepare("DELETE FROM batchTemplates WHERE id=?");
         preparedStatement.setLong(1, batchTemplate.getId());
@@ -510,6 +441,67 @@ public class Database {
             return true;
         } catch (Exception ex) {
             return false;
+        }
+    }
+
+    private Folder getFolder(long id, long dir) throws Exception {
+        Folder folder = null;
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM folders WHERE id=" + id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            folder = new Folder();
+            folder.setIcon(resultSet.getString("icon"));
+            folder.setPassword(resultSet.getString("password"));
+
+            long batch_id = resultSet.getLong("batch");
+            if(batch_id != 0) {
+                List<BatchTemplate> batchTemplates = this.getBatchTemplates("id=" + batch_id);
+                if(batchTemplates != null) {
+                    if(!batchTemplates.isEmpty()) {
+                        folder.setBatchTemplate(batchTemplates.get(0));
+                    }
+                }
+            }
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        if(folder != null) {
+            preparedStatement = this.prepare("SELECT parent FROM children WHERE child=" + dir);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                folder.setDirectory(this.getDirectories("id=" + resultSet.getLong("parent"), false).get(0));
+            }
+            resultSet.close();
+            preparedStatement.close();
+        }
+
+        return folder;
+    }
+
+    private long insertOrUpdateFolder(Folder folder) throws Exception {
+        PreparedStatement preparedStatement;
+
+        if(folder.getId() == 0) {
+            preparedStatement = this.prepare("INSERT INTO folders(icon, password, batch) VALUES(?, ?, ?)");
+        } else {
+            preparedStatement = this.prepare("UPDATE folders SET icon=?, password=?, batch=? WHERE id=?");
+            preparedStatement.setLong(4, folder.getId());
+        }
+        preparedStatement.setString(1, folder.getIcon());
+        preparedStatement.setString(2, folder.getPassword());
+        if(folder.getBatchTemplate() != null) {
+            preparedStatement.setLong(3, folder.getBatchTemplate().getId());
+        } else {
+            preparedStatement.setNull(3, Types.INTEGER);
+        }
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+
+        if(folder.getId() != 0) {
+            return folder.getId();
+        } else {
+            return this.getGeneratedId(preparedStatement);
         }
     }
 
@@ -573,26 +565,6 @@ public class Database {
         return descriptionObjects;
     }
 
-    private void getChildren(Directory directory) throws Exception {
-        List<Directory> directories = new LinkedList<>();
-        PreparedStatement preparedStatement = this.prepare("SELECT * FROM directories INNER JOIN children ON children.child=directories.ID WHERE children.parent=" + directory.getId());
-        ResultSet rs = preparedStatement.executeQuery();
-        while (rs.next()) {
-            Directory sub = new Directory();
-            sub.setId(rs.getInt("id"));
-            sub.setTitle(rs.getString("name"));
-            sub.setPath(rs.getString("path"));
-            sub.setLibrary(rs.getInt("isLibrary")==1);
-            sub.setRecursive(rs.getInt("isRecursive")==1);
-            sub.setCloud(this.getCloud(rs.getLong("cloud_id")));
-            this.getChildren(sub);
-            directories.add(sub);
-        }
-        rs.close();
-        preparedStatement.close();
-        directory.setChildren(directories);
-    }
-
     private long getGeneratedId(PreparedStatement preparedStatement) throws Exception {
         ResultSet rs = preparedStatement.getGeneratedKeys();
         rs.next();
@@ -603,7 +575,7 @@ public class Database {
 
     private Cloud getCloud(long id) throws Exception {
         Cloud cloud = null;
-        PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT * FROM cloud_inclusion WHERE ID=" + id);
+        PreparedStatement preparedStatement = this.prepare("SELECT * FROM cloud_inclusion WHERE ID=" + id);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
             cloud = new Cloud();
@@ -618,10 +590,10 @@ public class Database {
     private long insertCloud(Cloud cloud) throws Exception {
         PreparedStatement preparedStatement;
         if(cloud.getId()==0) {
-            preparedStatement = this.connection.prepareStatement("INSERT INTO cloud_inclusion(path) VALUES(?)");
+            preparedStatement = this.prepare("INSERT INTO cloud_inclusion(path) VALUES(?)");
 
         } else {
-            preparedStatement = this.connection.prepareStatement("UPDATE cloud_inclusion SET path=? WHERE id=?");
+            preparedStatement = this.prepare("UPDATE cloud_inclusion SET path=? WHERE id=?");
             preparedStatement.setLong(2, cloud.getId());
         }
 
@@ -631,6 +603,19 @@ public class Database {
             cloud.setId(this.getGeneratedId(preparedStatement));
         }
         return cloud.getId();
+    }
+
+    private String getChildren(long parent) throws Exception {
+        StringBuilder ids = new StringBuilder("(");
+        PreparedStatement preparedStatement = this.prepare("SELECT child FROM children WHERE parent=?");
+        preparedStatement.setLong(1, parent);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            ids.append(resultSet.getLong("child")).append(", ");
+        }
+        resultSet.close();
+        preparedStatement.close();
+        return (ids.toString() + ")").replace(", )", ")");
     }
 
     private int boolToInt(boolean value) {

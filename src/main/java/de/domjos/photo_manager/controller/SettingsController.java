@@ -4,16 +4,19 @@ import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.helper.InitializationHelper;
 import de.domjos.photo_manager.model.gallery.BatchTemplate;
+import de.domjos.photo_manager.model.gallery.Directory;
+import de.domjos.photo_manager.model.gallery.Folder;
 import de.domjos.photo_manager.services.WebDav;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.CryptoUtils;
 import de.domjos.photo_manager.utils.Dialogs;
+import javafx.beans.InvalidationListener;
+import javafx.beans.value.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -45,7 +48,7 @@ public class SettingsController extends ParentController {
     private @FXML CheckBox chkSettingsDirectoriesDelete;
     private @FXML TextField txtSettingsDirectoriesDelete;
     private @FXML Button cmdSettingsDirectoriesDelete;
-    private @FXML TableView<DirRow> tblSettingsDirectories;
+    private @FXML TableView<Directory> tblSettingsDirectories;
 
     private @FXML Accordion accSettings;
 
@@ -116,7 +119,9 @@ public class SettingsController extends ParentController {
         this.txtSettingsInstagramUser.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_USER, ""));
         this.txtSettingsInstagramPwd.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_PWD, ""));
         SettingsController.getRowsFromSettings().forEach(this.tblSettingsDirectories.getItems()::add);
-        this.tblSettingsDirectories.getItems().add(new DirRow());
+        Directory directory = new Directory();
+        directory.setFolder(new Folder());
+        this.tblSettingsDirectories.getItems().add(directory);
 
         String deleteDir = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
         this.chkSettingsDirectoriesDelete.setSelected(!deleteDir.trim().isEmpty());
@@ -127,50 +132,40 @@ public class SettingsController extends ParentController {
         }
     }
 
-    public static List<DirRow> getRowsFromSettings() {
-        List<DirRow> dirRows = new LinkedList<>();
+    public static List<Directory> getRowsFromSettings() {
+        List<Directory> directories = new LinkedList<>();
 
-        String setting = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES, "");
-        for(String row : setting.split(";")) {
-            if(row.contains(",")) {
-                String[] item = row.trim().split(",");
-                if(item.length >= 2) {
-                    DirRow dirRow = new DirRow();
-                    dirRow.setTitle(item[0]);
-                    dirRow.setPath(item[1]);
-                    if(item.length > 2) {
-                        dirRow.setIcon(item[2]);
-                    }
-                    if(item.length > 3) {
-                        try {
-                            int id = Integer.parseInt(item[3].trim());
-                            dirRow.batch = PhotoManager.GLOBALS.getDatabase().getBatchTemplates("id=" + id).get(0);
-                        } catch (Exception ignored) {}
-                    }
-                    if(item.length > 4) {
-                        dirRow.setEncryption(item[4].trim());
-                    } else {
-                        dirRow.setEncryption("");
-                    }
-                    dirRows.add(dirRow);
-                }
-            }
-        }
+        try {
+            directories = PhotoManager.GLOBALS.getDatabase().getDirectories("folder<>0", false);
+        } catch (Exception ignored) {}
 
-        return dirRows;
+        return directories;
     }
 
     private void saveRowsToSettings() {
-        boolean isEmpty = true;
-        for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
-            if(!dirRow.getTitle().trim().isEmpty() && !dirRow.getPath().trim().isEmpty()) {
-                PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES, this.generateSetting(), false);
-                isEmpty = false;
+        StringBuilder stringBuilder = new StringBuilder(" folder <> 0 and id not in (");
+        for(Directory directory : this.tblSettingsDirectories.getItems()) {
+            if(!directory.getTitle().trim().isEmpty() && !directory.getPath().trim().isEmpty()) {
+                try {
+                    long id = 1;
+                    if(directory.getFolder().getDirectory() != null) {
+                        id = directory.getFolder().getDirectory().getId();
+                    }
+                    stringBuilder.append(PhotoManager.GLOBALS.getDatabase().insertOrUpdateDirectory(directory, id, false));
+                    stringBuilder.append(", ");
+                } catch (Exception ex) {
+                    Dialogs.printException(ex);
+                }
             }
         }
-
-        if(isEmpty) {
-            PhotoManager.GLOBALS.saveSetting(Globals.DIRECTORIES, "", false);
+        String where = (stringBuilder.toString() + ")").replace(", )", ")");
+        try {
+            List<Directory> directories = PhotoManager.GLOBALS.getDatabase().getDirectories(where, false);
+            for(Directory directory : directories) {
+                PhotoManager.GLOBALS.getDatabase().deleteDirectory(directory);
+            }
+        } catch (Exception ex) {
+            Dialogs.printException(ex);
         }
     }
 
@@ -192,19 +187,66 @@ public class SettingsController extends ParentController {
         contextMenu.getItems().add(menuItem);
         this.tblSettingsDirectories.setContextMenu(contextMenu);
 
-        TableColumn<DirRow, String> colSettingsDirectoriesTitle = new TableColumn<>(this.lang.getString("settings.directories.title"));
-        colSettingsDirectoriesTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        TableColumn<Directory, String> colSettingsDirectoriesTitle = new TableColumn<>(this.lang.getString("settings.directories.title"));
+        colSettingsDirectoriesTitle.setCellValueFactory(param -> returnStringValue(param.getValue().getTitle()));
         colSettingsDirectoriesTitle.setCellFactory(TextFieldTableCell.forTableColumn());
         colSettingsDirectoriesTitle.setOnEditCommit(event -> {
             String val = event.getNewValue();
             event.getRowValue().setTitle(val);
             this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
-            this.tblSettingsDirectories.getItems().add(new DirRow());
+
+            Directory directory = new Directory();
+            directory.setFolder(new Folder());
+            this.tblSettingsDirectories.getItems().add(directory);
         });
         colSettingsDirectoriesTitle.setEditable(true);
 
-        TableColumn<DirRow, String> colSettingsDirectoriesPath = new TableColumn<>(this.lang.getString("settings.directories.path"));
-        colSettingsDirectoriesPath.setCellValueFactory(new PropertyValueFactory<>("path"));
+        List<Directory> directories = new LinkedList<>();
+        try {
+           directories = PhotoManager.GLOBALS.getDatabase().getDirectories("", true);
+        } catch (Exception ignored) {}
+        TableColumn<Directory, Directory> colSettingsDirectoriesParent = new TableColumn<>(this.lang.getString("settings.directories"));
+        colSettingsDirectoriesParent.setCellValueFactory(param -> returnDirectoryValue(param.getValue().getFolder().getDirectory()));
+        List<Directory> finalDirectories = directories;
+        colSettingsDirectoriesParent.setCellFactory(ComboBoxTableCell.forTableColumn(new StringConverter<>() {
+                 @Override
+                 public String toString(Directory object) {
+                     if (object != null) {
+                         return object.getTitle();
+                     } else {
+                         return "";
+                     }
+                 }
+
+                 @Override
+                 public Directory fromString(String string) {
+                     if (string != null) {
+                         for (Directory batchTemplate : finalDirectories) {
+                             if (batchTemplate != null) {
+                                 if (batchTemplate.getTitle().equals(string)) {
+                                     return batchTemplate;
+                                 }
+                             }
+                         }
+                     }
+                     return null;
+                 }
+             }, FXCollections.observableList(directories)
+
+        ));
+        colSettingsDirectoriesParent.setOnEditCommit(event -> {
+            Directory directory = event.getNewValue();
+            event.getRowValue().getFolder().setDirectory(directory);
+            this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
+
+            Directory dir = new Directory();
+            dir.setFolder(new Folder());
+            this.tblSettingsDirectories.getItems().add(dir);
+        });
+        colSettingsDirectoriesParent.setEditable(true);
+
+        TableColumn<Directory, String> colSettingsDirectoriesPath = new TableColumn<>(this.lang.getString("settings.directories.path"));
+        colSettingsDirectoriesPath.setCellValueFactory(param -> returnStringValue(param.getValue().getPath()));
         colSettingsDirectoriesPath.setEditable(true);
         colSettingsDirectoriesPath.setOnEditStart(event -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -216,8 +258,8 @@ public class SettingsController extends ParentController {
             }
         });
 
-        TableColumn<DirRow, String> colSettingsDirectoriesIcon = new TableColumn<>(this.lang.getString("settings.directories.icon"));
-        colSettingsDirectoriesIcon.setCellValueFactory(new PropertyValueFactory<>("icon"));
+        TableColumn<Directory, String> colSettingsDirectoriesIcon = new TableColumn<>(this.lang.getString("settings.directories.icon"));
+        colSettingsDirectoriesIcon.setCellValueFactory(param -> returnStringValue(param.getValue().getFolder().getIcon()));
         colSettingsDirectoriesIcon.setEditable(true);
         colSettingsDirectoriesIcon.setOnEditStart(event -> {
             FileChooser fileChooser = new FileChooser();
@@ -226,7 +268,7 @@ public class SettingsController extends ParentController {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
             File file = fileChooser.showOpenDialog(null);
             if(file!=null) {
-                event.getRowValue().setIcon(file.getAbsolutePath());
+                event.getRowValue().getFolder().setIcon(file.getAbsolutePath());
                 this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
             }
         });
@@ -235,8 +277,8 @@ public class SettingsController extends ParentController {
         try {
             batchTemplates.addAll(PhotoManager.GLOBALS.getDatabase().getBatchTemplates(""));
         } catch (Exception ignored) {}
-        TableColumn<DirRow, BatchTemplate> colSettingsDirectoriesBatch = new TableColumn<>(this.lang.getString("main.menu.program.batch"));
-        colSettingsDirectoriesBatch.setCellValueFactory(new PropertyValueFactory<>("batch"));
+        TableColumn<Directory, BatchTemplate> colSettingsDirectoriesBatch = new TableColumn<>(this.lang.getString("main.menu.program.batch"));
+        colSettingsDirectoriesBatch.setCellValueFactory(param -> returnBatchTemplateValue(param.getValue().getFolder().getBatchTemplate()));
         colSettingsDirectoriesBatch.setCellFactory(ComboBoxTableCell.forTableColumn(new StringConverter<>() {
             @Override
             public String toString(BatchTemplate object) {
@@ -263,12 +305,12 @@ public class SettingsController extends ParentController {
         }, FXCollections.observableList(batchTemplates)));
         colSettingsDirectoriesBatch.setOnEditCommit(event -> {
             BatchTemplate batchTemplate = event.getNewValue();
-            event.getRowValue().setBatch(batchTemplate);
+            event.getRowValue().getFolder().setBatchTemplate(batchTemplate);
         });
         colSettingsDirectoriesBatch.setEditable(true);
 
-        TableColumn<DirRow, String> colSettingsDirectoriesEncryption = new TableColumn<>(this.lang.getString("settings.directories.encryption"));
-        colSettingsDirectoriesEncryption.setCellValueFactory(new PropertyValueFactory<>("encryption"));
+        TableColumn<Directory, String> colSettingsDirectoriesEncryption = new TableColumn<>(this.lang.getString("settings.directories.encryption"));
+        colSettingsDirectoriesEncryption.setCellValueFactory(param -> returnStringValue(param.getValue().getFolder().getPassword()));
         colSettingsDirectoriesEncryption.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<>() {
             @Override
             public String toString(String s) {
@@ -282,11 +324,11 @@ public class SettingsController extends ParentController {
         }));
         colSettingsDirectoriesEncryption.setEditable(true);
         colSettingsDirectoriesEncryption.setOnEditStart(event -> {
-            Dialog<String> dialog = Dialogs.createPasswordDialog(event.getRowValue().getEncryption());
+            Dialog<String> dialog = Dialogs.createPasswordDialog(event.getRowValue().getFolder().getPassword());
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(s -> {
                 if(!s.trim().isEmpty()) {
-                    event.getRowValue().setEncryption(s.trim());
+                    event.getRowValue().getFolder().setPassword(s.trim());
                     this.tblSettingsDirectories.getItems().set(event.getTablePosition().getRow(), event.getRowValue());
                 }
             });
@@ -295,11 +337,101 @@ public class SettingsController extends ParentController {
 
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesTitle);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesPath);
+        this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesParent);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesIcon);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesBatch);
         this.tblSettingsDirectories.getColumns().add(colSettingsDirectoriesEncryption);
-        this.tblSettingsDirectories.getItems().add(new DirRow());
-        this.fixColumns(Arrays.asList(1, 2, 2, 1, 1));
+        Directory directory = new Directory();
+        directory.setFolder(new Folder());
+        this.tblSettingsDirectories.getItems().add(directory);
+        this.fixColumns(Arrays.asList(1, 2, 2, 2, 1, 1));
+    }
+
+    private ObservableValue<String> returnStringValue(String item) {
+        return new ObservableValue<>() {
+            @Override
+            public void addListener(ChangeListener<? super String> listener) {
+
+            }
+
+            @Override
+            public void removeListener(ChangeListener<? super String> listener) {
+
+            }
+
+            @Override
+            public String getValue() {
+                return item;
+            }
+
+            @Override
+            public void addListener(InvalidationListener listener) {
+
+            }
+
+            @Override
+            public void removeListener(InvalidationListener listener) {
+
+            }
+        };
+    }
+
+    private ObservableValue<BatchTemplate> returnBatchTemplateValue(BatchTemplate item) {
+        return new ObservableValue<>() {
+            @Override
+            public void addListener(ChangeListener<? super BatchTemplate> listener) {
+
+            }
+
+            @Override
+            public void removeListener(ChangeListener<? super BatchTemplate> listener) {
+
+            }
+
+            @Override
+            public BatchTemplate getValue() {
+                return item;
+            }
+
+            @Override
+            public void addListener(InvalidationListener listener) {
+
+            }
+
+            @Override
+            public void removeListener(InvalidationListener listener) {
+
+            }
+        };
+    }
+
+    private ObservableValue<Directory> returnDirectoryValue(Directory item) {
+        return new ObservableValue<>() {
+            @Override
+            public void addListener(ChangeListener<? super Directory> listener) {
+
+            }
+
+            @Override
+            public void removeListener(ChangeListener<? super Directory> listener) {
+
+            }
+
+            @Override
+            public Directory getValue() {
+                return item;
+            }
+
+            @Override
+            public void addListener(InvalidationListener listener) {
+
+            }
+
+            @Override
+            public void removeListener(InvalidationListener listener) {
+
+            }
+        };
     }
 
     public void fixColumns(List<Integer> sizes) {
@@ -318,71 +450,5 @@ public class SettingsController extends ParentController {
         this.mainController = mainController;
         this.fillData();
         this.initDirTableView();
-    }
-
-    private String generateSetting() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for(DirRow dirRow : this.tblSettingsDirectories.getItems()) {
-            if(dirRow.batch != null) {
-                stringBuilder.append(String.format("%s,%s,%s,%d,%s;", dirRow.title, dirRow.path, dirRow.icon, dirRow.batch.getId(), dirRow.encryption));
-            } else {
-                stringBuilder.append(String.format("%s,%s,%s,%s,%s;", dirRow.title, dirRow.path, dirRow.icon, "", dirRow.encryption));
-            }
-        }
-        return stringBuilder.toString();
-    }
-
-    public static class DirRow {
-        private String title, path, icon, encryption;
-        private BatchTemplate batch;
-
-        public DirRow() {
-            super();
-            this.title = "";
-            this.path = "";
-            this.icon = "";
-            this.batch = null;
-            this.encryption = "";
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
-
-        public String getIcon() {
-            return this.icon;
-        }
-
-        public void setIcon(String icon) {
-            this.icon = icon;
-        }
-
-        public BatchTemplate getBatch() {
-            return this.batch;
-        }
-
-        public void setBatch(BatchTemplate batch) {
-            this.batch = batch;
-        }
-
-        public String getEncryption() {
-            return this.encryption;
-        }
-
-        public void setEncryption(String encryption) {
-            this.encryption = encryption;
-        }
     }
 }

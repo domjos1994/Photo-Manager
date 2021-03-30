@@ -2,6 +2,7 @@ package de.domjos.photo_manager.helper;
 
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.database.Database;
+import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -106,13 +108,23 @@ public class InitializationHelper {
             Dialogs.printException(ex);
         }
 
-        database.addRoot();
+        List<Directory> directories = database.getDirectories("isRoot=1", false);
+        if(directories.isEmpty()) {
+            Directory directory = new Directory();
+            directory.setTitle("ROOT");
+            directory.setRoot(true);
+            directory.setRecursive(false);
+            directory.setLibrary(false);
+            directory.setCloud(null);
+            directory.setPath("");
+            database.insertOrUpdateDirectory(directory, -1,false);
+        }
         return database;
     }
 
     private static void updateDatabaseTo10(Database database) throws Exception {
-        if(!database.columnExists("batchTemplates", "dirRow")) {
-            database.executeUpdate("ALTER TABLE batchTemplates ADD COLUMN dirRow VARCHAR(255) DEFAULT ''");
+        if(!database.columnExists("directories", "folder")) {
+            database.executeUpdate("ALTER TABLE directories ADD COLUMN folder INTEGER DEFAULT 0 REFERENCES folders(id)");
         }
     }
 

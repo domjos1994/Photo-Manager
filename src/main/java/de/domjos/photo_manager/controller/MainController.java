@@ -55,10 +55,9 @@ public class MainController extends ParentController {
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow, ctxMainBatch;
 
     private @FXML ContextMenu ctxMainImage;
-    private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs, ctxMainImageAssemble, ctxMainImageScale;
+    private @FXML MenuItem ctxMainImageApply, ctxMainImageSaveAs, ctxMainImageAssemble, ctxMainImageScale, ctxMainUpdateDatabase;
     private @FXML MenuItem ctxMainImageDelete;
     private @FXML Menu ctxMainImageMove;
-    private List<SettingsController.DirRow> dirRows;
 
     private @FXML TreeView<Directory> tvMain;
     private @FXML ListView<Image> lvMain;
@@ -122,7 +121,6 @@ public class MainController extends ParentController {
 
     @Override
     public void initialize(ResourceBundle resources) {
-        this.dirRows = new LinkedList<>();
         ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController, helpController,
             histogramController, metaDataController, tinifyController, unsplashController, instagramController,
             cloudController, editController, historyController), this);
@@ -185,13 +183,6 @@ public class MainController extends ParentController {
             try {
                 if(newValue!=null) {
                     this.cmdMainBatchStart.setDisable(true);
-                    if(newValue.getValue() instanceof Folder) {
-                        Folder folder = (Folder) newValue.getValue();
-                        if(folder.getDirRow() != null) {
-                            this.cmdMainBatchStart.setDisable(folder.getDirRow().getBatch() == null);
-                        }
-                    }
-
                     this.fillImageList(newValue.getValue());
                     this.cloudController.fillCloudWithDefault();
                     this.cloudController.getCloudPath();
@@ -209,33 +200,13 @@ public class MainController extends ParentController {
 
                     File img = new File(newValue.getPath());
                     boolean encryption = false;
-                    boolean isFolder = false;
                     if(img.exists()) {
-                        if(this.tvMain.getSelectionModel().getSelectedItem().getValue() instanceof Folder) {
-                            SettingsController.DirRow dirRow = ((Folder)this.tvMain.getSelectionModel().getSelectedItem().getValue()).getDirRow();
-                            if(dirRow!=null) {
-                                if(dirRow.getEncryption().trim().isEmpty()) {
-                                    this.loadImage(img);
-                                } else {
-                                    encryption = true;
-                                    javafx.scene.image.Image image = new javafx.scene.image.Image(new ByteArrayInputStream(CryptoUtils.decrypt(new FileInputStream(newValue.getPath()), dirRow.getEncryption())));
-                                    this.pbMain.progressProperty().bind(image.progressProperty());
-                                    this.fillImage(image, true);
-                                }
-                            } else {
-                                this.loadImage(img);
-                            }
-                            isFolder = true;
-                        } else {
-                            this.loadImage(img);
+                        Directory directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+                        if(directory.getFolder() != null) {
+                            encryption = !directory.getFolder().getPassword().trim().isEmpty();
                         }
-                    } else {
-                        this.loadImage(img);
                     }
-
-                    this.history.setDisable(isFolder);
-                    this.edit.setDisable(isFolder);
-                    this.cloud.setDisable(isFolder);
+                    this.loadImage(img);
 
                     this.accItems.setVisible(!encryption);
                     this.pnlMainImage.setVisible(!encryption);
@@ -272,6 +243,7 @@ public class MainController extends ParentController {
         this.ctxMainImage.setOnShowing(event -> {
             this.ctxMainImageAssemble.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
             this.ctxMainImageScale.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
+            this.ctxMainUpdateDatabase.setDisable(this.lvMain.getSelectionModel().isEmpty());
         });
 
         this.ctxMainImageApply.setOnAction(event -> {
@@ -314,36 +286,41 @@ public class MainController extends ParentController {
 
         this.ctxMainImageMove.setOnAction(event -> {
             this.ctxMainImageMove.getItems().clear();
-            this.dirRows = SettingsController.getRowsFromSettings();
-            for(SettingsController.DirRow dirRow : this.dirRows) {
-                MenuItem menuItem = new MenuItem(dirRow.getTitle());
-                menuItem.setOnAction(itemEvent -> {
-                    try {
-                        for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
-                            HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.historyController.getSelectedId(), this.historyController.getItems(), this.ivMainImage.getImage(), currentImage);
-                            historyTask.onFinish(() -> {
-                                try {
-                                    BufferedImage bufferedImage = historyTask.getValue();
-                                    if(dirRow.getEncryption().isEmpty()) {
-                                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
-                                    } else {
-                                        ImageHelper.save(image.getPath(), dirRow.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage, dirRow.getEncryption());
-                                    }
 
-                                    Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("main.image.menu.copy.success"), this.lang.getString("main.image.menu.copy.success"));
-                                } catch (Exception ex) {
-                                    Dialogs.printException(ex);
-                                }
-                            });
-                            new Thread(historyTask).start();
+            try {
+                List<Directory> directories = PhotoManager.GLOBALS.getDatabase().getDirectories("folder<>0", false);
+                for(Directory directory : directories) {
+                    MenuItem menuItem = new MenuItem(directory.getTitle());
+                    menuItem.setOnAction(itemEvent -> {
+                        try {
+                            for(Image image : this.lvMain.getSelectionModel().getSelectedItems()) {
+                                HistoryTask historyTask = new HistoryTask(this.pbMain, this.lblMessages, this.historyController.getSelectedId(), this.historyController.getItems(), this.ivMainImage.getImage(), currentImage);
+                                historyTask.onFinish(() -> {
+                                    try {
+                                        BufferedImage bufferedImage = historyTask.getValue();
+                                        if(directory.getFolder().getPassword().isEmpty()) {
+                                            ImageHelper.save(image.getPath(), directory.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage);
+                                        } else {
+                                            ImageHelper.save(image.getPath(), directory.getPath() + File.separatorChar + new File(image.getPath()).getName(), bufferedImage, directory.getFolder().getPassword());
+                                        }
+
+                                        Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("main.image.menu.copy.success"), this.lang.getString("main.image.menu.copy.success"));
+                                    } catch (Exception ex) {
+                                        Dialogs.printException(ex);
+                                    }
+                                });
+                                new Thread(historyTask).start();
+                            }
+                        } catch (Exception ex) {
+                            Dialogs.printException(ex);
                         }
-                    } catch (Exception ex) {
-                        Dialogs.printException(ex);
-                    }
-                });
-                this.ctxMainImageMove.getItems().add(menuItem);
+                    });
+                    this.ctxMainImageMove.getItems().add(menuItem);
+                }
+                this.ctxMainImageMove.show();
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
             }
-            this.ctxMainImageMove.show();
         });
 
         this.ctxMainImageDelete.setOnAction(event -> {
@@ -409,6 +386,25 @@ public class MainController extends ParentController {
                 scaleImages.onFinish(()->fillImageList(directory));
                 new Thread(scaleImages).start();
             });
+        });
+
+        this.ctxMainUpdateDatabase.setOnAction(event -> {
+            try {
+                if(!this.tvMain.getSelectionModel().isEmpty()) {
+                    final long[] parentId = {rootID};
+                    String msg = resources.getString("main.image.import");
+                    this.directory = this.tvMain.getSelectionModel().getSelectedItem().getValue();
+
+                    importTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], true);
+                    importTask.onFinish(()->{
+                        this.enableFolderControls();
+                        this.initTreeView();
+                    });
+                    new Thread(importTask).start();
+                }
+            } catch (Exception ex) {
+                Dialogs.printException(ex);
+            }
         });
 
         this.slMainImageZoom.valueProperty().addListener((observable, oldValue, newValue) -> this.lblMainImageZoom.setText(newValue.intValue() + " %"));
@@ -505,7 +501,7 @@ public class MainController extends ParentController {
                             directory.setCloud(cloud);
                             this.tvMain.getSelectionModel().getSelectedItem().getValue().setCloud(cloud);
                         }
-                        PhotoManager.GLOBALS.getDatabase().updateDirectory(directory);
+                        PhotoManager.GLOBALS.getDatabase().insertOrUpdateDirectory(directory, -1, true);
                     }
                 }
             } catch (Exception ex) {
@@ -686,36 +682,34 @@ public class MainController extends ParentController {
                 if(treeItem != null) {
                     Directory directory = treeItem.getValue();
                     if(directory != null) {
-                        if(directory instanceof Folder) {
-                            Folder folder = (Folder) directory;
-                            if(folder.getDirRow() != null) {
-                                if(folder.getDirRow().getBatch() != null) {
-                                    BatchTemplate batchTemplate = folder.getDirRow().getBatch();
-                                    List<Image> images;
-                                    if(this.lvMain.getSelectionModel().isEmpty()) {
-                                        images = this.lvMain.getItems();
-                                    } else {
-                                        images = this.lvMain.getSelectionModel().getSelectedItems();
-                                    }
-                                    boolean state = Dialogs.printConfirmDialog(
-                                                Alert.AlertType.WARNING,
-                                                this.lang.getString("main.menu.program.batch"),
-                                                this.lang.getString("main.menu.program.batch"),
-                                                String.format(this.lang.getString("batch.msg.sure"), images.size()));
+                        if(directory.getFolder() != null) {
+                            if(directory.getFolder().getBatchTemplate() != null) {
+                                BatchTemplate batchTemplate = directory.getFolder().getBatchTemplate();
+                                List<Image> images;
+                                if(this.lvMain.getSelectionModel().isEmpty()) {
+                                    images = this.lvMain.getItems();
+                                } else {
+                                    images = this.lvMain.getSelectionModel().getSelectedItems();
+                                }
+                                boolean state = Dialogs.printConfirmDialog(
+                                        Alert.AlertType.WARNING,
+                                        this.lang.getString("main.menu.program.batch"),
+                                        this.lang.getString("main.menu.program.batch"),
+                                        String.format(this.lang.getString("batch.msg.sure"), images.size()));
 
-                                    if(state) {
-                                        BatchTask batchTask = new BatchTask(this.pbMain, this.lblMessages, batchTemplate, images);
-                                        batchTask.onFinish(()-> {
-                                            String title = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish");
-                                            String content = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish.content");
+                                if(state) {
+                                    BatchTask batchTask = new BatchTask(this.pbMain, this.lblMessages, batchTemplate, images);
+                                    batchTask.onFinish(()-> {
+                                        String title = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish");
+                                        String content = PhotoManager.GLOBALS.getLanguage().getString("batch.msg.finish.content");
 
-                                            Dialogs.printNotification(Alert.AlertType.CONFIRMATION, title, content);
-                                            this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
-                                        });
-                                        new Thread(batchTask).start();
-                                    }
+                                        Dialogs.printNotification(Alert.AlertType.CONFIRMATION, title, content);
+                                        this.fillImageList(this.tvMain.getSelectionModel().getSelectedItem().getValue());
+                                    });
+                                    new Thread(batchTask).start();
                                 }
                             }
+
                         }
                     }
                 }
@@ -723,7 +717,7 @@ public class MainController extends ParentController {
         });
 
         this.menMainSettings.setOnAction(event -> {
-            this.settingsController.fixColumns(Arrays.asList(1, 2, 2, 1, 1));
+            this.settingsController.fixColumns(Arrays.asList(1, 2, 2, 2, 1, 1));
             this.tbpMain.getSelectionModel().select(this.tbSettings);
         });
         this.menMainBatch.setOnAction(event -> this.openBatchWindow());
@@ -861,7 +855,7 @@ public class MainController extends ParentController {
             TreeViewTask treeViewTask = new TreeViewTask(this.pbMain, this.lblMessages);
             treeViewTask.onFinish(()->{
                 try {
-                    this.rootID = PhotoManager.GLOBALS.getDatabase().getRoot().getId();
+                    this.rootID = PhotoManager.GLOBALS.getDatabase().getDirectories("isRoot=1", true).get(0).getId();
                     TreeItem<Directory> root = treeViewTask.get();
                     this.tvMain.setRoot(root);
                 } catch (Exception ex) {

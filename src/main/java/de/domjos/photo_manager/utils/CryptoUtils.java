@@ -93,15 +93,19 @@ public final class CryptoUtils {
      */
     public static String encrypt(String str) {
         try {
-            if(str.equals("")) {
-                return "";
+            if(str != null) {
+                if(str.equals("")) {
+                    return "";
+                } else {
+                    SecretKey key = new SecretKeySpec(STR_KEY.getBytes(Charset.defaultCharset()), "AES");
+                    Cipher cipher = Cipher.getInstance("AES");
+                    cipher.init(Cipher.ENCRYPT_MODE, key);
+                    byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
+                    byte[] enc = cipher.doFinal(utf8);
+                    return Base64.getEncoder().encodeToString(enc);
+                }
             } else {
-                SecretKey key = new SecretKeySpec(STR_KEY.getBytes(Charset.defaultCharset()), "AES");
-                Cipher cipher = Cipher.getInstance("AES");
-                cipher.init(Cipher.ENCRYPT_MODE, key);
-                byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-                byte[] enc = cipher.doFinal(utf8);
-                return Base64.getEncoder().encodeToString(enc);
+                return "";
             }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
             Dialogs.printException(ex);

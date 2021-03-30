@@ -3,20 +3,15 @@ package de.domjos.photo_manager.services;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Directory;
-import de.domjos.photo_manager.model.gallery.Folder;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.model.objects.DescriptionObject;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import org.apache.commons.io.FilenameUtils;
 
 import java.awt.*;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,83 +31,114 @@ public final class ListViewTask extends ParentTask<List<Image>> {
         List<Image> list = new LinkedList<>();
         try {
             if (directory != null) {
-                if (directory instanceof Folder) {
-                    Folder folder = (Folder) directory;
 
-                    long[] index = {0};
-                    long max = Files.list(Paths.get(folder.getPath())).count();
-                    updateProgress(index[0], max);
-                    Files.list(Paths.get(folder.getPath())).forEach(path -> {
-                        try {
-                            File file = path.toFile();
-                            if(file.isFile()) {
-                                String extension = FilenameUtils.getExtension(file.getAbsolutePath());
-                                if(Arrays.asList(ImageHelper.EXTENSIONS).contains(extension)) {
-                                    Image image = new Image();
-                                    image.setPath(file.getAbsolutePath());
-                                    if(folder.getDirRow()!=null) {
-                                        if(folder.getDirRow().getEncryption().trim().isEmpty()) {
-                                            image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
-                                        } else {
-                                            image.setThumbnail(ImageHelper.imageToByteArray(file.getAbsolutePath(), folder.getDirRow().getEncryption()));
-                                        }
-                                    } else {
-                                        image.setThumbnail(ImageHelper.imageToByteArray(ImageHelper.scale(ImageHelper.getImage(file.getAbsolutePath()), 50, 50)));
-                                    }
-                                    Dimension dimension = ImageHelper.getSize(file.getAbsolutePath());
-                                    image.setWidth(dimension.width);
-                                    image.setHeight(dimension.height);
-                                    image.setTitle(file.getName());
-                                    list.add(image);
-                                }
+                if (directory.getFolder() != null) {
+                    this.updateDBByFileSystem();
+                }
+
+                List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages("parent=" + this.directory.getId());
+                int max = images.size();
+                int index = 0;
+                updateProgress(index, max);
+
+                for (Image image : images) {
+                    if (!new File(image.getPath()).exists()) {
+                        PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+                        continue;
+                    }
+
+                    boolean foundItem = true;
+                    if (!this.search.isEmpty()) {
+                        foundItem = false;
+                        if (image.getCategory() != null) {
+                            if (image.getCategory().getTitle().trim().toLowerCase().contains(this.search)) {
+                                foundItem = true;
                             }
-                            index[0]++;
-                            updateProgress(index[0], max);
-                        } catch (Exception ex) {
-                            Platform.runLater(()->Dialogs.printException(ex));
                         }
-                    });
-                } else {
-                    List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages(this.directory, false);
-                    int max = images.size();
-                    int index = 0;
-                    updateProgress(index, max);
-                    for (Image image : images) {
-                        if (!new File(image.getPath()).exists()) {
-                            PhotoManager.GLOBALS.getDatabase().deleteImage(image);
-                            continue;
-                        }
-
-                        boolean foundItem = true;
-                        if (!this.search.isEmpty()) {
-                            foundItem = false;
-                            if (image.getCategory() != null) {
-                                if (image.getCategory().getTitle().trim().toLowerCase().contains(this.search)) {
+                        if (!image.getTags().isEmpty()) {
+                            for (DescriptionObject descriptionObject : image.getTags()) {
+                                if (descriptionObject.getTitle().trim().toLowerCase().contains(this.search)) {
                                     foundItem = true;
                                 }
                             }
-                            if (!image.getTags().isEmpty()) {
-                                for (DescriptionObject descriptionObject : image.getTags()) {
-                                    if (descriptionObject.getTitle().trim().toLowerCase().contains(this.search)) {
-                                        foundItem = true;
-                                    }
-                                }
-                            }
-                        }
-                        Dimension dimension = ImageHelper.getSize(image.getPath());
-                        image.setWidth(dimension.width);
-                        image.setHeight(dimension.height);
-                        if (foundItem) {
-                            list.add(image);
                         }
                     }
-                    index++;
-                    updateProgress(index, max);
+                    Dimension dimension = ImageHelper.getSize(image.getPath());
+                    image.setWidth(dimension.width);
+                    image.setHeight(dimension.height);
+                    if (foundItem) {
+                        list.add(image);
+                    }
                 }
             }
         } catch (Exception ex) {
             Platform.runLater(()->Dialogs.printException(ex));
         }
         return list;
+    }
+
+    private void updateDBByFileSystem() throws Exception {
+        File currentFolder = new File(this.directory.getPath());
+        File[] content = currentFolder.listFiles(ImageHelper.getFilter());
+        List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages("parent=" + this.directory.getId());
+
+        List<Image> imagesToDelete = new LinkedList<>();
+        for(Image image : images) {
+            boolean exists = false;
+            if(content != null) {
+                for(File child : content) {
+                    if(image.getPath().trim().equals(child.getAbsolutePath().trim())) {
+                        exists = true;
+                        break;
+                    }
+                }
+            }
+            if(!exists) {
+                imagesToDelete.add(image);
+            }
+        }
+
+        for(Image image : imagesToDelete) {
+            PhotoManager.GLOBALS.getDatabase().deleteImage(image);
+        }
+
+        List<Image> imagesToAdd = new LinkedList<>();
+        if(content != null) {
+            for(File child : content) {
+                boolean exists = false;
+                for(Image image : images) {
+                    if(image.getPath().trim().equals(child.getAbsolutePath().trim())) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if(!exists) {
+                    imagesToAdd.add(SaveFolderTask.fileToImage(0, child, this.directory));
+                }
+            }
+        }
+
+        List<Image> imagesToUpdate = new LinkedList<>();
+        for(Image image : images) {
+            boolean exists = false;
+            for(Image newImage : imagesToAdd) {
+                if(image.getPath().trim().equals(newImage.getPath().trim())) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if(!exists) {
+                imagesToUpdate.add(image);
+            }
+        }
+
+        for(Image image : imagesToAdd) {
+            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+        }
+        for(Image image : imagesToUpdate) {
+            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+        }
     }
 }

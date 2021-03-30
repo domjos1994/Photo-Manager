@@ -21,7 +21,7 @@ public final class UploadTask extends ParentTask<Void> {
 
     public UploadTask(ProgressBar progressBar, Label messages, Directory directory, WebDav webDav, DavResource resource) throws Exception {
         super(progressBar, messages);
-        this.images = PhotoManager.GLOBALS.getDatabase().getImages(directory, false);
+        this.images = PhotoManager.GLOBALS.getDatabase().getImages("parent=" + directory.getId());
         this.webDav = webDav;
         this.resource = resource;
     }

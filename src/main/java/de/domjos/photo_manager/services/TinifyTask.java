@@ -84,7 +84,7 @@ public final class TinifyTask extends ParentTask<Void> {
                 }
             }
 
-            this.images.addAll(PhotoManager.GLOBALS.getDatabase().getImages(directory, false));
+            this.images.addAll(PhotoManager.GLOBALS.getDatabase().getImages("parent=" + directory.getId()));
         } catch (Exception ex) {
             Dialogs.printException(ex);
         }

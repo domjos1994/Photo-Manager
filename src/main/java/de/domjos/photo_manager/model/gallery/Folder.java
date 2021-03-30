@@ -1,15 +1,20 @@
 package de.domjos.photo_manager.model.gallery;
 
-import de.domjos.photo_manager.controller.SettingsController;
+import de.domjos.photo_manager.model.objects.BaseObject;
 
-public class Folder extends Directory {
+public class Folder extends BaseObject {
     private String icon;
-    private SettingsController.DirRow dirRow;
+    private String password;
+    private BatchTemplate batchTemplate;
+    private Directory directory;
 
     public Folder() {
         super();
 
-        this.dirRow = null;
+        this.icon = "";
+        this.password = "";
+        this.batchTemplate = null;
+        this.directory = null;
     }
 
     public String getIcon() {
@@ -20,11 +25,28 @@ public class Folder extends Directory {
         this.icon = icon;
     }
 
-    public SettingsController.DirRow getDirRow() {
-        return this.dirRow;
+
+    public String getPassword() {
+        return this.password;
     }
 
-    public void setDirRow(SettingsController.DirRow dirRow) {
-        this.dirRow = dirRow;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public BatchTemplate getBatchTemplate() {
+        return this.batchTemplate;
+    }
+
+    public void setBatchTemplate(BatchTemplate batchTemplate) {
+        this.batchTemplate = batchTemplate;
+    }
+
+    public Directory getDirectory() {
+        return this.directory;
+    }
+
+    public void setDirectory(Directory directory) {
+        this.directory = directory;
     }
 }
