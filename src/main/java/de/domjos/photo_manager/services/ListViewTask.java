@@ -114,7 +114,7 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                 }
 
                 if(!exists) {
-                    imagesToAdd.add(SaveFolderTask.fileToImage(0, child, this.directory));
+                    imagesToAdd.add(SaveFolderTask.fileToImage(0, child, this.directory, true));
                 }
             }
         }

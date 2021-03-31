@@ -10,6 +10,7 @@ import javafx.scene.control.ProgressBar;
 
 public abstract class ParentTask<T> extends Task<T> {
     private Runnable onFinish, onFailed;
+    public static int current = 0;
 
     public ParentTask(ProgressBar progressBar, Label messages) {
         this.exceptionProperty().addListener((observable, oldValue, newValue) -> Dialogs.printException(newValue));
@@ -61,6 +62,14 @@ public abstract class ParentTask<T> extends Task<T> {
             PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.DEFAULT);
         }));
         this.setOnCancelled(this.getOnFailed());
+    }
+
+    public void updateProgress(double max, String message) {
+        updateProgress(++ParentTask.current, max);
+
+        if(!message.isEmpty()) {
+            updateMessage(message);
+        }
     }
 
     public T call() throws Exception {

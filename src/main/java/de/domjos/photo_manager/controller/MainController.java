@@ -167,9 +167,8 @@ public class MainController extends ParentController {
                 boolean recursive = chkMainRecursive.isSelected();
                 directory.setRecursive(recursive);
                 directory.setLibrary(true);
-                String msg = resources.getString("main.image.import");
 
-                importTask = new SaveFolderTask(this.pbMain, this.lblMessages, msg, this.directory, parentId[0], recursive);
+                importTask = new SaveFolderTask(this.pbMain, this.lblMessages, this.directory, parentId[0], recursive);
                 importTask.onFinish(()->{
                     this.enableFolderControls();
                     this.initTreeView();
