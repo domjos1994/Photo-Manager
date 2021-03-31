@@ -50,6 +50,8 @@ public class MainController extends ParentController {
     private @FXML MenuItem menMainSettings, menMainBatch, menMainClose, menMainMap, menMainHelp;
     private @FXML MenuItem menMainDatabaseNew, menMainDatabaseDelete;
     private @FXML Menu menMainDatabaseOpen;
+
+    private @FXML ContextMenu ctxMainDirectory;
     private @FXML MenuItem ctxMainDelete, ctxMainRecreate, ctxMainSlideshow, ctxMainBatch;
 
     private @FXML ContextMenu ctxMainImage;
@@ -211,6 +213,11 @@ public class MainController extends ParentController {
             }
         });
 
+        this.ctxMainDirectory.setOnShowing(event -> {
+            this.ctxMainSlideshow.setDisable((this.tvMain.getSelectionModel().isEmpty() || this.lvMain.getItems().isEmpty()));
+            this.ctxMainBatch.setDisable((this.tvMain.getSelectionModel().isEmpty() || this.lvMain.getItems().isEmpty()));
+        });
+
         this.ctxMainImage.setOnShowing(event -> {
             this.ctxMainImageAssemble.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
             this.ctxMainImageScale.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);
@@ -295,7 +302,7 @@ public class MainController extends ParentController {
                 String path = PhotoManager.GLOBALS.getSetting(Globals.DIRECTORIES_DELETE_KEY, "");
                 String moveToPath = "";
                 if(path!=null) {
-                    if(!path.trim().isEmpty()) {
+                    if(!path.trim().isEmpty() && new File(path).exists()) {
                         moveToPath = path.trim();
                     }
                 }
@@ -514,7 +521,7 @@ public class MainController extends ParentController {
         });
 
         this.ctxMainSlideshow.setOnAction(event -> {
-            if(!this.tvMain.getSelectionModel().isEmpty()) {
+            if(!this.tvMain.getSelectionModel().isEmpty() && !this.lvMain.getItems().isEmpty()) {
                 this.slideshowController.getImages(this.lvMain.getItems());
                 this.tbpMain.getSelectionModel().select(this.tbSlideshow);
             }
