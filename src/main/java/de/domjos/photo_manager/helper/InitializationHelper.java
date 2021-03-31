@@ -149,7 +149,7 @@ public class InitializationHelper {
      */
     public static String getHeader() {
         String title = "PhotoManager";
-        if(PhotoManager.GLOBALS.isDebugMode()) {
+        if(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false)) {
             title += " - (Debug)";
         }
         if(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false)) {

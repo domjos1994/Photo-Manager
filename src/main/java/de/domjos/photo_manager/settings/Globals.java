@@ -14,7 +14,6 @@ import java.util.prefs.Preferences;
 
 @SuppressWarnings("unused")
 public class Globals {
-    private boolean debugMode;
     private Stage stage;
     private Logger logger;
     private final Preferences preferences;
@@ -30,6 +29,7 @@ public class Globals {
     public final static String DEBUG = "DEBUG";
     public final static String TITLE_PATH = "TITLE_PATH";
     public final static String RELOAD_ON_START = "RELOAD_ON_START";
+    public final static String MAX_ZOOM_VALUE = "MAX_ZOOM_VALUE";
 
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";
@@ -56,8 +56,9 @@ public class Globals {
     public final static String POSITION_WINDOW_WIDTH = "POSITION_WINDOW_WIDTH";
     public final static String POSITION_WINDOW_HEIGHT = "POSITION_WINDOW_HEIGHT";
 
+    public final static int MAX_ZOOM_VALUE_DEF = 400;
+
     public Globals() {
-        this.debugMode = false;
         this.stage = null;
         this.logger = null;
         this.preferences = Preferences.userRoot().node(PhotoManager.class.getName());
@@ -72,14 +73,6 @@ public class Globals {
 
     public void setArguments(String[] args) {
         this.args = args;
-    }
-
-    public boolean isDebugMode() {
-        return this.debugMode;
-    }
-
-    public void setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
     }
 
     public Stage getStage() {

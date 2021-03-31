@@ -800,6 +800,10 @@ public class MainController extends ParentController {
         this.instagramController.getInstagramListView().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
+    public void UpdateImageView() {
+        this.zivMainImage.updateMax();
+    }
+
     private ListCell<Image> initListCell() {
         return new ListCell<>() {
             private final ImageView imageView = new ImageView();

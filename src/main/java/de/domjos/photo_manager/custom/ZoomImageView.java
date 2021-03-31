@@ -1,10 +1,13 @@
 package de.domjos.photo_manager.custom;
 
+import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.images.ImageHelper;
+import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
@@ -29,8 +32,11 @@ public class ZoomImageView extends AnchorPane {
     private @FXML ImageView iv;
     private @FXML Slider zoom;
     private @FXML Label lbl;
+    private @FXML Button cmd100;
+    private int max;
 
     public ZoomImageView() {
+        this.max = PhotoManager.GLOBALS.getSetting(Globals.MAX_ZOOM_VALUE, Globals.MAX_ZOOM_VALUE_DEF);
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/custom/ZoomImageView.fxml"));
             fxmlLoader.setRoot(this);
@@ -61,6 +67,11 @@ public class ZoomImageView extends AnchorPane {
         this.iv.setImage(null);
     }
 
+    public void updateMax() {
+        this.max = PhotoManager.GLOBALS.getSetting(Globals.MAX_ZOOM_VALUE, Globals.MAX_ZOOM_VALUE_DEF);
+        this.zoom.setMax(this.max);
+    }
+
     public BufferedImage getBufferedImage() {
         return SwingFXUtils.fromFXImage(this.originalImage, null);
     }
@@ -83,10 +94,16 @@ public class ZoomImageView extends AnchorPane {
             this.updateLabel(this.zoom.getValue());
         });
 
+        this.cmd100.setOnAction(event -> {
+            this.zoom.setValue(100.0);
+            this.zoom();
+            this.updateLabel(this.zoom.getValue());
+        });
+
         this.iv.setOnScroll(event -> {
             if(event.getDeltaY() > 0) {
                 double newValue = this.zoom.getValue() + 20;
-                if(newValue <= 400) {
+                if(newValue <= this.max) {
                     this.zoom.setValue(newValue);
                 }
             } else {
@@ -125,7 +142,7 @@ public class ZoomImageView extends AnchorPane {
         this.iv.setFitHeight(this.scroller.getHeight());
         this.iv.preserveRatioProperty().set(true);
 
-        this.zoom.setMax(400);
+        this.zoom.setMax(this.max);
         this.zoom.setValue(100);
         this.updateLabel(100.0);
         this.zoom();

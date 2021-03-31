@@ -21,7 +21,6 @@ public class PhotoManager extends Application {
 
     public void start(Stage primaryStage) throws Exception {
         // initialize basic properties
-        PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         PhotoManager.GLOBALS.setStage(primaryStage);
 
         // initialize language

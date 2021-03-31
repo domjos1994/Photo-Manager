@@ -1,6 +1,7 @@
 package de.domjos.photo_manager.utils;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.settings.Globals;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -36,7 +37,7 @@ public final class Dialogs {
     }
 
     public static void printAlert(Alert.AlertType type, String title, String header, String content) {
-        if(PhotoManager.GLOBALS.isDebugMode()) {
+        if(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false)) {
             Dialogs.printNotification(type, title, header);
         } else {
             Alert alert = new Alert(type);
@@ -60,7 +61,7 @@ public final class Dialogs {
 
     public static void printException(Throwable ex) {
         PhotoManager.GLOBALS.getLogger().error("Unhandled " + ex.getClass().getName(), ex);
-        if(!PhotoManager.GLOBALS.isDebugMode()) {
+        if(!PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false)) {
             Dialogs.printNotification(Alert.AlertType.ERROR, "Unhandled " + ex.getClass().getName(), ex.toString());
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);

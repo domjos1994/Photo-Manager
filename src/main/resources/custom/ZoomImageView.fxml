@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.control.Slider?>
-
-<?import javafx.scene.control.Label?>
-<fx:root xmlns:fx="http://javafx,com/fxml" type="javafx.scene.layout.AnchorPane" styleClass="darkSlateGray">
+<fx:root styleClass="darkSlateGray" type="javafx.scene.layout.AnchorPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1">
     <ScrollPane fx:id="scroller" hbarPolicy="ALWAYS" hvalue="1.0" pannable="true" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <ImageView fx:id="iv" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="darkSlateGray" />
     </ScrollPane>
-    <Slider fx:id="zoom" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="65.0" styleClass="whiteColor"/>
-    <Label fx:id="lbl" maxWidth="60" prefWidth="60" maxHeight="25" prefHeight="25" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" styleClass="whiteColor"/>
+   <Button fx:id="cmd100" maxWidth="50.0" minWidth="50.0" mnemonicParsing="false" text="100%" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" />
+    
+    <Slider fx:id="zoom" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" styleClass="whiteColor" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="65.0" />
+    <Label fx:id="lbl" maxHeight="25.0" maxWidth="50.0" prefHeight="25" prefWidth="50.0" styleClass="whiteColor" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
 </fx:root>

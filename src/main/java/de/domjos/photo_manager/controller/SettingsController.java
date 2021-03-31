@@ -31,6 +31,7 @@ import java.util.*;
 public class SettingsController extends ParentController {
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
     private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath, chkSettingsReload;
+    private @FXML TextField txtSettingsZoomFactor;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
 
@@ -74,6 +75,7 @@ public class SettingsController extends ParentController {
             PhotoManager.GLOBALS.saveSetting(Globals.DEBUG, this.chkSettingsDebugMode.isSelected(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.RELOAD_ON_START, this.chkSettingsReload.isSelected(), false);
+            PhotoManager.GLOBALS.saveSetting(Globals.MAX_ZOOM_VALUE, Integer.parseInt(this.txtSettingsZoomFactor.getText()), false);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
             PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
             PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
@@ -100,9 +102,9 @@ public class SettingsController extends ParentController {
     }
 
     private void updateProgram() {
-        PhotoManager.GLOBALS.setDebugMode(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         PhotoManager.GLOBALS.getStage().setTitle(InitializationHelper.getHeader());
-        mainController.initTinify();
+        this.mainController.UpdateImageView();
+        this.mainController.initTinify();
     }
 
     private void fillData() {
@@ -110,6 +112,7 @@ public class SettingsController extends ParentController {
         this.chkSettingsDebugMode.setSelected(PhotoManager.GLOBALS.getSetting(Globals.DEBUG, false));
         this.chkSettingsPath.setSelected(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false));
         this.chkSettingsReload.setSelected(PhotoManager.GLOBALS.getSetting(Globals.RELOAD_ON_START, false));
+        this.txtSettingsZoomFactor.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.MAX_ZOOM_VALUE, Globals.MAX_ZOOM_VALUE_DEF)));
         this.txtSettingsTinyKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
         this.txtSettingsTinyFile.setText(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, ""));
         this.txtSettingsUnsplashKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.UNSPLASH_KEY, ""));
