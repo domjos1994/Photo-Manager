@@ -1,6 +1,7 @@
 package de.domjos.photo_manager.custom;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.controller.MainController;
 import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
@@ -35,6 +36,8 @@ public class ZoomImageView extends AnchorPane {
     private @FXML Button cmd100;
     private int max;
 
+    private MainController mainController;
+
     public ZoomImageView() {
         this.max = PhotoManager.GLOBALS.getSetting(Globals.MAX_ZOOM_VALUE, Globals.MAX_ZOOM_VALUE_DEF);
         try {
@@ -46,6 +49,10 @@ public class ZoomImageView extends AnchorPane {
         } catch (Exception exception) {
             Dialogs.printException(exception);
         }
+    }
+
+    public void setController(MainController mainController) {
+        this.mainController = mainController;
     }
 
     public void setImage(BufferedImage bufferedImage) {
@@ -121,17 +128,27 @@ public class ZoomImageView extends AnchorPane {
                 if(this.originalImage != null) {
                     Dragboard dragboard = this.iv.startDragAndDrop(TransferMode.COPY_OR_MOVE);
                     ClipboardContent clipboardContent = new ClipboardContent();
-                    File file = File.createTempFile("tmp", "");
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    IOUtils.write(ImageHelper.imageToByteArray(SwingFXUtils.fromFXImage(this.originalImage, null)), fileOutputStream);
-                    fileOutputStream.close();
-                    clipboardContent.putFiles(Collections.singletonList(file));
+                    if(this.mainController == null) {
+                        clipboardContent.putImage(this.originalImage);
+
+                    } else {
+                        de.domjos.photo_manager.model.gallery.Image img = this.mainController.getLvMain().getSelectionModel().getSelectedItem();
+                        if(img != null) {
+                            File file = new File(new File(img.getPath()).getName());
+                            if(file.createNewFile()) {
+                                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                                IOUtils.write(ImageHelper.imageToByteArray(SwingFXUtils.fromFXImage(this.originalImage, null)), fileOutputStream);
+                                fileOutputStream.close();
+                                clipboardContent.putFiles(Collections.singletonList(file));
+
+                                if(file.exists()) {
+                                    file.deleteOnExit();
+                                }
+                            }
+                        }
+                    }
                     dragboard.setContent(clipboardContent);
                     event.consume();
-
-                    if(file.exists()) {
-                        file.deleteOnExit();
-                    }
                 }
             } catch (Exception ex) {
                 Dialogs.printException(ex);

@@ -21,7 +21,7 @@ import org.brunocvcunha.instagram4j.requests.payload.InstagramLoginResult;
 
 import javax.imageio.ImageIO;
 
-public class InstagramTask extends ParentTask<List<Image>> {
+public final class InstagramTask extends ParentTask<List<Image>> {
     private final String user, pwd, search;
     private final int page;
     private final Image image;

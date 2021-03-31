@@ -117,6 +117,7 @@ public class MainController extends ParentController {
         ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController, helpController,
             histogramController, metaDataController, tinifyController, unsplashController, instagramController,
             cloudController, editController, historyController), this);
+        this.zivMainImage.setController(this);
         this.initBindings();
         this.initTinify();
         this.initTreeView();
@@ -209,17 +210,6 @@ public class MainController extends ParentController {
                 Dialogs.printException(ex);
             }
         });
-
-        /*this.zivMainImage.setOnDragDetected(event -> {
-            if(this.lvMain.getSelectionModel().getSelectedItem() != null) {
-                Dragboard db = this.lvMain.startDragAndDrop(TransferMode.COPY);
-                ClipboardContent content = new ClipboardContent();
-                this.instagramController.setImage(this.lvMain.getSelectionModel().getSelectedItem());
-                content.putString("image");
-                db.setContent(content);
-                event.consume();
-            }
-        });*/
 
         this.ctxMainImage.setOnShowing(event -> {
             this.ctxMainImageAssemble.setDisable(this.lvMain.getSelectionModel().getSelectedItems().size()<=1);

@@ -1,22 +1,26 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.PhotoManager;
+import de.domjos.photo_manager.images.ImageHelper;
 import de.domjos.photo_manager.model.gallery.Image;
 import de.domjos.photo_manager.services.InstagramTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import org.apache.commons.io.IOUtils;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 
 public class InstagramController extends ParentController {
-    private Image image;
-
     private @FXML TitledPane pnlInstagram;
     private @FXML TextField txtSearch;
     private @FXML Button cmdSearch, cmdPrevious, cmdNext;
@@ -31,7 +35,7 @@ public class InstagramController extends ParentController {
         this.hide();
 
         this.lblUpload.setOnDragOver(event -> {
-            if (event.getGestureSource() != this.lblUpload && event.getDragboard().hasString()) {
+            if (event.getGestureSource() != this.lblUpload && (event.getDragboard().hasFiles() || event.getDragboard().hasImage())) {
                 event.acceptTransferModes(TransferMode.COPY);
             }
 
@@ -41,10 +45,43 @@ public class InstagramController extends ParentController {
         this.lblUpload.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
-            if (db.hasString()) {
-                this.uploadImages(this.image);
-                this.image = null;
-                success = true;
+            if(db.hasImage() || db.hasFiles()) {
+                String path = null;
+                if(db.hasImage()) {
+                    try {
+                        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(db.getImage(), null);
+                        File file = new File("tmp.jpg");
+                        if(file.createNewFile()) {
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            IOUtils.write(ImageHelper.imageToByteArray(bufferedImage), fileOutputStream);
+                            fileOutputStream.close();
+
+                            path = file.getAbsolutePath();
+                            if(file.exists()) {
+                                file.deleteOnExit();
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                } else {
+                    List<File> files = db.getFiles();
+                    if(!files.isEmpty()) {
+                        if(files.size() == 1) {
+                            try {
+                                if(files.get(0).exists()) {
+                                    path = files.get(0).getAbsolutePath();
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                }
+
+                if(path != null) {
+                    Image image = new Image();
+                    image.setPath(path);
+                    image.setTitle(new File(path).getName());
+                    this.uploadImages(image);
+                    success = true;
+                }
             }
 
             event.setDropCompleted(success);
@@ -74,14 +111,10 @@ public class InstagramController extends ParentController {
         return this.lvInstagram;
     }
 
-    public void setImage(Image img) {
-        this.image = img;
-    }
-
     public void hide() {
         this.user = PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_USER, "");
         this.pwd = PhotoManager.GLOBALS.getDecryptedSetting(Globals.INSTAGRAM_PWD, "");
-        this.pnlInstagram.setDisable((this.user.trim().isEmpty() && this.pwd.trim().isEmpty()));
+        this.pnlInstagram.setDisable(this.user.trim().isEmpty() || this.pwd.trim().isEmpty());
     }
 
     private void executeInstagramTask(int page) {
