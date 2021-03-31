@@ -26,6 +26,10 @@
     -fx-background-color: #383f46;
 }
 
+.error {
+    -fx-background-color: #ff0000;
+}
+
 .split-pane:vertical > .split-pane-divider {
    -fx-border-width: 1 0 1 0;
    -fx-border-color: white;

@@ -3,6 +3,7 @@ package de.domjos.photo_manager.controller;
 import de.domjos.photo_manager.PhotoManager;
 import de.domjos.photo_manager.controller.subController.ParentController;
 import de.domjos.photo_manager.helper.InitializationHelper;
+import de.domjos.photo_manager.helper.Validator;
 import de.domjos.photo_manager.model.gallery.BatchTemplate;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Folder;
@@ -29,6 +30,8 @@ import java.io.File;
 import java.util.*;
 
 public class SettingsController extends ParentController {
+    private final Validator validator = new Validator();
+
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
     private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath, chkSettingsReload;
     private @FXML TextField txtSettingsZoomFactor;
@@ -72,24 +75,28 @@ public class SettingsController extends ParentController {
         this.cmdSettingsHome.setOnAction(event -> this.mainController.back());
 
         this.cmdSettingsSave.setOnAction(event -> {
-            PhotoManager.GLOBALS.saveSetting(Globals.DEBUG, this.chkSettingsDebugMode.isSelected(), false);
-            PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
-            PhotoManager.GLOBALS.saveSetting(Globals.RELOAD_ON_START, this.chkSettingsReload.isSelected(), false);
-            PhotoManager.GLOBALS.saveSetting(Globals.MAX_ZOOM_VALUE, Integer.parseInt(this.txtSettingsZoomFactor.getText()), false);
-            PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
-            PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_SECRET_KEY, this.txtSettingsUnsplashSecretKey.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_USER, this.txtSettingsInstagramUser.getText(), true);
-            PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_PWD, this.txtSettingsInstagramPwd.getText(), true);
-            this.saveDeleteFolder();
-            this.saveRowsToSettings();
+            if(this.validator.check()) {
+                PhotoManager.GLOBALS.saveSetting(Globals.DEBUG, this.chkSettingsDebugMode.isSelected(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.RELOAD_ON_START, this.chkSettingsReload.isSelected(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.MAX_ZOOM_VALUE, Integer.parseInt(this.txtSettingsZoomFactor.getText()), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_SECRET_KEY, this.txtSettingsUnsplashSecretKey.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PATH, this.txtSettingsCloudPath.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_USER, this.txtSettingsCloudUserName.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.CLOUD_PWD, this.txtSettingsCloudPassword.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_USER, this.txtSettingsInstagramUser.getText(), true);
+                PhotoManager.GLOBALS.saveSetting(Globals.INSTAGRAM_PWD, this.txtSettingsInstagramPwd.getText(), true);
+                this.saveDeleteFolder();
+                this.saveRowsToSettings();
 
-            this.updateProgram();
-            Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("settings.saved"), this.lang.getString("settings.saved.text"));
+                this.updateProgram();
+                Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("settings.saved"), this.lang.getString("settings.saved.text"));
+            } else {
+                Dialogs.printNotification(Alert.AlertType.ERROR, this.lang.getString("settings.error"), this.lang.getString("settings.error.text"));
+            }
         });
 
         this.cmdSettingsCloudTest.setOnAction(event -> {
@@ -422,10 +429,17 @@ public class SettingsController extends ParentController {
         }
     }
 
+    private void initValidator() {
+        this.validator.validateInteger(this.txtSettingsZoomFactor, true);
+        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsUnsplashKey, this.txtSettingsUnsplashSecretKey));
+        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsInstagramUser, this.txtSettingsInstagramPwd));
+    }
+
     @Override
     public void init(MainController mainController) {
         this.mainController = mainController;
         this.fillData();
         this.initDirTableView();
+        this.initValidator();
     }
 }
