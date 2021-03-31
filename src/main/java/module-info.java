@@ -37,6 +37,7 @@ module PhotoManager {
     opens de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager to javafx.controls, javafx.fxml;
     opens de.domjos.photo_manager.model.gallery to javafx.base;
+    opens de.domjos.photo_manager.custom to javafx.fxml;
 
     exports de.domjos.photo_manager.controller to javafx.controls, javafx.fxml;
     exports de.domjos.photo_manager.controller.subController to javafx.controls, javafx.fxml;
@@ -48,4 +49,5 @@ module PhotoManager {
     exports de.domjos.photo_manager.services;
     exports de.domjos.photo_manager;
     exports de.domjos.photo_manager.images.filter;
+    exports de.domjos.photo_manager.custom;
 }

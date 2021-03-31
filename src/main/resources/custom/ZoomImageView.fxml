@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Slider?>
+
+<?import javafx.scene.control.Label?>
+<fx:root xmlns:fx="http://javafx,com/fxml" type="javafx.scene.layout.AnchorPane" styleClass="darkSlateGray">
+    <ScrollPane fx:id="scroller" hbarPolicy="ALWAYS" hvalue="1.0" pannable="true" styleClass="darkSlateGray" vbarPolicy="ALWAYS" vvalue="1.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <ImageView fx:id="iv" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="darkSlateGray" />
+    </ScrollPane>
+    <Slider fx:id="zoom" maxHeight="25.0" min="1" minHeight="25.0" prefHeight="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="65.0" styleClass="whiteColor"/>
+    <Label fx:id="lbl" maxWidth="60" prefWidth="60" maxHeight="25" prefHeight="25" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" styleClass="whiteColor"/>
+</fx:root>

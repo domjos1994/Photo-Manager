@@ -72,6 +72,11 @@ public abstract class ParentTask<T> extends Task<T> {
         }
     }
 
+    public void reset() {
+        ParentTask.current = 0;
+        updateProgress(0, 0);
+    }
+
     public T call() throws Exception {
         Platform.runLater(()-> PhotoManager.GLOBALS.getStage().getScene().setCursor(Cursor.WAIT));
         T t = this.runBody();

@@ -30,17 +30,14 @@ public final class ListViewTask extends ParentTask<List<Image>> {
     List<Image> runBody() {
         List<Image> list = new LinkedList<>();
         try {
-            if (directory != null) {
+            if (this.directory != null) {
 
-                if (directory.getFolder() != null) {
+                if (this.directory.getFolder() != null) {
                     this.updateDBByFileSystem();
                 }
 
+                this.reset();
                 List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages("parent=" + this.directory.getId());
-                int max = images.size();
-                int index = 0;
-                updateProgress(index, max);
-
                 for (Image image : images) {
                     if (!new File(image.getPath()).exists()) {
                         PhotoManager.GLOBALS.getDatabase().deleteImage(image);
@@ -69,6 +66,7 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                     if (foundItem) {
                         list.add(image);
                     }
+                    this.updateProgress(images.size(), PhotoManager.GLOBALS.getLanguage().getString("msg.listView.load"));
                 }
             }
         } catch (Exception ex) {
@@ -82,28 +80,28 @@ public final class ListViewTask extends ParentTask<List<Image>> {
         File[] content = currentFolder.listFiles(ImageHelper.getFilter());
         List<Image> images = PhotoManager.GLOBALS.getDatabase().getImages("parent=" + this.directory.getId());
 
-        List<Image> imagesToDelete = new LinkedList<>();
-        for(Image image : images) {
-            boolean exists = false;
-            if(content != null) {
+        if(content != null) {
+            List<Image> imagesToDelete = new LinkedList<>();
+            for(Image image : images) {
+                boolean exists = false;
                 for(File child : content) {
                     if(image.getPath().trim().equals(child.getAbsolutePath().trim())) {
                         exists = true;
                         break;
                     }
                 }
+                if(!exists) {
+                    imagesToDelete.add(image);
+                }
+                this.updateProgress(images.size(), PhotoManager.GLOBALS.getLanguage().getString("msg.listView.update"));
             }
-            if(!exists) {
-                imagesToDelete.add(image);
+
+            for(Image image : imagesToDelete) {
+                PhotoManager.GLOBALS.getDatabase().deleteImage(image);
             }
-        }
 
-        for(Image image : imagesToDelete) {
-            PhotoManager.GLOBALS.getDatabase().deleteImage(image);
-        }
-
-        List<Image> imagesToAdd = new LinkedList<>();
-        if(content != null) {
+            this.reset();
+            List<Image> imagesToAdd = new LinkedList<>();
             for(File child : content) {
                 boolean exists = false;
                 for(Image image : images) {
@@ -116,29 +114,32 @@ public final class ListViewTask extends ParentTask<List<Image>> {
                 if(!exists) {
                     imagesToAdd.add(SaveFolderTask.fileToImage(0, child, this.directory, true));
                 }
+                this.updateProgress(content.length, PhotoManager.GLOBALS.getLanguage().getString("msg.listView.update"));
             }
-        }
 
-        List<Image> imagesToUpdate = new LinkedList<>();
-        for(Image image : images) {
-            boolean exists = false;
-            for(Image newImage : imagesToAdd) {
-                if(image.getPath().trim().equals(newImage.getPath().trim())) {
-                    exists = true;
-                    break;
+            this.reset();
+            List<Image> imagesToUpdate = new LinkedList<>();
+            for(Image image : images) {
+                boolean exists = false;
+                for(Image newImage : imagesToAdd) {
+                    if(image.getPath().trim().equals(newImage.getPath().trim())) {
+                        exists = true;
+                        break;
+                    }
                 }
+
+                if(!exists) {
+                    imagesToUpdate.add(image);
+                }
+                this.updateProgress(images.size(), PhotoManager.GLOBALS.getLanguage().getString("msg.listView.update"));
             }
 
-            if(!exists) {
-                imagesToUpdate.add(image);
+            for(Image image : imagesToAdd) {
+                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
             }
-        }
-
-        for(Image image : imagesToAdd) {
-            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
-        }
-        for(Image image : imagesToUpdate) {
-            PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+            for(Image image : imagesToUpdate) {
+                PhotoManager.GLOBALS.getDatabase().insertOrUpdateImage(image);
+            }
         }
     }
 }
