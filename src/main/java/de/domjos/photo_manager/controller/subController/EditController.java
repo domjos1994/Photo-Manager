@@ -157,6 +157,7 @@ public class EditController extends ParentController {
                 ResourceBundle lang = PhotoManager.GLOBALS.getLanguage();
                 Dialogs.printNotification(Alert.AlertType.INFORMATION, lang.getString("settings.saved"), lang.getString("settings.saved"));
                 this.reset();
+                this.mainController.historyController.selectLast();
             } catch (Exception ex) {
                 Dialogs.printException(ex);
             }
