@@ -42,13 +42,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>sf</id>
-            <url>sftp://frs.sourceforge.net/home/frs/project/${sourceforge.project.name}/${project.version}</url>
-        </repository>
-    </distributionManagement>
-
     <name>${application.name}</name>
     <url>${application.website}</url>
 
@@ -258,14 +251,6 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>3.0.0</version>
-            </extension>
-        </extensions>
-
         <!-- Initialize Resource-Directory -->
         <directory>${application.out}</directory>
         <outputDirectory>${application.out}</outputDirectory>
@@ -411,55 +396,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.ragedunicorn.tools.maven</groupId>
-                <artifactId>github-release-maven-plugin</artifactId>
-                <version>1.0.2</version>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <configuration>
-                            <owner>${application.user}</owner>
-                            <repository>${application.name}</repository>
-                            <server>github-oauth</server>
-                            <tagName>${project.version}</tagName>
-                            <name>${project.version}</name>
-                            <targetCommitish>master</targetCommitish>
-                            <releaseNotes>changelog/ReadMe.md</releaseNotes>
-                            <assets>
-                                <asset>${application.result}/${application.file}.jar</asset>
-                                <asset>${application.result}/${application.file}.exe</asset>
-                                <asset>${application.result}/${application.file}.msi</asset>
-                                <asset>${application.result}/${application.file}.rpm</asset>
-                                <asset>${application.result}/${application.file}.deb</asset>
-                            </assets>
-                            <!--
-                                <server>
-                                    <id>github-oauth</id>
-                                    <username></username>
-                                    <passphrase></passphrase>
-                                </server>
-                            -->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.bsc.maven.plugin</groupId>
-                <artifactId>bulk-deploy</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <outputFolder>${application.result}</outputFolder>
-                    <sourceFolder>${application.result}</sourceFolder>
-                    <url>sftp://frs.sourceforge.net/home/frs/</url>
-                    <repositoryId>sf</repositoryId>
-                    <includes>
-                        <include>/*.*</include>
-                    </includes>
-                    <groupId>project/dj-photo-manager</groupId>
-                    <version>.</version>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
