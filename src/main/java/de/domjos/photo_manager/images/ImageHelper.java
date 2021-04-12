@@ -2,6 +2,7 @@ package de.domjos.photo_manager.images;
 
 import de.domjos.photo_manager.images.filter.*;
 import de.domjos.photo_manager.model.gallery.MetaData;
+import org.apache.commons.imaging.ImageFormats;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
@@ -9,7 +10,11 @@ import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.FieldType;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputField;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -20,11 +25,11 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Class which contains helper and useful functions
@@ -194,11 +199,32 @@ public class ImageHelper {
                     }
                     metaData.setCamera(model.toString());
                 } catch (Exception ex) {
-                    System.err.println(ex.toString());
+                    System.err.println(ex.getMessage());
                 }
             } catch (Exception ignored) {}
         }
         return metaData;
+    }
+
+    public static void changeExifMetadata(String path, TagInfo field, String value) throws Exception {
+        ImageMetadata imageMetadata = Imaging.getMetadata(new File(path));
+        JpegImageMetadata jpegMetadata = (JpegImageMetadata) imageMetadata;
+
+        if(jpegMetadata != null) {
+            TiffImageMetadata tiffImageMetadata = jpegMetadata.getExif();
+
+            if(tiffImageMetadata != null) {
+                TiffOutputSet tiffOutputSet = tiffImageMetadata.getOutputSet();
+                TiffOutputDirectory tiffOutputDirectory = tiffOutputSet.getOrCreateExifDirectory();
+                tiffOutputDirectory.removeField(field);
+                TiffOutputField tiffOutputField = new TiffOutputField(field, FieldType.ASCII, 1, value.getBytes(StandardCharsets.US_ASCII));
+                tiffOutputDirectory.add(tiffOutputField);
+
+                Map<String, Object> optionalParams = new HashMap<>();
+                optionalParams.put("EXIF", tiffOutputSet);
+                Imaging.writeImage(ImageHelper.getImage(path), new File(path), ImageFormats.TIFF, optionalParams);
+            }
+        }
     }
 
     public static void changeHSB(BufferedImage bufferedImage, BufferedImage original, int hue, int saturation, int brightness) {

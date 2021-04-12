@@ -7,21 +7,16 @@ import de.domjos.photo_manager.helper.Validator;
 import de.domjos.photo_manager.model.gallery.BatchTemplate;
 import de.domjos.photo_manager.model.gallery.Directory;
 import de.domjos.photo_manager.model.gallery.Folder;
-import de.domjos.photo_manager.services.WebDav;
+import de.domjos.photo_manager.services.CloudTask;
 import de.domjos.photo_manager.settings.Globals;
 import de.domjos.photo_manager.utils.Dialogs;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -33,7 +28,7 @@ public class SettingsController extends ParentController {
     private final Validator validator = new Validator();
 
     private @FXML Button cmdSettingsSave, cmdSettingsHome;
-    private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath, chkSettingsReload;
+    private @FXML CheckBox chkSettingsDebugMode, chkSettingsPath, chkSettingsReload, chkSettingsMetaData;
     private @FXML TextField txtSettingsZoomFactor;
 
     private @FXML TextField txtSettingsTinyKey, txtSettingsTinyFile;
@@ -80,6 +75,7 @@ public class SettingsController extends ParentController {
                 PhotoManager.GLOBALS.saveSetting(Globals.TITLE_PATH, this.chkSettingsPath.isSelected(), false);
                 PhotoManager.GLOBALS.saveSetting(Globals.RELOAD_ON_START, this.chkSettingsReload.isSelected(), false);
                 PhotoManager.GLOBALS.saveSetting(Globals.MAX_ZOOM_VALUE, Integer.parseInt(this.txtSettingsZoomFactor.getText()), false);
+                PhotoManager.GLOBALS.saveSetting(Globals.SAVE_META, this.chkSettingsMetaData.isSelected(), false);
                 PhotoManager.GLOBALS.saveSetting(Globals.TINY_KEY, this.txtSettingsTinyKey.getText(), true);
                 PhotoManager.GLOBALS.saveSetting(Globals.TINY_FILE, this.txtSettingsTinyFile.getText(), false);
                 PhotoManager.GLOBALS.saveSetting(Globals.UNSPLASH_KEY, this.txtSettingsUnsplashKey.getText(), true);
@@ -100,11 +96,34 @@ public class SettingsController extends ParentController {
         });
 
         this.cmdSettingsCloudTest.setOnAction(event -> {
-            WebDav webDav = new WebDav(this.txtSettingsCloudUserName.getText(), this.txtSettingsCloudPassword.getText(), this.txtSettingsCloudPath.getText());
+            this.cmdSettingsCloudTest.getStyleClass().remove("error");
+            this.cmdSettingsCloudTest.getStyleClass().remove("success");
 
-            Color color = webDav.testConnection() ? Color.GREEN : Color.RED;
-            Background background = new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY));
-            this.cmdSettingsCloudTest.setBackground(background);
+            String userName = this.txtSettingsCloudUserName.getText();
+            String password = this.txtSettingsCloudPassword.getText();
+            String path = this.txtSettingsCloudPath.getText();
+            ProgressBar progressBar = this.mainController.getProgressBar();
+            Label label = this.mainController.getMessages();
+
+            CloudTask cloudTask = new CloudTask(progressBar, label, path, userName, password);
+            cloudTask.onFinish(()->{
+                try {
+                    if(!cloudTask.get()) {
+                        this.cmdSettingsCloudTest.getStyleClass().remove("success");
+                        if(!this.cmdSettingsCloudTest.getStyleClass().contains("error")) {
+                            this.cmdSettingsCloudTest.getStyleClass().add("error");
+                        }
+                    } else {
+                        this.cmdSettingsCloudTest.getStyleClass().remove("error");
+                        if(!this.cmdSettingsCloudTest.getStyleClass().contains("success")) {
+                            this.cmdSettingsCloudTest.getStyleClass().add("success");
+                        }
+                    }
+                } catch (Exception ex) {
+                    Dialogs.printException(ex);
+                }
+            });
+            new Thread(cloudTask).start();
         });
     }
 
@@ -120,6 +139,7 @@ public class SettingsController extends ParentController {
         this.chkSettingsPath.setSelected(PhotoManager.GLOBALS.getSetting(Globals.TITLE_PATH, false));
         this.chkSettingsReload.setSelected(PhotoManager.GLOBALS.getSetting(Globals.RELOAD_ON_START, false));
         this.txtSettingsZoomFactor.setText(String.valueOf(PhotoManager.GLOBALS.getSetting(Globals.MAX_ZOOM_VALUE, Globals.MAX_ZOOM_VALUE_DEF)));
+        this.chkSettingsMetaData.setSelected(PhotoManager.GLOBALS.getSetting(Globals.SAVE_META, false));
         this.txtSettingsTinyKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.TINY_KEY, ""));
         this.txtSettingsTinyFile.setText(PhotoManager.GLOBALS.getSetting(Globals.TINY_FILE, ""));
         this.txtSettingsUnsplashKey.setText(PhotoManager.GLOBALS.getDecryptedSetting(Globals.UNSPLASH_KEY, ""));
@@ -169,7 +189,8 @@ public class SettingsController extends ParentController {
                 }
             }
         }
-        String where = (stringBuilder.toString() + ")").replace(", )", ")");
+        String where = stringBuilder.toString();
+        where = (where + ")").replace(", )", ")");
         try {
             List<Directory> directories = PhotoManager.GLOBALS.getDatabase().getDirectories(where, false);
             for(Directory directory : directories) {

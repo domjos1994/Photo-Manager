@@ -32,6 +32,7 @@
                     <CheckBox fx:id="chkSettingsReload" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.reload" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0" />
                     <Label text="%settings.general.zoom" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="105.0" AnchorPane.rightAnchor="0.0"/>
                     <TextField fx:id="txtSettingsZoomFactor" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="140.0" AnchorPane.rightAnchor="0.0"/>
+                    <CheckBox fx:id="chkSettingsMetaData" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="%settings.general.meta" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="175.0" />
                 </AnchorPane>
             </TitledPane>
             <TitledPane text="%settings.directories">

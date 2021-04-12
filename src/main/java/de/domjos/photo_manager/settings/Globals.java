@@ -30,6 +30,7 @@ public class Globals {
     public final static String TITLE_PATH = "TITLE_PATH";
     public final static String RELOAD_ON_START = "RELOAD_ON_START";
     public final static String MAX_ZOOM_VALUE = "MAX_ZOOM_VALUE";
+    public final static String SAVE_META = "SAVE_META";
 
     public final static String TINY_KEY = "TINY";
     public final static String TINY_FILE = "TINY_FILE";

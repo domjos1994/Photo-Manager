@@ -48,35 +48,60 @@
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                 <SplitPane fx:id="splPaneImage" dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
-                              <SplitPane dividerPositions="0.697274031563845" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <items>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                       <children>
-                                            <ZoomImageView fx:id="zivMainImage" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-                                       </children>
-                                    </AnchorPane>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                       <children>
-                                            <TitledPane fx:id="pnlMainImage" animated="false" collapsible="false" maxHeight="200.0" minHeight="200.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                    <ToolBar layoutX="95.0" layoutY="47.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" styleClass="darkSlateGray" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0">
-                                                        <Button fx:id="cmdMainImageSave" mnemonicParsing="false">
-                                                            <graphic>
-                                                                <ImageView fitHeight="16" fitWidth="16">
-                                                                    <Image url="@../images/icons/save.png" />
-                                                                </ImageView>
-                                                            </graphic>
-                                                        </Button>
-                                                    </ToolBar>
-                                                    <TextField fx:id="txtMainImageName" layoutX="110.0" layoutY="61.0" promptText="%sys.name" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                    <TextField fx:id="txtMainImageCategory" layoutX="110.0" layoutY="61.0" promptText="%main.image.category" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                                    <TextField fx:id="txtMainImageTags" layoutX="74.0" layoutY="74.0" promptText="%main.image.tags" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
-                                                </AnchorPane>
-                                            </TitledPane>
-                                       </children>
-                                    </AnchorPane>
-                                </items>
-                              </SplitPane>
+                                        <SplitPane dividerPositions="0.697274031563845" orientation="VERTICAL"
+                                                   prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0"
+                                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                   AnchorPane.topAnchor="0.0">
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0"
+                                                        prefWidth="160.0">
+                                                <ZoomImageView fx:id="zivMainImage" AnchorPane.rightAnchor="0.0"
+                                                               AnchorPane.leftAnchor="0.0"
+                                                               AnchorPane.bottomAnchor="0.0"
+                                                               AnchorPane.topAnchor="0.0"/>
+                                            </AnchorPane>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0"
+                                                        prefWidth="160.0">
+                                                <TitledPane fx:id="pnlMainImage" animated="false"
+                                                            collapsible="false" maxHeight="200.0" minHeight="200.0"
+                                                            prefHeight="200.0" AnchorPane.bottomAnchor="0.0"
+                                                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                            AnchorPane.topAnchor="0.0">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0"
+                                                                prefWidth="200.0">
+                                                        <ToolBar layoutX="95.0" layoutY="47.0"
+                                                                 nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0"
+                                                                 prefWidth="200.0" styleClass="darkSlateGray"
+                                                                 AnchorPane.bottomAnchor="-10.0"
+                                                                 AnchorPane.leftAnchor="-10.0"
+                                                                 AnchorPane.rightAnchor="-10.0">
+                                                            <Button fx:id="cmdMainImageSave"
+                                                                    mnemonicParsing="false">
+                                                                <graphic>
+                                                                    <ImageView fitHeight="16" fitWidth="16">
+                                                                        <Image url="@../images/icons/save.png"/>
+                                                                    </ImageView>
+                                                                </graphic>
+                                                            </Button>
+                                                        </ToolBar>
+                                                        <TextField fx:id="txtMainImageName" layoutX="110.0"
+                                                                   layoutY="61.0" promptText="%sys.name"
+                                                                   AnchorPane.leftAnchor="0.0"
+                                                                   AnchorPane.rightAnchor="0.0"
+                                                                   AnchorPane.topAnchor="0.0"/>
+                                                        <TextField fx:id="txtMainImageCategory" layoutX="110.0"
+                                                                   layoutY="61.0" promptText="%main.image.category"
+                                                                   AnchorPane.leftAnchor="0.0"
+                                                                   AnchorPane.rightAnchor="0.0"
+                                                                   AnchorPane.topAnchor="30.0"/>
+                                                        <TextField fx:id="txtMainImageTags" layoutX="74.0"
+                                                                   layoutY="74.0" promptText="%main.image.tags"
+                                                                   AnchorPane.leftAnchor="0.0"
+                                                                   AnchorPane.rightAnchor="0.0"
+                                                                   AnchorPane.topAnchor="60.0"/>
+                                                    </AnchorPane>
+                                                </TitledPane>
+                                            </AnchorPane>
+                                        </SplitPane>
                                     </AnchorPane>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="darkSlateGray">
                                         <Accordion fx:id="accItems" layoutX="16.0" layoutY="93.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -86,7 +111,7 @@
                                                 <fx:include fx:id="edit" source="main_edit.fxml" />
                                                 <TitledPane animated="false" text="%main.image.services">
                                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                        <MapView fx:id="gvMainServicesLocation" maxHeight="200.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
+                                                        <MapView fx:id="gvMainServicesLocation" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
                                                         <fx:include fx:id="tinify" source="main_services_tinify.fxml" />
                                                         <fx:include fx:id="cloud" source="main_services_cloud.fxml" />
                                                     </AnchorPane>

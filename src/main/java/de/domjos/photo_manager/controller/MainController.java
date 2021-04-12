@@ -27,6 +27,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -389,6 +390,9 @@ public class MainController extends ParentController {
 
                     if(!this.txtMainImageName.getText().trim().isEmpty()) {
                         image.setTitle(this.txtMainImageName.getText().trim());
+                        if(PhotoManager.GLOBALS.getSetting(Globals.SAVE_META, false)) {
+                            ImageHelper.changeExifMetadata(image.getPath(), TiffTagConstants.TIFF_TAG_IMAGE_DESCRIPTION, image.getTitle());
+                        }
                     }
 
                     if(!this.txtMainImageTags.getText().trim().isEmpty()) {
