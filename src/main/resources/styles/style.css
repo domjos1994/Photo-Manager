@@ -14,6 +14,10 @@
     -fx-background-color: #708090;
 }
 
+.titled-pane.error > .title {
+    -fx-background-color: #ff0000;
+}
+
 .darkSlateGray,
 .root,
 .tree-view, .tree-cell,

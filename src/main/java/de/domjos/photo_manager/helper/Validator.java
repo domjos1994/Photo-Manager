@@ -1,6 +1,7 @@
 package de.domjos.photo_manager.helper;
 
 import javafx.scene.control.TextInputControl;
+import javafx.scene.control.TitledPane;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,19 +15,19 @@ public class Validator {
         this.states = new LinkedHashMap<>();
     }
 
-    public void validateInteger(TextInputControl txt, boolean mandatory) {
-        this.states.put(txt.getId(), this.checkInteger(txt, mandatory));
+    public void validateInteger(TextInputControl textInputControl, boolean mandatory, TitledPane panel) {
+        this.states.put(textInputControl.getId(), this.checkInteger(textInputControl, mandatory, panel));
 
-        txt.textProperty().addListener((observable, oldValue, newValue) -> this.states.put(txt.getId(), this.checkInteger(txt, mandatory)));
+        textInputControl.textProperty().addListener((observable, oldValue, newValue) -> this.states.put(textInputControl.getId(), this.checkInteger(textInputControl, mandatory, panel)));
     }
 
-    public void validateFieldsTogetherMandatory(List<TextInputControl> txts) {
-        for(TextInputControl txt : txts) {
-            this.states.put(txt.getId(), this.checkMandatoryTogether(txts));
+    public void validateFieldsTogetherMandatory(List<TextInputControl> textInputControls, TitledPane panel) {
+        for(TextInputControl txt : textInputControls) {
+            this.states.put(txt.getId(), this.checkMandatoryTogether(textInputControls, panel));
 
             txt.textProperty().addListener((observable, oldValue, newValue) -> {
-                for(TextInputControl txt2 : txts) {
-                    this.states.put(txt2.getId(), this.checkMandatoryTogether(txts));
+                for(TextInputControl txt2 : textInputControls) {
+                    this.states.put(txt2.getId(), this.checkMandatoryTogether(textInputControls, panel));
                 }
             });
         }
@@ -44,11 +45,11 @@ public class Validator {
         return valid;
     }
 
-    private boolean checkMandatoryTogether(List<TextInputControl> txts) {
+    private boolean checkMandatoryTogether(List<TextInputControl> textInputControls, TitledPane panel) {
         boolean result = true;
 
         boolean isNotEmpty = false;
-        for(TextInputControl txt : txts) {
+        for(TextInputControl txt : textInputControls) {
             if(txt == null) {
                 return false;
             }
@@ -63,7 +64,7 @@ public class Validator {
         }
 
         if(isNotEmpty) {
-            for(TextInputControl txt : txts) {
+            for(TextInputControl txt : textInputControls) {
                 if(txt.getText().isEmpty()) {
                     result = false;
                     break;
@@ -71,42 +72,48 @@ public class Validator {
             }
         }
 
-        for(TextInputControl txt : txts) {
-            if(!result) {
-                if(!txt.getStyleClass().contains("error")) {
-                    txt.getStyleClass().add("error");
-                }
-            } else {
-                txt.getStyleClass().remove("error");
-            }
+        for(TextInputControl textInputControl : textInputControls) {
+            this.showError(textInputControl, panel, result);
         }
 
         return result;
     }
 
-    private boolean checkInteger(TextInputControl txt, boolean mandatory) {
+    private boolean checkInteger(TextInputControl textInputControl, boolean mandatory, TitledPane panel) {
         boolean result = false;
-        if(txt != null) {
-            if(txt.getText() != null) {
-                if(txt.getText().isEmpty()) {
+        if(textInputControl != null) {
+            if(textInputControl.getText() != null) {
+                if(textInputControl.getText().isEmpty()) {
                     result = !mandatory;
                 } else {
                     try {
-                        Integer.parseInt(txt.getText());
+                        Integer.parseInt(textInputControl.getText());
                         result = true;
                     } catch (Exception ignored) {}
                 }
             }
 
-            if(!result) {
-                if(!txt.getStyleClass().contains("error")) {
-                    txt.getStyleClass().add("error");
-                }
-            } else {
-                txt.getStyleClass().remove("error");
-            }
+            this.showError(textInputControl, panel, result);
         }
 
         return result;
+    }
+
+    private void showError(TextInputControl textInputControl, TitledPane panel, boolean result) {
+        if(!result) {
+            if(!textInputControl.getStyleClass().contains("error")) {
+                textInputControl.getStyleClass().add("error");
+            }
+            if(panel != null) {
+                if(!panel.getStyleClass().contains("error")) {
+                    panel.getStyleClass().add("error");
+                }
+            }
+        } else {
+            textInputControl.getStyleClass().remove("error");
+            if(panel != null) {
+                panel.getStyleClass().remove("error");
+            }
+        }
     }
 }

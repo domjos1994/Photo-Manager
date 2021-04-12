@@ -430,9 +430,9 @@ public class SettingsController extends ParentController {
     }
 
     private void initValidator() {
-        this.validator.validateInteger(this.txtSettingsZoomFactor, true);
-        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsUnsplashKey, this.txtSettingsUnsplashSecretKey));
-        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsInstagramUser, this.txtSettingsInstagramPwd));
+        this.validator.validateInteger(this.txtSettingsZoomFactor, true, this.accSettings.getPanes().get(0));
+        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsUnsplashKey, this.txtSettingsUnsplashSecretKey), this.accSettings.getPanes().get(3));
+        this.validator.validateFieldsTogetherMandatory(Arrays.asList(this.txtSettingsInstagramUser, this.txtSettingsInstagramPwd), this.accSettings.getPanes().get(5));
     }
 
     @Override
