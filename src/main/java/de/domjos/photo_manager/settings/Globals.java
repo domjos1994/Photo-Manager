@@ -18,6 +18,7 @@ public class Globals {
     private Logger logger;
     private final Preferences preferences;
     private ResourceBundle language;
+    private ResourceBundle help;
     private Database database;
     private final List<Runnable> closeRunnable;
     private boolean close;
@@ -98,6 +99,14 @@ public class Globals {
 
     public void setLanguage(ResourceBundle language) {
         this.language = language;
+    }
+
+    public ResourceBundle getHelp() {
+        return this.help;
+    }
+
+    public void setHelp(ResourceBundle help) {
+        this.help = help;
     }
 
     public Database getDatabase() {

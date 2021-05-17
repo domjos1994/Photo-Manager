@@ -206,9 +206,6 @@
         <Tab fx:id="tbSlideshow" text="%main.menu.program.settings">
             <fx:include fx:id="slideshow" source="slideshow.fxml" />
         </Tab>
-        <Tab fx:id="tbHelp" text="%main.menu.help">
-            <fx:include fx:id="help" source="help.fxml" />
-        </Tab>
     </TabPane>
     <MenuBar id="menMain" fx:id="menMain" layoutX="14.0" layoutY="14.0" styleClass="slateGray" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu mnemonicParsing="false" text="%main.menu.program">
@@ -249,11 +246,7 @@
             </MenuItem>
         </Menu>
         <Menu mnemonicParsing="false" text="%main.menu.help">
-            <MenuItem fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help">
-                <accelerator>
-                    <KeyCodeCombination alt="ANY" code="H" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-                </accelerator>
-            </MenuItem>
+            <MenuItem fx:id="menMainHelp" mnemonicParsing="false" text="%main.menu.help"/>
         </Menu>
     </MenuBar>
     <ToolBar fx:id="toolbarMain" layoutY="360.0" nodeOrientation="RIGHT_TO_LEFT" styleClass="slateGray" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

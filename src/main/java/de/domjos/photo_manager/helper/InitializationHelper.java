@@ -130,15 +130,16 @@ public class InitializationHelper {
 
     /**
      * Chooses the current language
+     * @param key key of resource-bundle
      * @return the current resource-bundle
      */
-    public static ResourceBundle getResourceBundle() {
+    public static ResourceBundle getResourceBundle(String key) {
         URL[] urls = new URL[]{InitializationHelper.class.getResource("/languages/")};
         URLClassLoader classLoader = new URLClassLoader(urls);
         if(Locale.getDefault().getLanguage().equals(Locale.GERMAN.getLanguage())) {
-            return ResourceBundle.getBundle("lang", Locale.GERMAN, classLoader);
+            return ResourceBundle.getBundle(key, Locale.GERMAN, classLoader);
         } else {
-            return ResourceBundle.getBundle("lang", Locale.ENGLISH, classLoader);
+            return ResourceBundle.getBundle(key, Locale.ENGLISH, classLoader);
         }
     }
 

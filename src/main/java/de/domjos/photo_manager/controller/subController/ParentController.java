@@ -1,9 +1,8 @@
 package de.domjos.photo_manager.controller.subController;
 
 import de.domjos.photo_manager.controller.MainController;
-import de.domjos.photo_manager.utils.Dialogs;
+import de.domjos.photo_manager.helper.ContextHelp;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
 
@@ -12,9 +11,11 @@ import java.util.ResourceBundle;
 
 public abstract class ParentController implements Initializable {
     protected MainController mainController;
+    private ContextHelp contextHelp;
     protected ResourceBundle lang;
 
     public void initialize(URL location, ResourceBundle resources) {
+        this.contextHelp = new ContextHelp();
         this.lang = resources;
         this.initContextHelp();
         this.initialize(resources);
@@ -31,9 +32,10 @@ public abstract class ParentController implements Initializable {
     }
 
     protected void addContextHelp(Control control, String key) {
+        this.contextHelp.add(control, key);
         control.setOnKeyReleased(keyEvent -> {
             if(keyEvent.getCode() == KeyCode.F1) {
-                Dialogs.printNotification(Alert.AlertType.INFORMATION, this.lang.getString("help.title"), this.lang.getString(key));
+                this.contextHelp.fireMessage(control);
             }
         });
     }

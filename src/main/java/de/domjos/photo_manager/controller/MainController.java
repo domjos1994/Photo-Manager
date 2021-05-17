@@ -39,7 +39,7 @@ import java.util.*;
 
 public class MainController extends ParentController {
     public TitledPane history, unsplash, histogram, metaData, edit, tinify, cloud;
-    public AnchorPane settings, map, slideshow, help;
+    public AnchorPane settings, map, slideshow;
 
     private @FXML SplitPane splPaneDirectories, splPaneImages, splPaneImage;
 
@@ -47,7 +47,7 @@ public class MainController extends ParentController {
     private @FXML ToolBar toolbarMain;
 
     private @FXML TabPane tbpMain;
-    private @FXML Tab tbMain, tbSettings, tbBatch, tbMap, tbSlideshow, tbHelp;
+    private @FXML Tab tbMain, tbSettings, tbBatch, tbMap, tbSlideshow;
     private @FXML MenuItem menMainSettings, menMainBatch, menMainClose, menMainMap, menMainHelp;
     private @FXML MenuItem menMainDatabaseNew, menMainDatabaseDelete;
     private @FXML Menu menMainDatabaseOpen;
@@ -90,8 +90,6 @@ public class MainController extends ParentController {
     private @FXML MapController mapController;
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML SlideshowController slideshowController;
-    @SuppressWarnings({"UnusedDeclaration"})
-    private @FXML HelpController helpController;
 
     @SuppressWarnings({"UnusedDeclaration"})
     private @FXML HistogramController histogramController;
@@ -117,7 +115,7 @@ public class MainController extends ParentController {
 
     @Override
     public void initialize(ResourceBundle resources) {
-        ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController, helpController,
+        ControlsHelper.initController(Arrays.asList(settingsController, batchController, mapController, slideshowController,
             histogramController, metaDataController, tinifyController, unsplashController, instagramController,
             cloudController, editController, historyController), this);
         this.zivMainImage.setController(this);
@@ -707,16 +705,19 @@ public class MainController extends ParentController {
                 this.mapController.initMap(this.tvMain.getSelectionModel().getSelectedItem().getValue());
             }
         });
-        this.menMainHelp.setOnAction(event -> this.tbpMain.getSelectionModel().select(this.tbHelp));
+        this.menMainHelp.setOnAction(event -> {
+            String msg = PhotoManager.GLOBALS.getHelp().getString("help");
+            String title = PhotoManager.GLOBALS.getLanguage().getString("help.title");
+
+            Dialogs.printNotification(Alert.AlertType.INFORMATION, title, msg);
+        });
         this.menMainClose.setOnAction(event -> Platform.exit());
     }
 
     @Override
     protected void initContextHelp() {
-        super.addContextHelp(this.txtMainFolderName, "help.main.folderName");
-        super.addContextHelp(this.txtMainImageName, "help.main.imageSettings");
-        super.addContextHelp(this.txtMainImageCategory, "help.main.imageSettings");
-        super.addContextHelp(this.txtMainImageTags, "help.main.imageSettings");
+        super.addContextHelp(this.txtMainFolderName, "main.import.name");
+        super.addContextHelp(this.chkMainRecursive, "main.import.recursive");
     }
 
     void back() {

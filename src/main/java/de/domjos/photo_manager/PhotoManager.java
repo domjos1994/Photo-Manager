@@ -23,9 +23,11 @@ public class PhotoManager extends Application {
         // initialize basic properties
         PhotoManager.GLOBALS.setStage(primaryStage);
 
-        // initialize language
-        ResourceBundle language = InitializationHelper.getResourceBundle();
+        // initialize bundles
+        ResourceBundle language = InitializationHelper.getResourceBundle("lang");
+        ResourceBundle help = InitializationHelper.getResourceBundle("help");
         PhotoManager.GLOBALS.setLanguage(language);
+        PhotoManager.GLOBALS.setHelp(help);
 
         // initialize path
         InitializationHelper.initializePath(PhotoManager.path);
