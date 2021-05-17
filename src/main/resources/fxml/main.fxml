@@ -110,11 +110,11 @@
                                                 <fx:include fx:id="metaData" source="main_metaData.fxml" />
                                                 <fx:include fx:id="edit" source="main_edit.fxml" />
                                                 <TitledPane animated="false" text="%main.image.services">
-                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                        <MapView fx:id="gvMainServicesLocation" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
+                                                    <SplitPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" orientation="VERTICAL">
+                                                        <MapView fx:id="gvMainServicesLocation" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" AnchorPane.bottomAnchor="-10.0"/>
                                                         <fx:include fx:id="tinify" source="main_services_tinify.fxml" />
                                                         <fx:include fx:id="cloud" source="main_services_cloud.fxml" />
-                                                    </AnchorPane>
+                                                    </SplitPane>
                                                 </TitledPane>
                                                 <fx:include fx:id="unsplash" source="main_services_unsplash.fxml" />
                                                 <fx:include fx:id="instagram" source="main_services_instagram.fxml" />

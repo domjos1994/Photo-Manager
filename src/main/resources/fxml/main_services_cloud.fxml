@@ -5,7 +5,7 @@
 
 <TitledPane animated="false" collapsible="false" layoutX="15.0" layoutY="338.0" text="%settings.cloud"
             AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0"
-            AnchorPane.topAnchor="320.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            AnchorPane.topAnchor="-10.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="de.domjos.photo_manager.controller.subController.CloudController">
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
         <TreeView fx:id="tvDirectories" layoutX="-9.0" layoutY="-25.0" prefHeight="200.0" prefWidth="200.0"
